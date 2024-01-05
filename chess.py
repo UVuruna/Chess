@@ -9,11 +9,13 @@ class Chess(ABC):
         super().__init__()
         self.side = side
         Chess.pieces.append(self)
+        Chess.MovesDict[self] = 0
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Hash TABLES  --  CORE MECHANIC <<< 
-    MovesSet = set()
-    TakenDict = {} 
+    MovesDict = {}
+    TakenDict = {}
+    PromoteDict = {}
 
     def countExecutionMethod(method):
         def wrapper(*args, **kwargs):
@@ -107,18 +109,20 @@ class Chess(ABC):
         if square in PossibleLines:
             position = Chess.NotationTableDict[self.position()]
             self.x,self.y = square
-            Chess.MovesSet.add(self)
+            Chess.MovesDict[self] +=1
             transcript = f"{str(self)[1:]} {position} move {Chess.NotationTableDict[square]}\n"   
             moveOutput = f"{str(self).ljust(8)}{(position.ljust(5)+'➔').ljust(8)}{Chess.NotationTableDict[square]}"
             return moveOutput,transcript
     # Setter #2 
-    def take(self,tableDict,obj):
+    def take(self,tableDict,obj,moveCounter):
         PossibleTake = self.possibleMoves(tableDict)[1]
         if obj.position() in PossibleTake:
             position = Chess.NotationTableDict[self.position()]
             self.x,self.y = obj.position()
-            Chess.TakenDict[obj] = self
-            Chess.MovesSet.add(self)
+            if self not in Chess.TakenDict:
+                Chess.TakenDict[self] = {}
+            Chess.TakenDict[self][moveCounter+1] = obj
+            Chess.MovesDict[self] +=1
             transcript = f"{str(self)[1:]} {position} took {Chess.NotationTableDict[obj.position()]} {str(obj)[1:]}\n"  
             moveOutput = f"{str(self).ljust(8)}{(position.ljust(4)+'❌').ljust(7)}{Chess.NotationTableDict[obj.position()]} {obj}"
             Chess.pieces.remove(obj)
@@ -126,8 +130,7 @@ class Chess(ABC):
     
     #@countExecutionMethod
     def possibleMoves(self,tableDict):
-
-        def polje(Self):
+        def square(Self):
             return tableDict[Self.x,Self.y]
         
         possibleMoveAttack_List = []
@@ -138,16 +141,16 @@ class Chess(ABC):
             possMove = copy.deepcopy(self)
             while possMove.insideBorder(): 
                 possMove.incrementation(dir)
-                if possMove.insideBorder() and polje(possMove) == '':
+                if possMove.insideBorder() and square(possMove) == '':
                     possibleMoveAttack_List.append(possMove.position())
                     if possMove.type == 'Archer':
                         None
                     else:
                         break
-                elif possMove.insideBorder() and possMove.side !=polje(possMove).side:
+                elif possMove.insideBorder() and possMove.side !=square(possMove).side:
                     possibleTake_List.append(possMove.position())
                     break
-                elif possMove.insideBorder() and possMove.side ==polje(possMove).side:
+                elif possMove.insideBorder() and possMove.side ==square(possMove).side:
                     possibleDefend_List.append(possMove.position())
                     break
                 else:

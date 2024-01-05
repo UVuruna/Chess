@@ -299,15 +299,9 @@ class Rendering():
     # Button Borders Rendering
     ButtonChanged = []
     def borderColors(square):
-        global enPassant,enPassant_objPos
-        try:
-            Move,Take = CurrentTableDict[square].possibleMoves(CurrentTableDict)[:2]
-            if isinstance(Self,Pawn):
-                enPassant,enPassant_objPos = Rewind.EnPassant(TranscriptName)
-                if enPassant in Self.possibleMoves(CurrentTableDict)[3]:
-                    Take.append(enPassant)
-        except (AttributeError,TypeError):
-            None
+        Move,Take = CurrentTableDict[square].possibleMoves(CurrentTableDict)[:2]
+        if isinstance(Self,Pawn) and enPassant in possibleActionsDict[Self]:
+            Take.append(enPassant)
         for m in Move:
             Import.ButtonDict[m].config(background='#00BB00')
             Rendering.ButtonChanged.append(Import.ButtonDict[m])
@@ -416,6 +410,9 @@ class Actions():
             if newXY in possibleActionsDict[Self]:
                 if isinstance(Self,King):
                     output,transcript = Self.move(CurrentTableDict,newXY)
+                elif enPassant == newXY and isinstance(Self,Pawn):
+                    output,transcript = Actions.enPassantTake(enPassant,enPassant_objPos)
+                    return output,transcript,"#FF0000"
                 elif directAttackers and Self not in Defenders.keys() and newXY in DangerTeamSolve:
                     output,transcript = Self.move(CurrentTableDict,newXY)      
                 elif not directAttackers and ((Self not in Defenders.keys()) or (Self in Defenders.keys() and newXY in Defenders[Self])):
@@ -423,10 +420,6 @@ class Actions():
                 else:
                     return False,False,False
             else:
-                if enPassant == newXY and isinstance(Self,Pawn) and \
-                        newXY in Self.possibleMoves(CurrentTableDict)[3]:
-                    output,transcript = Actions.enPassantTake(enPassant,enPassant_objPos)
-                    return output,transcript,"#FF0000"
                 return False,False,False
             return output,transcript,"#00BB00"
         else:
@@ -438,11 +431,11 @@ class Actions():
         if CurrentTableDict[enemyXY].side != Self.side:
             if enemyXY in possibleActionsDict[Self]:
                 if isinstance(Self,King):
-                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY])
+                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
                 elif directAttackers and Self not in Defenders.keys() and enemyXY in DangerTeamSolve:
-                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY])
+                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
                 elif not directAttackers and ((Self not in Defenders.keys()) or (Self in Defenders.keys() and enemyXY in Defenders[Self])):
-                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY])
+                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
                 else:
                     return False,False,False
             else:
@@ -455,7 +448,10 @@ class Actions():
         global Self
         position = Chess.NotationTableDict[Self.position()]
         Self.x,Self.y = newXY
-        Chess.TakenDict[CurrentTableDict[objXY]] = Self
+        Chess.MovesDict[Self]+=1
+        if Self not in Chess.TakenDict:
+            Chess.TakenDict[Self] = {}
+        Chess.TakenDict[Self][Actions.moveCounter+1]=CurrentTableDict[objXY]
         transcript = f"{str(Self)[1:]} {position} take {Chess.NotationTableDict[newXY]} {str(CurrentTableDict[objXY])[1:]} {Chess.NotationTableDict[objXY]}\n"
         moveOutput = f"{str(Self).ljust(8)}{(position.ljust(4)+'❌').ljust(7)}{Chess.NotationTableDict[newXY]} {CurrentTableDict[objXY]} {Chess.NotationTableDict[objXY]}"
         Chess.pieces.remove(CurrentTableDict[objXY])
@@ -466,8 +462,11 @@ class Actions():
         output = None ; transcript = None
         OwnRook = CurrentTableDict[ownRook]
         if isinstance(Self,King) and isinstance(OwnRook,Rook):
-            output,transcript = Self.castling(OwnRook,kW,qW,kB,qB)
-            return output,transcript,"#00AACC"
+            try:
+                output,transcript = Self.castling(OwnRook,kW,qW,kB,qB)
+                return output,transcript,"#00AACC"
+            except Exception:
+                return None,None,None   
         else:
             return None,None,None
 
@@ -493,6 +492,7 @@ class Actions():
             if posInTransc <-1:
                 Rendering.delMovesDone(posInTransc)
             Rendering.printMovesDone("#7700FF",output,None)
+            Chess.PromoteDict[promote]=Self
             Chess.pieces.remove(Self)
             Self = None
             Phase = 'Game Mechanic'
@@ -507,12 +507,10 @@ class Actions():
         global Self,Turn,CurrentTableDict
         startingTime = time.time()
         if Phase == 'Game Mechanic':
-            CurrentTableDict = Rewind.Previous()
-            Turn *=-1
-            Self =None
+            CurrentTableDict = Rewind.Previous(Actions.moveCounter)
+            Turn *=-1 ; Self =None ; Actions.moveCounter -=1
             Actions.End_Turn()
             Rendering.printMovesDone("#0000FF",None,posInTransc)
-            Actions.moveCounter -= 1
             
             actionTime = time.time()
             Rendering.RenderingScreen(CurrentTableDict)
@@ -523,13 +521,11 @@ class Actions():
         global Self,Turn,CurrentTableDict
         startingTime = time.time()
         if Phase == 'Game Mechanic':
-            CurrentTableDict = Rewind.Next()
-            Turn *=-1
-            Self =None
+            CurrentTableDict = Rewind.Next(Actions.moveCounter)
+            Turn *=-1 ; Self =None ; Actions.moveCounter +=1
             Actions.End_Turn()
             Rendering.printMovesDone("#0000FF",None,posInTransc)
-            Actions.moveCounter += 1
-            
+
             actionTime = time.time()
             Rendering.RenderingScreen(CurrentTableDict)
             endTime = time.time()
@@ -578,20 +574,24 @@ class Actions():
                 posInTransc = Rewind.ResetPosition() 
 
     def End_Turn():
-        global posInTransc,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,GameOver,CurrentTableDict,PossibleCheck,enPassant,possibleActionsDict 
-        PossibleCheck,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,GameOver,CurrentTableDict,possibleActionsDict = AI.GameOverCheck(Turn)
+        global posInTransc,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,CurrentTableDict,PossibleCheck,possibleActionsDict,enPassant,enPassant_objPos
+        GameOver=None
+        try:
+            enPassant,enPassant_objPos = Rewind.EnPassant(TranscriptName)
+        except TypeError:
+            enPassant=None
+        CurrentTableDict,selfKing,TeamOptions,Defenders,directAttackers,DangerKingSolve,DangerTeamSolve,possibleActionsDict = AI.dangerZone(Turn,enPassant)
+        if directAttackers:
+            PossibleCheck = selfKing.position()
+            GameOver = AI.GameOverCheck(selfKing,TeamOptions,directAttackers,DangerKingSolve,DangerTeamSolve)
+        elif not DangerKingSolve or len(Chess.pieces)<5:
+            PossibleCheck = None
+            GameOver = AI.GameOverCheck(selfKing,TeamOptions,directAttackers,DangerKingSolve,DangerTeamSolve)
+        else:
+            PossibleCheck = None
+
         Rendering.borderDefault()
         Rendering.borderCheck(PossibleCheck)
-        try:
-            enPassant = Rewind.EnPassant(TranscriptName)[0]
-            for pie in Chess.pieces:
-                if isinstance(pie,Pawn) and enPassant in pie.possibleMoves(CurrentTableDict)[3]:
-                    try:
-                        possibleActionsDict[pie].add(enPassant)
-                    except KeyError:
-                        continue
-        except TypeError:
-            None
         rewindButtonsManage,posInTransc = Rewind.Get_Transcript_and_Position(TranscriptName)
         Rendering.PreviousNextButtons(rewindButtonsManage)
         GameFlow.GameOver(Turn,GameOver)
@@ -619,7 +619,7 @@ class GameFlow:
         canvas.itemconfigure(ExecutionTime_window, state='hidden')
         canvas.itemconfigure(buttonBack_window,state='hidden')
         canvas.itemconfigure(buttonNext_window,state='hidden')
-        Chess.pieces.clear()
+        Chess.pieces.clear() ; Chess.MovesDict.clear() ; Chess.TakenDict.clear()
         CurrentTableDict = Chess.currentTableDict()
         MoveOutput.delete('1.0', END)
         Rendering.borderDefault()
@@ -635,7 +635,7 @@ class GameFlow:
             f.truncate(0)
         GameFlow.MouseKeyboard(None,None,None,'win')
         GameFlow.StartingPosition()
-        PossibleCheck,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,GameOver,CurrentTableDict,possibleActionsDict = AI.GameOverCheck(Turn)
+        CurrentTableDict,selfKing,TeamOptions,Defenders,directAttackers,DangerKingSolve,DangerTeamSolve,possibleActionsDict = AI.dangerZone(Turn,enPassant)
        
         canvas.itemconfigure(buttonGM_window,state='hidden')
         canvas.itemconfigure(buttonSG_window,state='hidden')
@@ -702,6 +702,10 @@ class GameFlow:
             print(DangerKingSolve)
             print(DangerTeamSolve)
             print(possibleActionsDict)
+            for k,v in Chess.MovesDict.items():
+                print(list[k],f"se pomerio: {v} puta")
+            print('----------------------------------')
+            print(Chess.TakenDict)
         window.bind("<space>",spacePressed)   
 
         if rClick == 'turn':
@@ -722,19 +726,16 @@ class GameFlow:
             def deletePressed(event):
                 global Self,CurrentTableDict              
                 startTime = time.time()
-                try:
-                    if Self is not None and not isinstance(Self,King):
-                        Chess.pieces.remove(Self)
-                        Self = None
-                        Rendering.borderDefault()     
-                        Actions.End_Turn()
+                if Self is not None and not isinstance(Self,King):
+                    Chess.pieces.remove(Self)
+                    Self = None
+                    Rendering.borderDefault()     
+                    Actions.End_Turn()
 
-                        verificationTime = time.time()
-                        Rendering.RenderingScreen(CurrentTableDict)
-                        endTime = time.time()
-                        Rendering.timeShowing(startTime,endTime,verificationTime,None)
-                except ValueError: # x not in list
-                    None # ne znam zasto se javlja mozda zbog prebrzog klika ako se spamuje del key
+                    verificationTime = time.time()
+                    Rendering.RenderingScreen(CurrentTableDict)
+                    endTime = time.time()
+                    Rendering.timeShowing(startTime,endTime,verificationTime,None)
             window.bind("<Delete>", deletePressed)
 
         if insert == 'moving':

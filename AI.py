@@ -17,52 +17,6 @@ class AI():
         wrapper.counter = 0
         return wrapper
 
-    #@countExecutionMethod   
-    def AnalyzingMovements(Turn,tableDict,ourTeam,king,defenders,ActDict):
-        def team(Turn,ourTeam):
-            if ourTeam is False:
-                if Turn==1:
-                    return piece.side == 'b'
-                else:
-                    return piece.side == 'w'
-            else:
-                if Turn==1:
-                    return piece.side == 'w'
-                else:
-                    return piece.side == 'b'
-        def noKing(king):
-            if king is False:
-                return not isinstance(piece,King)
-            else:
-                return True     
-        def noDefender(defenders):
-            if defenders:
-                return piece not in list(defenders.keys())
-            else:
-                return True
-
-        PossibleTakes = set()
-        PossibleMoves = set()
-        possibleActionsDefenders = set()
-        possibleActionsDict = {}
-        for piece in Chess.pieces:
-            take = set() ; move = set()
-            if team(Turn,ourTeam) and noKing(king):
-                possMove,possTake = piece.possibleMoves(tableDict)[:2]
-                if noDefender(defenders):  
-                    PossibleMoves.update(possMove)
-                    PossibleTakes.update(possTake)   
-                    if ActDict:
-                        possibleActionsDict[piece]=set(set(possTake)|set(possMove))
-                else:
-                    take.update(possTake)
-                    move.update(possMove)
-                    actionsAll = take|move
-                    possibleActionsDefenders.update(actionsAll&set(defenders[piece]))
-                    if ActDict:
-                        possibleActionsDict[piece]=set(actionsAll&set(defenders[piece]))
-        return PossibleTakes, PossibleMoves, possibleActionsDefenders, possibleActionsDict
-    
     #@AI.countExecutionMethod
     def selfKingActionsCalc(Turn,CurrentTableDict):
         global realKing
@@ -115,6 +69,52 @@ class AI():
                 continue
         return dict(Defenders),set(BlockableLine)
 
+    #@countExecutionMethod   
+    def AnalyzingMovements(Turn,tableDict,ourTeam,king,defenders,ActDict):
+        def team(Turn,ourTeam):
+            if ourTeam is False:
+                if Turn==1:
+                    return piece.side == 'b'
+                else:
+                    return piece.side == 'w'
+            else:
+                if Turn==1:
+                    return piece.side == 'w'
+                else:
+                    return piece.side == 'b'
+        def noKing(king):
+            if king is False:
+                return not isinstance(piece,King)
+            else:
+                return True     
+        def noDefender(defenders):
+            if defenders:
+                return piece not in list(defenders.keys())
+            else:
+                return True
+
+        PossibleTakes = set()
+        PossibleMoves = set()
+        possibleActionsDefenders = set()
+        possibleActionsDict = {}
+        for piece in Chess.pieces:
+            take = set() ; move = set()
+            if team(Turn,ourTeam) and noKing(king):
+                possMove,possTake = piece.possibleMoves(tableDict)[:2]
+                if noDefender(defenders):  
+                    PossibleMoves.update(possMove)
+                    PossibleTakes.update(possTake)   
+                    if ActDict:
+                        possibleActionsDict[piece]=set(set(possTake)|set(possMove))
+                else:
+                    take.update(possTake)
+                    move.update(possMove)
+                    actionsAll = take|move
+                    possibleActionsDefenders.update(actionsAll&set(defenders[piece]))
+                    if ActDict:
+                        possibleActionsDict[piece]=set(actionsAll&set(defenders[piece]))
+        return PossibleTakes, PossibleMoves, possibleActionsDefenders, possibleActionsDict
+
     #@AI.countExecutionMethod
     def whoAttack_Position(Turn,CurrentTableDict,selfKing,position,noKing):
         king = copy.deepcopy(selfKing)
@@ -146,36 +146,39 @@ class AI():
         return set(enemyAttack)
 
     #@countExecutionMethod    
-    def dangerZone(turn):
+    def dangerZone(turn,enPassant):
         Turn = turn
         CurrentTableDict = Chess.currentTableDict()
 
         selfKing,selfKingActions = AI.selfKingActionsCalc(Turn,CurrentTableDict)
         Defenders,BlockableLine = AI.enemyArcherDanger(CurrentTableDict,selfKing)
-        directAttacker: set = set(AI.whoAttack_Position(Turn,CurrentTableDict,selfKing,selfKing.position(),noKing=False)[0]) 
+        directAttackers: set = set(AI.whoAttack_Position(Turn,CurrentTableDict,selfKing,selfKing.position(),noKing=False)[0]) 
         defendedEnemies: set = AI.whoAttack_PositionsList(Turn,CurrentTableDict,selfKing,selfKingActions,noKing=True) 
         teamPossTake,teamPossMove,possibleActionsDefenders,possibleActionsDict  = AI.AnalyzingMovements(turn,CurrentTableDict,ourTeam=True,king=False,defenders=Defenders,ActDict=True) 
-        directAttackerSolution = directAttacker&teamPossTake
+        directAttackerSolution = directAttackers&teamPossTake
         blockableLineSolution = BlockableLine&teamPossMove
         
 
         DangerKingSolve: set = selfKingActions - defendedEnemies
-        DangerTeamSolve: set = directAttackerSolution|blockableLineSolution if len(directAttacker)==1 else set()
+        DangerTeamSolve: set = directAttackerSolution|blockableLineSolution if len(directAttackers)==1 else set()
         TeamOptions: set = teamPossMove|teamPossTake|possibleActionsDefenders
         possibleActionsDict[realKing]=DangerKingSolve
+        if enPassant:
+            for pie in Chess.pieces:
+                if isinstance(pie,Pawn) and pie.side==selfKing.side and enPassant in pie.possibleMoves(CurrentTableDict)[3]:
+                    possibleActionsDict[pie].add(enPassant)
 
-        return CurrentTableDict,selfKing,TeamOptions,Defenders,directAttacker,DangerKingSolve,DangerTeamSolve,possibleActionsDict
+
+        return CurrentTableDict,realKing,TeamOptions,Defenders,directAttackers,DangerKingSolve,DangerTeamSolve,possibleActionsDict
 
 
     def Computer(turn):
-        directAttacker,DangerKingSolve,DangerTeamSolve,possibleActionsDict=AI.dangerZone(turn)[4:]
+        directAttackers,DangerKingSolve,DangerTeamSolve,possibleActionsDict=AI.dangerZone(turn)[4:]
 
     #@countExecutionMethod
-    def GameOverCheck(turn):
-        CurrentTableDict,selfKing,TeamOptions,Defenders,directAttacker,DangerKingSolve,DangerTeamSolve,possibleActionsDict = AI.dangerZone(turn)
-        king = None
+    def GameOverCheck(selfKing,TeamOptions,directAttackers,DangerKingSolve,DangerTeamSolve):
         Solution: set =  DangerKingSolve|DangerTeamSolve
-        StaleMate: set = Solution|directAttacker|TeamOptions
+        StaleMate: set = Solution|directAttackers|TeamOptions
 
         GameOver = None
         selfTeam = []
@@ -196,12 +199,10 @@ class AI():
             GameOver = 'StaleMate'
         if not StaleMate:
             GameOver = 'StaleMate'
-        if directAttacker and not Solution:
+        if directAttackers and not Solution:
             GameOver = 'CheckMate'
-        if directAttacker:
-            king = selfKing.position()
 
-        return king,DangerKingSolve,directAttacker,DangerTeamSolve,Defenders,GameOver,CurrentTableDict,possibleActionsDict
+        return GameOver
     
     #@countExecutionMethod
     def CastlingCheck(turn,tableDict,king):

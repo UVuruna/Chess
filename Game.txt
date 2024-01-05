@@ -1,3 +1,11 @@
-1 Pawn B7 move B6
-2 Pawn A7 move A5
-StaleMate
+1 Pawn G2 move G4
+2 Pawn F7 move F5
+3 Pawn G4 took F5 Pawn
+4 Knight G8 move F6
+5 Knight G1 move H3
+6 Pawn G7 move G5
+7 Pawn F5 take G6 Pawn G5
+8 Pawn H7 took G6 Pawn
+9 Pawn F2 move F4
+10 Pawn E7 move E5
+11 Pawn F4 took E5 Pawn
