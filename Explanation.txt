@@ -1,0 +1,15 @@
+    POJMOVI:
+        - DEFENDERS  == Defender je figura koja stoji na liniji koja napada kralja. Ako ima 2 nase figure ili 1 protivnicka na toj liniji to se ne ne smatra linijom napada.
+                        Linije napada su one linije koje imaju NAPADACA (Kraljicu, Lovca, Topa) i na kojima se nalazi kralj i SAMO jedna nasa figura (ta figura je DEFENDER)
+                        Kod nas DEFENDERS je DICT koji ima kao kljuc OBJEKAT (figuru DEFENDER), a kao vrednost ima LISTU (liniju od NAPADACA do kralja)
+    
+    
+    1. Attacked Pieces   ==  Koga sve napadaju sve figure?
+            - TEAM       ==  Moze za oba tima (i onaj koji je na potezu i protivnicki tim)
+            - CLAS       ==  Moze sa ili bez kralja (ovde nas ne zanima koga napada kralj ako uzmemo bez kralja  
+                                                - to nam treba kada izracunavamo kako tim moze da resi problem)
+            - DEFENDERS  ==  Da li zelimo sa figurama koje stoje na linijama odbrane ili bez. Ovde se uzimaju KLJUCEVI recnika DEFENDERS (objekti)
+                                            (jedna situacija nam treba kada izracunavamo sve moguce poteze, 
+                                                    a druga kada trazimo resenje za direktne napadace)
+
+    2. Danger Zone       ==  
