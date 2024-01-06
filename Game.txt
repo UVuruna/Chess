@@ -1,11 +1,16 @@
-1 Pawn G2 move G4
-2 Pawn F7 move F5
-3 Pawn G4 took F5 Pawn
-4 Knight G8 move F6
-5 Knight G1 move H3
-6 Pawn G7 move G5
-7 Pawn F5 take G6 Pawn G5
-8 Pawn H7 took G6 Pawn
-9 Pawn F2 move F4
-10 Pawn E7 move E5
-11 Pawn F4 took E5 Pawn
+1 Queen D1 move E2
+2 Pawn D7 move D5
+3 Queen E2 move E3
+4 Bishop C8 move G4
+5 Queen E3 took E4 Queen
+6 Knight B8 move C6
+7 Bishop C1 move D2
+8 Queenside: black
+9 Knight C3 took D5 Pawn
+10 Knight C6 move D4
+11 Knight D5 took E7 Pawn
+12 Knight G8 took E7 Knight
+13 Bishop D2 took A5 Bishop
+14 Knight E7 move F5
+15 Queen E4 move E5
+16 Knight D4 move C2
