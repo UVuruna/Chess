@@ -10,6 +10,7 @@ from pawn import Pawn
 from rook import Rook
 from AI import AI
 from transcript import Rewind
+from rendering import Rendering
 from computerAI import ComputerAI
 import os
 
@@ -248,147 +249,22 @@ class Import():
             buttonKing.config(image=Import.Img_bPwS[0])
             buttonPawn.config(image=Import.Img_bPwS[6])
 
-
-# >>> VISUAL <<<
-class Rendering():
-
-    # Images Rendering   
-    def RenderingScreen(TableDict):
-        CurrentTableDict = TableDict
-        for k,v in CurrentTableDict.items():
-            if v != '': 
-                if isinstance(CurrentTableDict[k],King): # King
-                    if CurrentTableDict[k].side == 'w':
-                        Import.ButtonDict[k].config(image=Import.Img_wPwS[0]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[0])
-                    else:
-                        Import.ButtonDict[k].config(image=Import.Img_bPwS[0]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[0])                 
-                elif isinstance(CurrentTableDict[k],Queen): # Queen
-                    if CurrentTableDict[k].side == 'w':
-                        Import.ButtonDict[k].config(image=Import.Img_wPwS[1]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[1])
-                    else:
-                        Import.ButtonDict[k].config(image=Import.Img_bPwS[1]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[1])           
-                elif isinstance(CurrentTableDict[k],Bishop): # Bishop
-                    if CurrentTableDict[k].side == 'w':
-                        Import.ButtonDict[k].config(image=Import.Img_wPwS[2]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[2])
-                    else:
-                        Import.ButtonDict[k].config(image=Import.Img_bPwS[2]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[2])           
-                elif isinstance(CurrentTableDict[k],Knight): # Knight
-                    if CurrentTableDict[k].y < 4:
-                        if CurrentTableDict[k].side == 'w':
-                            Import.ButtonDict[k].config(image=Import.Img_wPwS[3]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[3])
-                        else:
-                            Import.ButtonDict[k].config(image=Import.Img_bPwS[3]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[3])
-                    else:
-                        if CurrentTableDict[k].side == 'w':
-                            Import.ButtonDict[k].config(image=Import.Img_wPwS[4]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[4])
-                        else:
-                            Import.ButtonDict[k].config(image=Import.Img_bPwS[4]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[4])            
-                elif isinstance(CurrentTableDict[k],Rook): # Rook
-                    if CurrentTableDict[k].side == 'w':
-                        Import.ButtonDict[k].config(image=Import.Img_wPwS[5]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[5])
-                    else:
-                        Import.ButtonDict[k].config(image=Import.Img_bPwS[5]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[5])           
-                elif isinstance(CurrentTableDict[k],Pawn): # Pawn
-                    if CurrentTableDict[k].side == 'w':
-                        Import.ButtonDict[k].config(image=Import.Img_wPwS[6]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_wPbS[6])
-                    else:
-                        Import.ButtonDict[k].config(image=Import.Img_bPwS[6]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Img_bPbS[6])
-            else: # Empty Square
-                Import.ButtonDict[k].config(image=Import.Images[1]) if Import.ButtonDict[k].color == 'w' else Import.ButtonDict[k].config(image=Import.Images[2])
-
-    # Button Borders Rendering
-    ButtonChanged = []
-    def borderColors(square):
-        Move,Take = CurrentTableDict[square].possibleMoves(CurrentTableDict)[:2]
-        if isinstance(Self,Pawn) and enPassant in possibleActionsDict[Self]:
-            Take.append(enPassant)
-        for m in Move:
-            Import.ButtonDict[m].config(background='#00BB00')
-            Rendering.ButtonChanged.append(Import.ButtonDict[m])
-        for t in Take:
-            Import.ButtonDict[t].config(background='#FF0000')
-            Rendering.ButtonChanged.append(Import.ButtonDict[t])
-
-    def borderCheck(PossibleCheck):
-        if PossibleCheck:
-            Import.ButtonDict[PossibleCheck].config(background='#FFFF00')
-            Rendering.ButtonChanged.append(Import.ButtonDict[PossibleCheck])
-
-    def borderCastling():
-        global kW,qW,kB,qB
-        try:
-            if isinstance(Self,King):
-                squares,kW,qW,kB,qB = AI.CastlingCheck(Turn,CurrentTableDict,Self)
-                for v in squares:
-                    Import.ButtonDict[v].config(background='#00AACC')
-                    Rendering.ButtonChanged.append(Import.ButtonDict[v])
-        except TypeError:
-            None
-
-    def borderDefault():
-        for b in Rendering.ButtonChanged:
-            b.config(background='SystemButtonFace')
-        Rendering.ButtonChanged.clear()
-
-    def PreviousNextButtons(rewindButtonsManage):
-        if rewindButtonsManage == None:
-            canvas.itemconfigure(buttonNext_window,state='normal')
-            canvas.itemconfigure(buttonBack_window,state='normal')
-        if rewindButtonsManage == 'noBack':
-            canvas.itemconfigure(buttonBack_window,state='hidden')
-            canvas.itemconfigure(buttonNext_window,state='normal')
-        elif rewindButtonsManage == 'noNext':
-            canvas.itemconfigure(buttonNext_window,state='hidden')
-            canvas.itemconfigure(buttonBack_window,state='normal')
-
-    # Text Rendering
-    def timeShowing(sta,end,ver,act):
-        ExecutionTime.config( text=f"Turn: {'White' if Turn == 1 else 'Black'}\n{Self if Self is not None else ''}\n\n"
-                                    f">>> Calculation Time <<<\n"
-                                    f"{'Action' if act else 'Verification'}: {((act if act else ver) - sta) * 1000:,.2f} ms\n"
-                                    f"Rendering: {(end - (act if act else ver)) * 1000:,.2f} ms\n"
-                                    f"Execution time: {(end - sta) * 1000:,.2f} ms")    
-
-    def printMovesDone(color,output=None,rewindPos=None,delete=None):
-        if rewindPos:
-            placeForColorStart = f"end{rewindPos}l"
-            if (rewindPos+1):
-                placeForColorEnd = f"end{rewindPos+1}l"
-            else:
-                placeForColorEnd="end"
-            tags_to_remove = ["#FF0000","#00AACC","#FDD017","#00BB00","#7700FF","#0000FF"]
-            for tag in tags_to_remove:
-                MoveOutput.tag_remove(tag, "1.0", END)
-            MoveOutput.tag_add(color, placeForColorStart, placeForColorEnd)
-            MoveOutput.tag_config(color, foreground=color)
-            MoveOutput.see(END)
-        try:
-            MoveOutput.insert(END,'\n'+output)
-            tags_to_remove = ["#FF0000","#00AACC","#FDD017","#00BB00","#7700FF","#0000FF"]
-            for tag in tags_to_remove:
-                MoveOutput.tag_remove(tag, "1.0", END)
-            MoveOutput.tag_add(color, "end-1l", "end")
-            MoveOutput.tag_config(color, foreground=color)
-            MoveOutput.see(END)
-        except TypeError:
-            None
-
-    def delMovesDone(delete):
-        deleteFrom = f"end{delete+1}l"
-        MoveOutput.delete(deleteFrom, END)
-
 # >>> MOVES  <<<
 class Actions():
     # Selecting Piece       
     def verification(position,startingTime): # Ovo je kada SELEKTUJEMO FIGURU  >>> First Click <<<
         def verify(xy):
-            global Self
+            global Self,kW,qW,kB,qB
             if isinstance(CurrentTableDict[xy],Chess):
                 Self = CurrentTableDict[xy]
                 Rendering.borderDefault()
-                Rendering.borderCheck(PossibleCheck)
-                Rendering.borderColors(xy)
-                Rendering.borderCastling()
+                Rendering.borderCheck(PossibleCheck,Import.ButtonDict)
+                Rendering.borderColors(xy,Import.ButtonDict,Self,CurrentTableDict,possibleActionsDict,enPassant)
+                try:
+                    kW,qW,kB,qB=Rendering.borderCastling(Import.ButtonDict,Self,Turn,CurrentTableDict)
+                except TypeError:
+                    None
+
         try:
             if Turn == 1 and CurrentTableDict[position].side == 'w':
                 verify(position)
@@ -397,9 +273,9 @@ class Actions():
         except (AttributeError,KeyError):
             None
         verificationTime = time.time()
-        Rendering.RenderingScreen(CurrentTableDict)
+        Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
         endTime = time.time()
-        Rendering.timeShowing(startingTime,endTime,verificationTime,None) 
+        Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,verificationTime,None) 
 
     # Taking Actions
     moveCounter: int
@@ -490,8 +366,8 @@ class Actions():
                 f.write(f"{Actions.moveCounter} promote {str(promote)[1:]} {Chess.NotationTableDict[promote.position()]}\n")
             output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.position()].ljust(5)+'⛨').ljust(8)}{promote}"
             if posInTransc <-1:
-                Rendering.delMovesDone(posInTransc)
-            Rendering.printMovesDone("#7700FF",output,None)
+                Rendering.delMovesDone(MoveOutput,posInTransc)
+            Rendering.printMovesDone(MoveOutput,"#7700FF",output,None)
             Chess.PromoteDict[promote]=Self
             Chess.pieces.remove(Self)
             Self = None
@@ -499,9 +375,9 @@ class Actions():
             Actions.End_Turn()
 
             actionTime = time.time()
-            Rendering.RenderingScreen(CurrentTableDict)
+            Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
             endTime = time.time()
-            Rendering.timeShowing(startingTime,endTime,None,actionTime)
+            Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)
 
     def Previous():
         global Self,Turn,CurrentTableDict
@@ -510,12 +386,12 @@ class Actions():
             CurrentTableDict = Rewind.Previous(Actions.moveCounter)
             Turn *=-1 ; Self =None ; Actions.moveCounter -=1
             Actions.End_Turn()
-            Rendering.printMovesDone("#0000FF",None,posInTransc)
+            Rendering.printMovesDone(MoveOutput,"#0000FF",None,posInTransc)
             
             actionTime = time.time()
-            Rendering.RenderingScreen(CurrentTableDict)
+            Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
             endTime = time.time()
-            Rendering.timeShowing(startingTime,endTime,None,actionTime)  
+            Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)  
 
     def Next():
         global Self,Turn,CurrentTableDict
@@ -524,12 +400,12 @@ class Actions():
             CurrentTableDict = Rewind.Next(Actions.moveCounter)
             Turn *=-1 ; Self =None ; Actions.moveCounter +=1
             Actions.End_Turn()
-            Rendering.printMovesDone("#0000FF",None,posInTransc)
+            Rendering.printMovesDone(MoveOutput,"#0000FF",None,posInTransc)
 
             actionTime = time.time()
-            Rendering.RenderingScreen(CurrentTableDict)
+            Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
             endTime = time.time()
-            Rendering.timeShowing(startingTime,endTime,None,actionTime) 
+            Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime) 
 
     # Finishing Turn
     ActionsDone = [movingDone, takingDone, castlingDone, pieceChange]
@@ -540,7 +416,7 @@ class Actions():
             if output is None:
                 continue
             elif output is False:
-                Self=None ; Rendering.borderDefault() ; Rendering.borderCheck(PossibleCheck)
+                Self=None ; Rendering.borderDefault() ; Rendering.borderCheck(PossibleCheck,Import.ButtonDict)
                 return
             else:
                 if isinstance(Self,Pawn) and (Self.x == 7 or Self.x == 0):
@@ -561,8 +437,8 @@ class Actions():
             f.write(f'{Actions.moveCounter} {transcript}')
         output = f"{(str(Actions.moveCounter)+'.').ljust(4)}{output}"
         if posInTransc <-1:
-            Rendering.delMovesDone(posInTransc)
-        Rendering.printMovesDone(color,output,None)
+            Rendering.delMovesDone(MoveOutput,posInTransc)
+        Rendering.printMovesDone(MoveOutput,color,output,None)
         if posInTransc < -1:
             with open(f'{TranscriptName}.txt','r+') as f:
                 text = f.readlines()
@@ -591,9 +467,9 @@ class Actions():
             PossibleCheck = None
 
         Rendering.borderDefault()
-        Rendering.borderCheck(PossibleCheck)
+        Rendering.borderCheck(PossibleCheck,Import.ButtonDict)
         rewindButtonsManage,posInTransc = Rewind.Get_Transcript_and_Position(TranscriptName)
-        Rendering.PreviousNextButtons(rewindButtonsManage)
+        Rendering.PreviousNextButtons(canvas,buttonNext_window,buttonBack_window,rewindButtonsManage)
         GameFlow.GameOver(Turn,GameOver)
 
 # >>> GAME <<<
@@ -624,7 +500,7 @@ class GameFlow:
         MoveOutput.delete('1.0', END)
         Rendering.borderDefault()
         posInTransc = Rewind.ResetPosition()
-        Rendering.RenderingScreen(CurrentTableDict)
+        Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
 
     def StandardGame():
         global Phase,Turn,Self,PossibleCheck,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,CurrentTableDict,posInTransc,enPassant,possibleActionsDict 
@@ -643,9 +519,9 @@ class GameFlow:
 
         verificationTime = time.time()
 
-        Rendering.RenderingScreen(CurrentTableDict)
+        Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
         endTime = time.time()
-        Rendering.timeShowing(startingTime,endTime,verificationTime,None)
+        Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,verificationTime,None)
           
     def GameMechanic(xy):
         startingTime = time.time()
@@ -661,9 +537,9 @@ class GameFlow:
                     Actions.ActionResult(output,transcript,color)
                     Actions.End_Turn()
                     actionTime = time.time()
-                    Rendering.RenderingScreen(CurrentTableDict)
+                    Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
                     endTime = time.time()
-                    Rendering.timeShowing(startingTime,endTime,None,actionTime)  
+                    Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)  
 
     def GameOver(turn,GameOver=None):
         global Phase
@@ -676,7 +552,7 @@ class GameFlow:
                 f.write(GameOver)
             Phase = 'Game Over'
             output = str(GameOver+winner)
-            Rendering.printMovesDone("#D2AA00",output,None)
+            Rendering.printMovesDone(MoveOutput,"#D2AA00",output,None)
 
     # Extra Methods
     def GodMode():
@@ -694,7 +570,7 @@ class GameFlow:
                 Rendering.borderDefault()
                 verificationTime = time.time()
                 endTime = time.time()
-                Rendering.timeShowing(startTime,endTime,verificationTime,None)
+                Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
         window.bind("<Escape>", escPressed)
 
         def spacePressed(event):
@@ -717,9 +593,9 @@ class GameFlow:
                 Actions.End_Turn()
 
                 verificationTime = time.time()
-                Rendering.RenderingScreen(CurrentTableDict)
+                Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
                 endTime = time.time()
-                Rendering.timeShowing(startTime,endTime,verificationTime,None)
+                Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
             window.bind("<Button-3>", rightClick)
 
         if delete == 'remove':
@@ -733,9 +609,9 @@ class GameFlow:
                     Actions.End_Turn()
 
                     verificationTime = time.time()
-                    Rendering.RenderingScreen(CurrentTableDict)
+                    Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
                     endTime = time.time()
-                    Rendering.timeShowing(startTime,endTime,verificationTime,None)
+                    Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
             window.bind("<Delete>", deletePressed)
 
         if insert == 'moving':
@@ -749,9 +625,9 @@ class GameFlow:
                     Actions.End_Turn()
 
                     verificationTime = time.time()
-                    Rendering.RenderingScreen(CurrentTableDict)
+                    Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.Img_wPwS,Import.Img_wPbS,Import.Img_bPwS,Import.Img_bPbS,Import.Images)
                     endTime = time.time()
-                    Rendering.timeShowing(startTime,endTime,verificationTime,None)
+                    Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
             window.bind("<Insert>", insertPressed)
 
         if win == 'win':
@@ -763,7 +639,7 @@ class GameFlow:
                         f.truncate(0)
                     with open(f'{TranscriptName}.txt','w') as f:
                         f.writelines(text[:-1])
-                    Rendering.delMovesDone(-2)
+                    Rendering.delMovesDone(MoveOutput,-2)
                     Phase = 'Game Mechanic'
             window.bind('\u0075\u0076',freeMode)
             window.bind('\u0076\u0075',freeMode)
