@@ -3,8 +3,8 @@ from chess import Chess
 class Knight(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
-    def __init__(self, side, name=None) -> None:
-        super().__init__(side)
+    def __init__(self,side,name=None) -> None:
+        super().__init__(side,move=None,take=None,defend=None,Defender=None)
         self.type = 'Warrior'
         self.name = name
         self.x = (0 if self.side == 'w' else 7)

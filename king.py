@@ -4,11 +4,12 @@ from rook import Rook
 class King(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<   
-    def __init__(self, side) -> None:
-        super().__init__(side)
+    def __init__(self,side,castling=None) -> None:
+        super().__init__(side,move=None,take=None,defend=None)
         self.type = 'Warrior'
         self.x = (0 if self.side == 'w' else 7)
         self.y = 4
+        self.castling = castling
     def __str__(self) -> str:
         white_king = '♔'
         black_king = '♚'
@@ -35,7 +36,7 @@ class King(Chess):
             return 0,0,0,0
     
     #castle = '⚜'
-    def castling(self,obj,kingWh,queenWh,kingBl,queenBl):
+    def Castling(self,obj,kingWh,queenWh,kingBl,queenBl):
         k = 'Kingside:'
         q = 'Queenside:'
         if obj.name == 'L':

@@ -285,14 +285,14 @@ class Actions():
         if CurrentTableDict[newXY] =='':
             if newXY in possibleActionsDict[Self]:
                 if isinstance(Self,King):
-                    output,transcript = Self.move(CurrentTableDict,newXY)
+                    output,transcript = Self.Move(CurrentTableDict,newXY)
                 elif enPassant == newXY and isinstance(Self,Pawn):
                     output,transcript = Actions.enPassantTake(enPassant,enPassant_objPos)
                     return output,transcript,"#FF0000"
                 elif directAttackers and Self not in Defenders.keys() and newXY in DangerTeamSolve:
-                    output,transcript = Self.move(CurrentTableDict,newXY)      
+                    output,transcript = Self.Move(CurrentTableDict,newXY)      
                 elif not directAttackers and ((Self not in Defenders.keys()) or (Self in Defenders.keys() and newXY in Defenders[Self])):
-                    output,transcript = Self.move(CurrentTableDict,newXY)
+                    output,transcript = Self.Move(CurrentTableDict,newXY)
                 else:
                     return False,False,False
             else:
@@ -307,11 +307,11 @@ class Actions():
         if CurrentTableDict[enemyXY].side != Self.side:
             if enemyXY in possibleActionsDict[Self]:
                 if isinstance(Self,King):
-                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
+                    output,transcript = Self.Take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
                 elif directAttackers and Self not in Defenders.keys() and enemyXY in DangerTeamSolve:
-                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
+                    output,transcript = Self.Take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
                 elif not directAttackers and ((Self not in Defenders.keys()) or (Self in Defenders.keys() and enemyXY in Defenders[Self])):
-                    output,transcript = Self.take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
+                    output,transcript = Self.Take(CurrentTableDict,CurrentTableDict[enemyXY],Actions.moveCounter)
                 else:
                     return False,False,False
             else:
@@ -339,7 +339,7 @@ class Actions():
         OwnRook = CurrentTableDict[ownRook]
         if isinstance(Self,King) and isinstance(OwnRook,Rook):
             try:
-                output,transcript = Self.castling(OwnRook,kW,qW,kB,qB)
+                output,transcript = Self.Castling(OwnRook,kW,qW,kB,qB)
                 return output,transcript,"#00AACC"
             except Exception:
                 return None,None,None   
@@ -577,7 +577,18 @@ class GameFlow:
 
         def spacePressed(event):
             start = time.time()
+            XY = hover.text
+            if isinstance(CurrentTableDict[XY],Chess):
+                AI.possibleMoves(CurrentTableDict[XY],CurrentTableDict)
+                print('moves',CurrentTableDict[XY].move)
+                print('takes',CurrentTableDict[XY].take)
+                print('defends',CurrentTableDict[XY].defend)
+                if isinstance(CurrentTableDict[XY],Pawn):
+                    print('attack',CurrentTableDict[XY].attack)
+                print('Defender',CurrentTableDict[XY].Defender)
+
             for _ in range(100):
+                
                 AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)
                 AllActions_Dict_enemy,AllActionsNum_Dict_enemy=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=False)
                 

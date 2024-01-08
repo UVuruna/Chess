@@ -5,9 +5,13 @@ class Chess(ABC):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Shared Initialization <<<
     pieces = [] 
-    def __init__(self,side) -> None:
+    def __init__(self,side,move=None,take=None,defend=None,Defender=None) -> None:
         super().__init__()
         self.side = side
+        self.move=move
+        self.take=take
+        self.defend=defend
+        self.Defender=Defender
         Chess.pieces.append(self)
         Chess.MovesDict[self] = 0
 
@@ -104,7 +108,7 @@ class Chess(ABC):
     #arrow = '➔'
     #sword = '🗙'
     # Setter #1
-    def move(self,tableDict,square):
+    def Move(self,tableDict,square):
         PossibleLines = self.possibleMoves(tableDict)[0]
         if square in PossibleLines:
             position = Chess.NotationTableDict[self.position()]
@@ -114,7 +118,7 @@ class Chess(ABC):
             moveOutput = f"{str(self).ljust(8)}{(position.ljust(5)+'➔').ljust(8)}{Chess.NotationTableDict[square]}"
             return moveOutput,transcript
     # Setter #2 
-    def take(self,tableDict,obj,moveCounter):
+    def Take(self,tableDict,obj,moveCounter):
         PossibleTake = self.possibleMoves(tableDict)[1]
         if obj.position() in PossibleTake:
             position = Chess.NotationTableDict[self.position()]

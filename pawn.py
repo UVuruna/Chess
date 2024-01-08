@@ -5,10 +5,11 @@ class Pawn(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<< 
     Name = ['L1','L2','L3','CL','CR','R3','R2','R1']  
-    def __init__(self, side, name=None) -> None:
-        super().__init__(side)
+    def __init__(self,side,name=None,attack=None) -> None:
+        super().__init__(side,move=None,take=None,defend=None,Defender=None)
         self.type = 'Warrior'
         self.name = name
+        self.attack = attack
         self.x = (1 if self.side == 'w' else 6)
         self.y = Pawn.Name.index(self.name)  if name else 0
 
