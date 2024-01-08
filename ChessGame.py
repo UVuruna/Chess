@@ -577,6 +577,9 @@ class GameFlow:
 
         def spacePressed(event):
             start = time.time()
+            for _ in range(100):
+                for p in Chess.pieces:
+                    AI.possibleMoves(p,CurrentTableDict)
             XY = hover.text
             if isinstance(CurrentTableDict[XY],Chess):
                 AI.possibleMoves(CurrentTableDict[XY],CurrentTableDict)
@@ -586,13 +589,14 @@ class GameFlow:
                 if isinstance(CurrentTableDict[XY],Pawn):
                     print('attack',CurrentTableDict[XY].attack)
                 print('Defender',CurrentTableDict[XY].Defender)
-
-            for _ in range(100):
+                print("check",Chess.Check)
+          
+            '''
+            AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)
+            AllActions_Dict_enemy,AllActionsNum_Dict_enemy=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=False)
+            
+            
                 
-                AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)
-                AllActions_Dict_enemy,AllActionsNum_Dict_enemy=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=False)
-                
-                '''
                 
                 print('--'*33)
                 print('--'*33)
@@ -601,9 +605,9 @@ class GameFlow:
                 print('--'*33)
                 print(AllActionsNum_Dict)
                 print('--'*33)
-                '''
+                
                 a = ComputerAI.PointCalulator(AllActionsNum_Dict)
-                '''
+                
                 print('--'*33)
                 for k,v in AllActions_Dict_enemy.items():
                     print([k],'---',v)
@@ -611,11 +615,13 @@ class GameFlow:
                 print(AllActionsNum_Dict_enemy)
                 print('--'*33)
                 print('+++'*33)
-                '''
+                
                 b = ComputerAI.PointCalulator(AllActionsNum_Dict_enemy)
-            end = time.time()
+            
             print('our',a)
             print('enemy',b)
+            '''
+            end = time.time()
             print(f'{(end-start)* 1000:,.2f} ms')
         window.bind("<space>",spacePressed)   
 

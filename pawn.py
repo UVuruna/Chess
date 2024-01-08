@@ -6,18 +6,27 @@ class Pawn(Chess):
 # >>> Creating Object <<< 
     Name = ['L1','L2','L3','CL','CR','R3','R2','R1']  
     def __init__(self,side,name=None,attack=None) -> None:
-        super().__init__(side,move=None,take=None,defend=None,Defender=None)
+        super().__init__(side,move=set(),take=set(),defend=set(),Defender=set())
         self.type = 'Warrior'
         self.name = name
-        self.attack = attack
+        self.attack = attack if attack is not None else set()
         self.x = (1 if self.side == 'w' else 6)
         self.y = Pawn.Name.index(self.name)  if name else 0
+        if self.side == 'w':
+            self.directionMove = Chess.direction[0]
+            self.directionAttack = Chess.direction[4:6]
+        else:
+            self.directionMove = Chess.direction[1]
+            self.directionAttack = Chess.direction[6:]
+
+
 
     def __str__(self) -> str:
         white_pawn = '♙'
         black_pawn = '♟'
         return f"{white_pawn if self.side == 'w' else black_pawn}Pawn" 
 
+    
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Moves - Game Mechanic <<<   
@@ -26,14 +35,6 @@ class Pawn(Chess):
         def polje(content):
             return TableDict[content.x,content.y]
         
-        # Za razliku od ostalih PION ima razlicite PETLJE za JEDENJE i KRETANJE, jer to radi u razlicitim smerovima
-        # Takodje kretanje zavisi od strane na kojoj se nalazi za razliku od ostalih FIGURA, zato postoji ovaj IF-ELSE
-        if self.side == 'w':
-            self.directionMove = Chess.direction[0]
-            self.directionAttack = Chess.direction[4:6]
-        elif self.side == 'b':
-            self.directionMove = Chess.direction[1]
-            self.directionAttack = Chess.direction[6:]
         # Varijabla TRIES sluzi jer PION u odredjenim slucajevima moze da skoci 2 polja, dok u vecini moze samo 1 polje kao 1 korak
         if (self.side == 'w' and self.x == 1) or (self.side == 'b' and self.x == 6):
             tries = 2

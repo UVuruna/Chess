@@ -5,7 +5,7 @@ class King(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<   
     def __init__(self,side,castling=None) -> None:
-        super().__init__(side,move=None,take=None,defend=None)
+        super().__init__(side,move=set(),take=set(),defend=set())
         self.type = 'Warrior'
         self.x = (0 if self.side == 'w' else 7)
         self.y = 4

@@ -4,7 +4,7 @@ class Knight(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
-        super().__init__(side,move=None,take=None,defend=None,Defender=None)
+        super().__init__(side,move=set(),take=set(),defend=set(),Defender=set())
         self.type = 'Warrior'
         self.name = name
         self.x = (0 if self.side == 'w' else 7)

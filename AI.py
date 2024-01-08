@@ -23,29 +23,14 @@ class AI():
         return tableDict[Self.x,Self.y]
 
     def updatingAttributes(Self,m,t,d,De,extL,a=None):
-        if Self.move is None:
-            Self.move = m
-        else:
-            Self.move.update(m)
-
-        if Self.take is None:
-            Self.take = t
-        else:
-            Self.take.update(t)
-
-        if Self.defend is None:
-            Self.defend = d
-        else:
-            Self.defend.update(d)
-
+        Self.move.update(m)
+        Self.take.update(t)
+        Self.defend.update(d)
         if a is not None:
-            if Self.attack is None:
-                Self.attack = a
-            else:
-                Self.attack.update(a)
-
+            Self.attack.update(a)
         if De is not None:
-            De.Defender = extL
+            De.Defender = extL|m
+            De.Defender.add(Self)
 
     def possibleMoves(Self,tableDict):
         possibleMoves = set()
@@ -59,63 +44,64 @@ class AI():
                 DefenderEnemy=None
                 possibleMoves,possibleTakes,possibleDefends,extendedLine = set(),set(),set(),set()
                 possMove = copy.deepcopy(Self)
+                enemy = None
                 while AI.insideBorder(possMove): 
                     possMove.incrementation(dir)
                     if AI.insideBorder(possMove):
-                        if AI.square(possMove,tableDict) == '': # -------------------Prazno polje------------------------------------
+                        if AI.square(possMove,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
                             if not extLine:
                                 possibleMoves.add(possMove.position())
                                 if possMove.type == 'Archer':
                                     None
                                 else:
                                     AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
+                                    del possMove                  
                                     break
                             else:
-                                extendedLine.add(possMove.position()) # -------------------------------------------------------------
+                                extendedLine.add(possMove.position()) # ----------------------------------------------------------------------------------------
 
-                        elif possMove.side !=AI.square(possMove,tableDict).side: # -------Protivnicka figura ------------------------
+                        elif possMove.side !=AI.square(possMove,tableDict).side: # -------Protivnicka figura ---------------------------------------------------
+                            enemy = tableDict[possMove.position()]
                             if not extLine:
-                                possibleTakes.add(tableDict[possMove.position()])
+                                possibleTakes.add(enemy)
+                                if isinstance(enemy,King):
+                                    Chess.Check.add(Self)
                                 if possMove.type == 'Archer':
                                     extLine=True
-                                    extendedLine.update(possibleMoves)
-                                    extendedLine.add(possMove)
-                                    DefenderEnemy = tableDict[possMove.position()]
+                                    if not isinstance(enemy,King):
+                                        DefenderEnemy = enemy
                                 else:
                                     AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
+                                    del possMove
                                     break
                             else:
-                                if isinstance(tableDict[possMove.position()],King):
+                                if isinstance(enemy,King):
                                     AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
                                 else:
                                     DefenderEnemy=None
                                     AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
-                                    break # ----------------------------------------------------------------------------------------
+                                    del possMove   
+                                    break # -------------------------------------------------------------------------------------------------------------------
 
-                        elif possMove.side ==AI.square(possMove,tableDict).side: # ----------Nasa figura----------------------------
+                        elif possMove.side ==AI.square(possMove,tableDict).side: # ----------Nasa figura-------------------------------------------------------
                             if not extLine:
                                 possibleDefends.add(tableDict[possMove.position()])
                                 AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
+                                del possMove
+                                
                                 break
                             else:
                                 DefenderEnemy=None
                                 AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
-                                break # --------------------------------------------------------------------------------------------
+                                del possMove  
+                                break # -----------------------------------------------------------------------------------------------------------------------
                     else:
                         DefenderEnemy=None
                         AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,DefenderEnemy,extendedLine)
+                        del possMove              
                         break
     
     def possibleMovesPawn(Self,tableDict,possibleMoves,possibleTakes,possibleDefends):
-        possibleAttacks = set()
-
-        if Self.side == 'w':
-            Self.directionMove = Chess.direction[0]
-            Self.directionAttack = Chess.direction[4:6]
-        else:
-            Self.directionMove = Chess.direction[1]
-            Self.directionAttack = Chess.direction[6:]
-
         tries = 2 if (Self.side == 'w' and Self.x == 1) or (Self.side == 'b' and Self.x == 6) else 1
 
         for dir in Self.directionMove:
@@ -123,35 +109,46 @@ class AI():
             while AI.insideBorder(possMove): 
                 possMove.incrementation(dir)
                 if tries == 0:
-                    AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,possibleAttacks)
+                    AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,None)
+                    del possMove
                     break
                 elif AI.insideBorder(possMove) and AI.square(possMove,tableDict) =='':
                     possibleMoves.add(possMove.position())
                     tries -= 1
                 else:
-                    AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,possibleAttacks)
+                    AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,None)
+                    del possMove
                     break 
 
         for dir in Self.directionAttack:
+            possibleAttacks = set()
             possMove = copy.deepcopy(Self)
+            enemy = None
             while AI.insideBorder(possMove):
                 possMove.incrementation(dir)
                 if AI.insideBorder(possMove):
                     if AI.square(possMove,tableDict) !='':
                         if possMove.side !=AI.square(possMove,tableDict).side:
-                            possibleTakes.add(tableDict[possMove.position()])
+                            enemy = tableDict[possMove.position()]
+                            possibleTakes.add(enemy)
+                            if isinstance(enemy,King):
+                                Chess.Check.add(Self)
                             AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,possibleAttacks)
+                            del possMove
                             break
                         elif possMove.side ==AI.square(possMove,tableDict).side:
-                            possibleDefends.add(possMove.position())
+                            possibleDefends.add(tableDict[possMove.position()])
                             AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,possibleAttacks)
+                            del possMove 
                             break
                     else:
                         possibleAttacks.add(possMove.position())
                         AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,possibleAttacks)
+                        del possMove
                         break
                 else:
                     AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,None,possibleAttacks)
+                    del possMove
                     break                    
 
 

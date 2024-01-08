@@ -5,7 +5,7 @@ class Chess(ABC):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Shared Initialization <<<
     pieces = [] 
-    def __init__(self,side,move=None,take=None,defend=None,Defender=None) -> None:
+    def __init__(self,side,move=set(),take=set(),defend=set(),Defender=set()) -> None:
         super().__init__()
         self.side = side
         self.move=move
@@ -20,6 +20,7 @@ class Chess(ABC):
     MovesDict = {}
     TakenDict = {}
     PromoteDict = {}
+    Check = set()
 
     def countExecutionMethod(method):
         def wrapper(*args, **kwargs):
