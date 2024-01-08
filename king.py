@@ -15,10 +15,7 @@ class King(Chess):
         return f"{white_king if self.side == 'w' else black_king}King"        
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# >>> Moves - Game Mechanic <<<   
-    def possibleMoves(self, tableDict):
-         return super().possibleMoves(tableDict)
-       
+# >>> Moves - Game Mechanic <<<     
     def castlingCheck(self,tableDict):
         kingsideWhite, queensideWhite, kingsideBlack, queensideBlack = 0,0,0,0
 
@@ -34,6 +31,8 @@ class King(Chess):
                     elif self.side=='b' and ownRook.name=='L' and tableDict[(7,1)]=='' and tableDict[(7,2)]=='' and tableDict[(7,3)]=='':
                         queensideBlack = 1
             return kingsideWhite, queensideWhite, kingsideBlack, queensideBlack
+        else:
+            return 0,0,0,0
     
     #castle = '⚜'
     def castling(self,obj,kingWh,queenWh,kingBl,queenBl):

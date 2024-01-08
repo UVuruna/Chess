@@ -58,7 +58,7 @@ class Chess(ABC):
             piecesDict[i.position()] = i
         return piecesDict
     
-    #@countExecutionMethod
+    @countExecutionMethod
     def currentTableDict():
         currentTableDict = Chess.EmptyTableDict.copy()
         piecesDict = Chess.piecesDict()

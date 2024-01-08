@@ -10,88 +10,126 @@ import time
 
 class ComputerAI():
 
-    def getTable():
-        return Chess.currentTableDict()
+    def PositionAnalyze(Turn,tableDict,enPassant,ourTeam):
+        def turnSwap(Turn):
+            return Turn if ourTeam is True else Turn*-1
 
-    def StartingPosition():
-            # Senatus
-        king_W=King('w'); king_B=King('b') ; queen_W=Queen('w'); queen_B=Queen('b')
-            # Hiereus
-        bishop_wL=Bishop('w','L'); bishop_wR=Bishop('w','R'); bishop_bL=Bishop('b','L'); bishop_bR=Bishop('b','R')
-            # Medjay
-        knight_wL=Knight('w','L'); knight_wR=Knight('w','R'); knight_bL=Knight('b','L'); knight_bR=Knight('b','R')
-            # Legiones
-        rook_wL=Rook('w','L'); rook_wR=Rook('w','R'); rook_bL=Rook('b','L'); rook_bR=Rook('b','R')
-            # Plebs
-        pawn_bL1=Pawn('b', 'L1'); pawn_bL2=Pawn('b', 'L2'); pawn_bL3=Pawn('b', 'L3'); pawn_bCL=Pawn('b', 'CL')
-        pawn_bCR=Pawn('b', 'CR'); pawn_bR3=Pawn('b', 'R3'); pawn_bR2=Pawn('b', 'R2'); pawn_bR1=Pawn('b', 'R1')
-        pawn_wL1=Pawn('w', 'L1'); pawn_wL2=Pawn('w', 'L2'); pawn_wL3=Pawn('w', 'L3'); pawn_wCL=Pawn('w', 'CL')
-        pawn_wCR=Pawn('w', 'CR'); pawn_wR3=Pawn('w', 'R3'); pawn_wR2=Pawn('w', 'R2'); pawn_wR1=Pawn('w', 'R1')
-
-    def AllActions():
-        pass
-
-
-    def PositionAnalyze(Turn,tableDict,ourTeam):
         def team(Turn,ourTeam):
-            if ourTeam is False:
-                if Turn==1:
-                    return piece.side == 'b'
-                else:
-                    return piece.side == 'w'
+            if (ourTeam is False and Turn==1) or (ourTeam is True and Turn==-1):
+                return piece.side == 'b'
             else:
-                if Turn==1:
-                    return piece.side == 'w'
+                return piece.side == 'w'
+               
+        def position_toObject(possActions,tableDict,noKing):
+            
+            def withoutKing(piece):
+                if noKing is True:
+                    return not isinstance(piece,King)
                 else:
-                    return piece.side == 'b'   
+                    return True
+            piecesSet = set()
+            points=0
+            for i in possActions:
+                obj = tableDict[i]
+                if withoutKing(obj):
+                    points +=(ComputerAI.PointsCoefficient(obj,action=False))
+                    piecesSet.add(obj)
+            return piecesSet,points
 
+        directAttackers,DangerTeamSolve,Defenders,possibleActionsDict=AI.dangerZone(turnSwap(Turn),tableDict,enPassant)[-4:]
+        if directAttackers:
+            for k,v in possibleActionsDict.items():
+                if not isinstance(k,King):
+                    possibleActionsDict[k]=set(v)&DangerTeamSolve
+  
         ActionDict = {}
+        ActionNumDict = {}
         for piece in Chess.pieces:
             if team(Turn,ourTeam):
                 move,take,defend,attack = piece.possibleMoves(tableDict)
-                piece_actions = { 'position': piece.position(),
-                                  'move': move,
-                                  'take': take,
-                                  'defend': defend,
-                                  'attack': attack if isinstance(piece,Pawn) else None}
+                allowedActions = set(possibleActionsDict[piece])
+                possMove:set = set(move)&allowedActions
+                numPossMove = len(possMove)
+
+                possTake:set = set(take)&allowedActions
+                possTakeObj,possTakeObjPoints = position_toObject(possTake,tableDict,False)
+                numPossTake = len(possTakeObj)*possTakeObjPoints/4
+
+                possDefendObj,possDefendObjPoints = position_toObject(defend,tableDict,True)
+                numPossDefend = len(possDefendObj)*possDefendObjPoints/4
+
+                if isinstance(piece,Pawn):
+                    try:
+                        possAttack:set = set(attack)&set(Defenders[piece])
+                    except KeyError:
+                        possAttack=set(attack)
+                    numPossOther = len(possAttack)
+                    piece_actions = { 'move': possMove,
+                                    'take': possTakeObj,
+                                    'defend': possDefendObj,
+                                    'attack': possAttack}
+                elif isinstance(piece,King):
+                    possCastlingObj=set()
+                    numPossOther =0
+                    kW,qW,kB,qB = AI.CastlingCheck(turnSwap(Turn),tableDict,piece)[1:]
+                    if (kW or kB)!=0:
+                        for rook in Chess.pieces:
+                            if isinstance(rook,Rook) and rook.side==piece.side and rook.name=='R':
+                                possCastlingObj.add(rook)
+                                numPossOther +=1
+                    if (qW or qB)!=0:
+                        for rook in Chess.pieces:
+                            if isinstance(rook,Rook) and rook.side==piece.side and rook.name=='L':
+                                possCastlingObj.add(rook)
+                                numPossOther +=1
+                    piece_actions = { 'move': possMove,
+                                    'take': possTakeObj,
+                                    'defend': possDefendObj,
+                                    'castling': possCastlingObj}
+                else:
+                    piece_actions = { 'move': possMove,
+                                    'take': possTakeObj,
+                                    'defend': possDefendObj}
+                    numPossOther=0
                 ActionDict[piece] = piece_actions
-        if ourTeam==True:
-            possibleActionsDict=AI.GameOverCheck(Turn)[-1]
-        else:
-            possibleActionsDict=AI.GameOverCheck(Turn*-1)[-1]    
-        return ActionDict,possibleActionsDict
-
-
-if __name__ == '__main__':
-    ComputerAI.StartingPosition()
-
-    start = time.time()
-    for _ in range(1000):
-        PossibleCheck,DangerKingSolve,directAttacker,DangerTeamSolve,Defenders,GameOver,CurrentTableDict,possibleActionsDict=AI.GameOverCheck(1)
-        
-        
-    currentTable = ComputerAI.getTable()
-
-    ActionDictOUR = ComputerAI.PositionAnalyze(1,currentTable,ourTeam=True)
-    ActionDictENEMY = ComputerAI.PositionAnalyze(-1,currentTable,ourTeam=True)
-
-
-
-    end = time.time()
-
-
-    print(f'{(end-start)* 1000:,.2f} ms')
-
-    print(Defenders)
-    print(possibleActionsDict)
-
-    print("OUR TEAM")
-    for k,v in ActionDictOUR.items():
-        print(str(type(k)).ljust(24),v)
-
-    print("ENEMY TEAM")
-    for k,v in ActionDictENEMY.items():
-        print(str(type(k)).ljust(24),v)
-
-
+                ActionNumDict[piece] = [numPossMove,numPossTake,numPossDefend,numPossOther]
+          
+        return ActionDict,ActionNumDict
     
+
+    def PointsCoefficient(Piece,action):
+        if isinstance(Piece,Pawn):
+            coef = 2
+        elif isinstance(Piece,Knight):
+            coef = 4
+        elif isinstance(Piece,Bishop):
+            coef = 4
+        elif isinstance(Piece,Rook):
+            coef = 5
+        elif isinstance(Piece,Queen):
+            coef = 7
+        elif isinstance(Piece,King):
+            coef = 1
+
+        if action is True:
+            move=1 if not isinstance(Piece,Pawn) else 0.5
+            take=2.5
+            defend=1.5
+            other=1 if isinstance(Piece,Pawn) else 1.5
+            return coef,[move,take,defend,other]
+        else:
+            return coef
+    
+    def PointCalulator(actionDictionary):
+        points=0
+        for k,v in actionDictionary.items():
+            lifeCoeff,actionCoeff = ComputerAI.PointsCoefficient(k,action=True)
+            points+=2*lifeCoeff
+            for i in range(4):
+                points+=(v[i]*actionCoeff[i]) if not isinstance(k,King) else (v[i]*actionCoeff[i])/3
+        return points
+
+
+
+
+

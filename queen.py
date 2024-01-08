@@ -13,8 +13,3 @@ class Queen(Chess):
             black_queen = '♛'
             white_queen = '♕'
             return f"{white_queen if self.side == 'w' else black_queen}Queen"
-
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# >>> Moves - Game Mechanic <<<
-    def possibleMoves(self, tableDict):
-         return super().possibleMoves(tableDict)

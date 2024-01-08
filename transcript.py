@@ -8,7 +8,7 @@ class Rewind():
             text = f.readlines()
         try:
             lastPlay = text[Rewind.PosInTransc].split()
-            if lastPlay [3]=='move' and lastPlay[1]=='Pawn' and abs(int(lastPlay[2][1])-int(lastPlay[4][1])) == 2:
+            if lastPlay[3]=='move' and lastPlay[1]=='Pawn' and abs(int(lastPlay[2][1])-int(lastPlay[4][1])) == 2:
                 xy: tuple = ((int(lastPlay[2][1])+int(lastPlay[4][1]))//2-1),(Rewind.letterToNum(lastPlay[2][0]))
                 enemyXY: tuple = ((int(lastPlay[4][1])-1),(Rewind.letterToNum(lastPlay[2][0])))
                 return xy,enemyXY

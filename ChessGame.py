@@ -452,11 +452,12 @@ class Actions():
     def End_Turn():
         global posInTransc,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,CurrentTableDict,PossibleCheck,possibleActionsDict,enPassant,enPassant_objPos
         GameOver=None
+        CurrentTableDict = Chess.currentTableDict()
         try:
             enPassant,enPassant_objPos = Rewind.EnPassant(TranscriptName)
         except TypeError:
             enPassant=None
-        CurrentTableDict,selfKing,TeamOptions,Defenders,directAttackers,DangerKingSolve,DangerTeamSolve,possibleActionsDict = AI.dangerZone(Turn,enPassant)
+        selfKing,TeamOptions,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,possibleActionsDict = AI.dangerZone(Turn,CurrentTableDict,enPassant)
         if directAttackers:
             PossibleCheck = selfKing.position()
             GameOver = AI.GameOverCheck(selfKing,TeamOptions,directAttackers,DangerKingSolve,DangerTeamSolve)
@@ -511,7 +512,8 @@ class GameFlow:
             f.truncate(0)
         GameFlow.MouseKeyboard(None,None,None,'win')
         GameFlow.StartingPosition()
-        CurrentTableDict,selfKing,TeamOptions,Defenders,directAttackers,DangerKingSolve,DangerTeamSolve,possibleActionsDict = AI.dangerZone(Turn,enPassant)
+        CurrentTableDict = Chess.currentTableDict()
+        DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,possibleActionsDict = AI.dangerZone(Turn,CurrentTableDict,enPassant)[2:]
        
         canvas.itemconfigure(buttonGM_window,state='hidden')
         canvas.itemconfigure(buttonSG_window,state='hidden')
@@ -574,14 +576,36 @@ class GameFlow:
         window.bind("<Escape>", escPressed)
 
         def spacePressed(event):
-            print(directAttackers)
-            print(DangerKingSolve)
-            print(DangerTeamSolve)
-            print(possibleActionsDict)
-            for k,v in Chess.MovesDict.items():
-                print(list[k],f"se pomerio: {v} puta")
-            print('----------------------------------')
-            print(Chess.TakenDict)
+            start = time.time()
+            for _ in range(100):
+                AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)
+                AllActions_Dict_enemy,AllActionsNum_Dict_enemy=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=False)
+                
+                '''
+                
+                print('--'*33)
+                print('--'*33)
+                for k,v in AllActions_Dict.items():
+                    print([k],'---',v)
+                print('--'*33)
+                print(AllActionsNum_Dict)
+                print('--'*33)
+                '''
+                a = ComputerAI.PointCalulator(AllActionsNum_Dict)
+                '''
+                print('--'*33)
+                for k,v in AllActions_Dict_enemy.items():
+                    print([k],'---',v)
+                print('--'*33)
+                print(AllActionsNum_Dict_enemy)
+                print('--'*33)
+                print('+++'*33)
+                '''
+                b = ComputerAI.PointCalulator(AllActionsNum_Dict_enemy)
+            end = time.time()
+            print('our',a)
+            print('enemy',b)
+            print(f'{(end-start)* 1000:,.2f} ms')
         window.bind("<space>",spacePressed)   
 
         if rClick == 'turn':

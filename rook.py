@@ -14,8 +14,4 @@ class Rook(Chess):
         black_rook = '♜'
         return f"{white_rook if self.side == 'w' else black_rook}Rook"
     
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# >>> Moves - Game Mechanic <<<
     direction = Chess.direction[:4]        
-    def possibleMoves(self, tableDict):
-         return super().possibleMoves(tableDict)

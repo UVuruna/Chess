@@ -42,6 +42,3 @@ class Knight(Chess):
         elif path == self.direction[7]:
             self.x -=1 ; self.y -=2
             return self.x,self.y
-        
-    def possibleMoves(self, tableDict):
-         return super().possibleMoves(tableDict)

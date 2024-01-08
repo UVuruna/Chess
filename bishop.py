@@ -14,8 +14,4 @@ class Bishop(Chess):
         white_bishop = '♗'
         return f"{white_bishop if self.side == 'w' else black_bishop}Bishop"
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# >>> Moves - Game Mechanic <<<
     direction = Chess.direction[4:]  
-    def possibleMoves(self, tableDict):
-         return super().possibleMoves(tableDict)
