@@ -24,7 +24,7 @@ class AI():
     def square(Self,tableDict):
         return tableDict[Self.x,Self.y]
 
-    def updatingAttributes(Self,m,t,d,De,a=None):
+    def updatingAttributes(Self,m,t,d,De=None,a=None):
         if De:
             defender = De[0]
             defender.Defender = True
@@ -53,78 +53,102 @@ class AI():
             Self.defend.clear()
      
     def possibleMoves(Self,tableDict):
+        Self_Copy = copy.deepcopy(Self)
+        if Self.type == 'Archer':
+            AI.possibleMovesArcher(Self,Self_Copy,tableDict)
+        elif isinstance(Self,Pawn):
+            AI.possibleMovesPawn(Self,Self_Copy,tableDict)
+        else:
+            AI.possibleMovesWarrior(Self,Self_Copy,tableDict)
+    
+    def possibleMovesArcher(Self,Self_Copy,tableDict):
+        possibleMoves = set()
+        possibleTakes = set()
+        possibleDefends = set()
+        Defenders = {}
+        for dir in Self_Copy.direction:
+            DefenderEnemy=None ; extLine = False ; possMove,extendedLine = set(),set()
+            Self_Copy.x,Self_Copy.y = Self.position()
+            while AI.insideBorder(Self_Copy): 
+                Self_Copy.incrementation(dir)
+                if AI.insideBorder(Self_Copy):
+                    if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
+                        if not extLine:
+                            possMove.add(Self_Copy.position())
+                        else:
+                            extendedLine.add(Self_Copy.position()) # ----------------------------------------------------------------------------------------
+                    elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura ---------------------------------------------------
+                        if not extLine:
+                            enemy = tableDict[Self_Copy.position()]
+                            possibleTakes.add(Self_Copy.position())                               
+                            if isinstance(enemy,King):
+                                Chess.Check[Self.position()]=possMove
+                                possibleMoves.update(possMove)
+                                break
+                            else:
+                                extLine=True
+                                DefenderEnemy = enemy
+                        else:
+                            if isinstance(tableDict[Self_Copy.position()],King):
+                                Defenders=[DefenderEnemy,(extendedLine|possMove)]
+                                possibleMoves.update(possMove) 
+                                break
+                            else:
+                                DefenderEnemy=None
+                                possibleMoves.update(possMove)
+                                break # -------------------------------------------------------------------------------------------------------------------
+
+                    elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
+                        if not extLine:
+                            possibleDefends.add(Self_Copy.position())
+                            possibleMoves.update(possMove)
+                            break
+                        else:
+                            DefenderEnemy=None
+                            possibleMoves.update(possMove) 
+                            break # -----------------------------------------------------------------------------------------------------------------------
+                else:
+                    DefenderEnemy=None
+                    possibleMoves.update(possMove)
+                    break
+        else:
+            del Self_Copy
+            AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,Defenders)
+
+    def possibleMovesWarrior(Self,Self_Copy,tableDict):
+        possibleMoves = set()
+        possibleTakes = set()
+        possibleDefends = set()
+        for dir in Self_Copy.direction:
+            Self_Copy.x,Self_Copy.y = Self.position()
+            while AI.insideBorder(Self_Copy): 
+                Self_Copy.incrementation(dir)
+                if AI.insideBorder(Self_Copy):
+                    if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
+                        possibleMoves.add(Self_Copy.position())
+                        break  # ----------------------------------------------------------------------------------------------------------------------------
+
+                    elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura --------------------------------------------------
+                        possibleTakes.add(Self_Copy.position())                               
+                        if isinstance(tableDict[Self_Copy.position()],King):
+                            Chess.Check[Self.position()]=None
+                        break # -----------------------------------------------------------------------------------------------------------------------------
+
+                    elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
+                        possibleDefends.add(Self_Copy.position())
+                        break # -----------------------------------------------------------------------------------------------------------------------------
+                else:
+                    break
+        else:
+            del Self_Copy
+            AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends)
+
+    def possibleMovesPawn(Self,Self_Copy,tableDict):
         possibleMoves = set()
         possibleTakes = set()
         possibleDefends = set()
         possibleAttacks = set()
-        Defenders = {}
-        if isinstance(Self,Pawn):
-            AI.possibleMovesPawn(Self,tableDict,possibleMoves,possibleTakes,possibleDefends,possibleAttacks)
-        else:
-            Self_Copy = copy.deepcopy(Self)
-            for dir in Self_Copy.direction:
-                DefenderEnemy=None ; extLine = False ; possMove,extendedLine = set(),set()
-                Self_Copy.x,Self_Copy.y = Self.position()
-                while AI.insideBorder(Self_Copy): 
-                    Self_Copy.incrementation(dir)
-                    if AI.insideBorder(Self_Copy):
-                        if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
-                            if not extLine:
-                                possMove.add(Self_Copy.position())
-                                if Self_Copy.type == 'Archer':
-                                    None
-                                else:
-                                    possibleMoves.update(possMove)
-                                    break
-                            else:
-                                extendedLine.add(Self_Copy.position()) # ----------------------------------------------------------------------------------------
-
-                        elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura ---------------------------------------------------
-                            if not extLine:
-                                enemy = tableDict[Self_Copy.position()]
-                                possibleTakes.add(Self_Copy.position())                               
-                                if Self_Copy.type == 'Archer':
-                                    if isinstance(enemy,King):
-                                        Chess.Check[Self.position()]=possMove
-                                        possibleMoves.update(possMove)
-                                        break
-                                    else:
-                                        extLine=True
-                                        DefenderEnemy = enemy
-                                else:
-                                    if isinstance(enemy,King):
-                                        Chess.Check[Self.position()]=None
-                                    break
-                            else:
-                                if isinstance(tableDict[Self_Copy.position()],King):
-                                    Defenders=[DefenderEnemy,(extendedLine|possMove)]
-                                    possibleMoves.update(possMove) 
-                                    break
-                                else:
-                                    DefenderEnemy=None
-                                    possibleMoves.update(possMove)
-                                    break # -------------------------------------------------------------------------------------------------------------------
-
-                        elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
-                            if not extLine:
-                                possibleDefends.add(Self_Copy.position())
-                                possibleMoves.update(possMove)
-                                break
-                            else:
-                                DefenderEnemy=None
-                                possibleMoves.update(possMove) 
-                                break # -----------------------------------------------------------------------------------------------------------------------
-                    else:
-                        DefenderEnemy=None
-                        possibleMoves.update(possMove)
-                        break
-            else:
-                del Self_Copy
-                AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,Defenders)
-    
-    def possibleMovesPawn(Self,tableDict,possibleMoves,possibleTakes,possibleDefends,possibleAttacks):
         tries = 2 if (Self.side == 'w' and Self.x == 1) or (Self.side == 'b' and Self.x == 6) else 1
-        Self_Copy = copy.deepcopy(Self)
         for dir in Self.directionMove:
             Self_Copy.x,Self_Copy.y = Self.position()
             while AI.insideBorder(Self_Copy): 

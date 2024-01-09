@@ -1,35 +1,25 @@
-from chess import Chess
-from king import King
-from queen import Queen
-from bishop import Bishop
-from knight import Knight
-from pawn import Pawn
-from rook import Rook
+def possibleMovesWarrior(Self,tableDict,possibleMoves,possibleTakes,possibleDefends):
+    Self_Copy = copy.deepcopy(Self)
+    for dir in Self_Copy.direction:
+        Self_Copy.x,Self_Copy.y = Self.position()
+        while AI.insideBorder(Self_Copy): 
+            Self_Copy.incrementation(dir)
+            if AI.insideBorder(Self_Copy):
+                if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
+                    possibleMoves.update(Self_Copy.position())
+                    break  # ----------------------------------------------------------------------------------------------------------------------------
 
-a: set = {1,2,3,4,5}
-b: set = set()
+                elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura --------------------------------------------------
+                    possibleTakes.add(Self_Copy.position())                               
+                    if isinstance(tableDict[Self_Copy.position()],King):
+                        Chess.Check[Self.position()]=None
+                    break # -----------------------------------------------------------------------------------------------------------------------------
 
-print(a&b)
-
-
-a = Pawn('w')
-b = Knight('w')
-c = Bishop('w')
-d = Rook('w')
-e = Queen('w')
-f = King('w')
-
-print(str(a)[1:3])
-print(str(b)[1:3])
-print(str(c)[1:3])
-print(str(d)[1:3])
-print(str(e)[1:3])
-print(str(f)[1:3])
-
-print(type(a))
-print(type(b))
-print(type(c))
-print(type(d))
-print(type(e))
-print(type(f))
-
+                elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
+                    possibleDefends.add(Self_Copy.position())
+                    break # -----------------------------------------------------------------------------------------------------------------------------
+            else:
+                break
+    else:
+        del Self_Copy
+        AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,Defenders)
