@@ -4,7 +4,7 @@ class Queen(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
-        super().__init__(side,move=set(),take=set(),defend=set(),Defender=set())
+        super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Archer'
         self.name = name
         self.x = (0 if self.side == 'w' else 7)

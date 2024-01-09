@@ -5,7 +5,7 @@ class Chess(ABC):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Shared Initialization <<<
     pieces = [] 
-    def __init__(self,side,move=set(),take=set(),defend=set(),Defender=set()) -> None:
+    def __init__(self,side,move=set(),take=set(),defend=set(),Defender=False) -> None:
         super().__init__()
         self.side = side
         self.move=move
@@ -14,13 +14,15 @@ class Chess(ABC):
         self.Defender=Defender
         Chess.pieces.append(self)
         Chess.MovesDict[self] = 0
+        
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# >>> Hash TABLES  --  CORE MECHANIC <<< 
+# >>> Hash TABLES  --  CORE MECHANIC <<<
     MovesDict = {}
     TakenDict = {}
     PromoteDict = {}
-    Check = set()
+    Check = {}
 
     def countExecutionMethod(method):
         def wrapper(*args, **kwargs):

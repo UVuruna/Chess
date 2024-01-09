@@ -6,7 +6,7 @@ class Pawn(Chess):
 # >>> Creating Object <<< 
     Name = ['L1','L2','L3','CL','CR','R3','R2','R1']  
     def __init__(self,side,name=None,attack=None) -> None:
-        super().__init__(side,move=set(),take=set(),defend=set(),Defender=set())
+        super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Warrior'
         self.name = name
         self.attack = attack if attack is not None else set()

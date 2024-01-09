@@ -1,3 +1,0 @@
-1 Pawn E2 move E4
-2 Pawn E7 move E5
-3 Queen D1 move H5

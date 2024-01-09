@@ -577,12 +577,28 @@ class GameFlow:
 
         def spacePressed(event):
             start = time.time()
-            for _ in range(100):
+            Chess.Check.clear()
+            n = 100
+            print('++'*66)
+            for _ in range(n):
+                for p in Chess.pieces:
+                    if isinstance(p,Pawn):
+                        p.attack.clear()
+                    p.move.clear() ; p.take.clear() ; p.defend.clear() ; p.Defender=False
+            end = time.time()
+            print(f'{str('brisanje svih attributa :').ljust(33)}{(end-start)/n* 1000000:,.0f} ns')
+            for _ in range(n):
                 for p in Chess.pieces:
                     AI.possibleMoves(p,CurrentTableDict)
+            end1 = time.time()
+            print(f'{str('postavljanje svih attributa :').ljust(33)}{(end1-end)/n* 1000000:,.0f} ns')
+            for _ in range(n):
+                AI.possibleActions()
+            end2 = time.time()
+            print(f'{str('korigovanje svih attributa :').ljust(33)}{(end2-end1)/n* 1000000:,.0f} ns')
+            print('++'*66)
             XY = hover.text
             if isinstance(CurrentTableDict[XY],Chess):
-                AI.possibleMoves(CurrentTableDict[XY],CurrentTableDict)
                 print('moves',CurrentTableDict[XY].move)
                 print('takes',CurrentTableDict[XY].take)
                 print('defends',CurrentTableDict[XY].defend)
@@ -590,7 +606,7 @@ class GameFlow:
                     print('attack',CurrentTableDict[XY].attack)
                 print('Defender',CurrentTableDict[XY].Defender)
                 print("check",Chess.Check)
-          
+
             '''
             AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)
             AllActions_Dict_enemy,AllActionsNum_Dict_enemy=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=False)
@@ -620,9 +636,9 @@ class GameFlow:
             
             print('our',a)
             print('enemy',b)
-            '''
             end = time.time()
             print(f'{(end-start)* 1000:,.2f} ms')
+            '''
         window.bind("<space>",spacePressed)   
 
         if rClick == 'turn':
