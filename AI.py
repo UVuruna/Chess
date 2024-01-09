@@ -38,7 +38,7 @@ class AI():
                     defender.attack &= De[1]
                 defender.move &= De[1]
                 defender.take &= set([Self.position()])
-                
+
         if Self.Defender is False:
             Self.move.update(m)
             Self.take.update(t)
@@ -63,9 +63,7 @@ class AI():
         else:
             Self_Copy = copy.deepcopy(Self)
             for dir in Self_Copy.direction:
-                extLine = False
-                DefenderEnemy=None
-                possMove,possTake,extendedLine = set(),set(),set()
+                DefenderEnemy=None ; extLine = False ; possMove,extendedLine = set(),set()
                 Self_Copy.x,Self_Copy.y = Self.position()
                 while AI.insideBorder(Self_Copy): 
                     Self_Copy.incrementation(dir)
@@ -83,32 +81,28 @@ class AI():
 
                         elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura ---------------------------------------------------
                             if not extLine:
-                                possTake.add(Self_Copy.position())                               
+                                enemy = tableDict[Self_Copy.position()]
+                                possibleTakes.add(Self_Copy.position())                               
                                 if Self_Copy.type == 'Archer':
-                                    if isinstance(tableDict[Self_Copy.position()],King):
+                                    if isinstance(enemy,King):
                                         Chess.Check[Self.position()]=possMove
                                         possibleMoves.update(possMove)
                                         break
                                     else:
                                         extLine=True
-                                        DefenderEnemy = tableDict[Self_Copy.position()]
+                                        DefenderEnemy = enemy
                                 else:
-                                    if isinstance(tableDict[Self_Copy.position()],King):
+                                    if isinstance(enemy,King):
                                         Chess.Check[Self.position()]=None
-                                        break
-                                    else:
-                                        possibleTakes.update(possTake)
-                                        break
+                                    break
                             else:
                                 if isinstance(tableDict[Self_Copy.position()],King):
                                     Defenders=[DefenderEnemy,(extendedLine|possMove)]
-                                    possibleMoves.update(possMove)
-                                    possibleTakes.update(possTake)  
+                                    possibleMoves.update(possMove) 
                                     break
                                 else:
                                     DefenderEnemy=None
                                     possibleMoves.update(possMove)
-                                    possibleTakes.update(possTake)
                                     break # -------------------------------------------------------------------------------------------------------------------
 
                         elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
@@ -118,12 +112,11 @@ class AI():
                                 break
                             else:
                                 DefenderEnemy=None
-                                possibleMoves.update(possMove)
+                                possibleMoves.update(possMove) 
                                 break # -----------------------------------------------------------------------------------------------------------------------
                     else:
                         DefenderEnemy=None
                         possibleMoves.update(possMove)
-                        possibleTakes.update(possTake)
                         break
             else:
                 del Self_Copy

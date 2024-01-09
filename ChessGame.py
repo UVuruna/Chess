@@ -579,6 +579,7 @@ class GameFlow:
             start = time.time()
             Chess.Check.clear()
             n = 100
+            ns = 1000000
             print('++'*66)
             for _ in range(n):
                 for p in Chess.pieces:
@@ -586,16 +587,16 @@ class GameFlow:
                         p.attack.clear()
                     p.move.clear() ; p.take.clear() ; p.defend.clear() ; p.Defender=False
             end = time.time()
-            print(f'{str('brisanje svih attributa :').ljust(33)}{(end-start)/n* 1000000:,.0f} ns')
+            print(f'{str('brisanje svih attributa :').ljust(33)}{(end-start)/n*ns:,.0f} ns')
             for _ in range(n):
                 for p in Chess.pieces:
                     AI.possibleMoves(p,CurrentTableDict)
             end1 = time.time()
-            print(f'{str('postavljanje svih attributa :').ljust(33)}{(end1-end)/n* 1000000:,.0f} ns')
+            print(f'{str('postavljanje svih attributa :').ljust(33)}{(end1-end)/n*ns:,.0f} ns')
             for _ in range(n):
                 AI.possibleActions()
             end2 = time.time()
-            print(f'{str('korigovanje svih attributa :').ljust(33)}{(end2-end1)/n* 1000000:,.0f} ns')
+            print(f'{str('korigovanje svih attributa :').ljust(33)}{(end2-end1)/n*ns:,.0f} ns')
             print('++'*66)
             XY = hover.text
             if isinstance(CurrentTableDict[XY],Chess):
