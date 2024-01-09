@@ -184,35 +184,43 @@ class AI():
 
     def possibleActions():
         self_WKing=None   ; self_BKing=None
-        whiteMove=set()   ; blackMove=set()
-        whiteAttack=set() ; blackAttack=set()
-        whiteTake=set()   ; blackTake=set()
-        whiteDefend=set() ; blackDefend=set()
         if not Chess.Check:
             for p in Chess.pieces:
                 if p.side=='w':
                     if isinstance(p,King):
                         self_WKing=p
+                        Chess.whiteDefend.update(p.defend)
                     else:
-                        whiteMove.update(p.move)
                         if isinstance(p,Pawn):
-                            whiteAttack.update(p.attack)
-                        whiteTake.update(p.take)
-                        whiteDefend.update(p.defend)
+                            Chess.whiteAttack.update(p.attack)
+                        Chess.whiteMove.update(p.move)
+                        Chess.whiteTake.update(p.take)
+                        Chess.whiteDefend.update(p.defend)
                 else:
                     if isinstance(p,King):
                         self_BKing=p
+                        Chess.blackDefend.update(p.defend)
                     else:
-                        blackMove.update(p.move)
                         if isinstance(p,Pawn):
-                            blackAttack.update(p.attack)
-                        blackTake.update(p.take)
-                        blackDefend.update(p.defend)
+                            Chess.blackAttack.update(p.attack)
+                        Chess.blackMove.update(p.move)
+                        Chess.blackTake.update(p.take)
+                        Chess.blackDefend.update(p.defend)
 
-            self_WKing.move -= (blackMove|blackAttack)
-            self_WKing.take -= (blackDefend)
-            self_BKing.move -= (whiteMove|whiteAttack)
-            self_BKing.take -= (whiteDefend)
+            self_WKing.take -= (Chess.blackDefend)
+            self_BKing.take -= (Chess.whiteDefend)
+
+            W = self_WKing.move.copy()
+            B = self_BKing.move.copy()
+            self_WKing.move -= (Chess.blackMove|Chess.blackAttack|B)
+            self_BKing.move -= (Chess.whiteMove|Chess.whiteAttack|W)
+            
+            Chess.whiteMove.update(self_WKing.move)
+            Chess.whiteTake.update(self_WKing.take)
+            Chess.blackMove.update(self_BKing.move)
+            Chess.blackTake.update(self_BKing.take)
+
+
 
         else:
             print(len(Chess.Check)) 

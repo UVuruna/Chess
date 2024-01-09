@@ -23,6 +23,10 @@ class Chess(ABC):
     TakenDict = {}
     PromoteDict = {}
     Check = {}
+    whiteMove=set()   ; blackMove=set()
+    whiteAttack=set() ; blackAttack=set()
+    whiteTake=set()   ; blackTake=set()
+    whiteDefend=set() ; blackDefend=set()
 
     def countExecutionMethod(method):
         def wrapper(*args, **kwargs):

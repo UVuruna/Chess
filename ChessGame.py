@@ -582,6 +582,10 @@ class GameFlow:
             ns = 1000000
             print('++'*66)
             for _ in range(n):
+                Chess.whiteMove.clear()   ; Chess.blackMove.clear()
+                Chess.whiteAttack.clear() ; Chess.blackAttack.clear()
+                Chess.whiteTake.clear()   ; Chess.blackTake.clear()
+                Chess.whiteDefend.clear() ; Chess.blackDefend.clear()
                 for p in Chess.pieces:
                     if isinstance(p,Pawn):
                         p.attack.clear()
@@ -599,14 +603,26 @@ class GameFlow:
             print(f'{str('korigovanje svih attributa :').ljust(33)}{(end2-end1)/n*ns:,.0f} ns')
             print('++'*66)
             XY = hover.text
-            if isinstance(CurrentTableDict[XY],Chess):
-                print('moves',CurrentTableDict[XY].move)
-                print('takes',CurrentTableDict[XY].take)
-                print('defends',CurrentTableDict[XY].defend)
-                if isinstance(CurrentTableDict[XY],Pawn):
-                    print('attack',CurrentTableDict[XY].attack)
-                print('Defender',CurrentTableDict[XY].Defender)
+            selfP = CurrentTableDict[XY]
+            if isinstance(selfP,Chess):
+                print('moves',selfP.move)
+                print('takes',selfP.take)
+                print('defends',selfP.defend)
+                if isinstance(selfP,Pawn):
+                    print('attack',selfP.attack)
+                print('Defender',selfP.Defender)
                 print("check",Chess.Check)
+                print('++'*66)
+                if selfP.side=='w':
+                    print('whole team possible moves',Chess.whiteMove)
+                    print('whole team possible takes',Chess.whiteTake)
+                    print('whole team possible defends',Chess.whiteDefend)
+                    print('whole team possible attacks',Chess.whiteAttack)
+                else:
+                    print('whole team possible moves',Chess.blackMove)
+                    print('whole team possible takes',Chess.blackTake)
+                    print('whole team possible defends',Chess.blackDefend)
+                    print('whole team possible attacks',Chess.blackAttack)
 
             '''
             AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)
