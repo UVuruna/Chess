@@ -12,6 +12,7 @@ from AI import AI
 from transcript import Rewind
 from rendering import Rendering
 from computerAI import ComputerAI
+import actions as a
 import os
 
 ImagesLocation = os.path.join(os.path.dirname(__file__),'Slike')
@@ -322,7 +323,7 @@ class Actions():
 
     def enPassantTake(newXY,objXY):
         global Self
-        position = Chess.NotationTableDict[Self.position()]
+        position = Chess.NotationTableDict[Self.getXY()]
         Self.x,Self.y = newXY
         Chess.MovesDict[Self]+=1
         if Self not in Chess.TakenDict:
@@ -361,10 +362,10 @@ class Actions():
             canvas.itemconfigure(ExecutionTime_window,state='normal')
 
             promote = choice
-            promote.x,promote.y = Self.position()
+            promote.x,promote.y = Self.getXY()
             with open(f'{TranscriptName}.txt','a') as f:
-                f.write(f"{Actions.moveCounter} promote {str(promote)[1:]} {Chess.NotationTableDict[promote.position()]}\n")
-            output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.position()].ljust(5)+'⛨').ljust(8)}{promote}"
+                f.write(f"{Actions.moveCounter} promote {str(promote)[1:]} {Chess.NotationTableDict[promote.getXY()]}\n")
+            output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.getXY()].ljust(5)+'⛨').ljust(8)}{promote}"
             if posInTransc <-1:
                 Rendering.delMovesDone(MoveOutput,posInTransc)
             Rendering.printMovesDone(MoveOutput,"#7700FF",output,None)
@@ -459,7 +460,7 @@ class Actions():
             enPassant=None
         selfKing,TeamOptions,DangerKingSolve,directAttackers,DangerTeamSolve,Defenders,possibleActionsDict = AI.dangerZone(Turn,CurrentTableDict,enPassant)
         if directAttackers:
-            PossibleCheck = selfKing.position()
+            PossibleCheck = selfKing.getXY()
             GameOver = AI.GameOverCheck(selfKing,TeamOptions,directAttackers,DangerKingSolve,DangerTeamSolve)
         elif not DangerKingSolve or len(Chess.pieces)<5:
             PossibleCheck = None
@@ -576,20 +577,23 @@ class GameFlow:
         window.bind("<Escape>", escPressed)
 
         def spacePressed(event):
+            _ = os.system('cls')
             start = time.time()
             Chess.Check.clear()
             n = 100
             ns = 1000000
             print('++'*66)
             for _ in range(n):
-                Chess.whiteMove.clear()   ; Chess.blackMove.clear()
-                Chess.whiteAttack.clear() ; Chess.blackAttack.clear()
-                Chess.whiteTake.clear()   ; Chess.blackTake.clear()
-                Chess.whiteDefend.clear() ; Chess.blackDefend.clear()
+                for k in Chess.AllActions_W.keys():
+                    Chess.AllActions_W[k].clear()
+                for k in Chess.AllActions_B.keys():
+                    Chess.AllActions_B[k].clear()
                 for p in Chess.pieces:
-                    if isinstance(p,Pawn):
-                        p.attack.clear()
-                    p.move.clear() ; p.take.clear() ; p.defend.clear() ; p.Defender=False
+                    if not isinstance(p,Pawn):
+                        p.move.clear()
+                    else:
+                        p.attack.clear() ; p.passiv_move.clear()
+                    p.take.clear() ; p.defend.clear() ; p.Defender=False
             end = time.time()
             print(f'{str('brisanje svih attributa :').ljust(33)}{(end-start)/n*ns:,.0f} ns')
             for _ in range(n):
@@ -598,31 +602,39 @@ class GameFlow:
             end1 = time.time()
             print(f'{str('postavljanje svih attributa :').ljust(33)}{(end1-end)/n*ns:,.0f} ns')
             for _ in range(n):
-                AI.possibleActions()
+                wk,wlr,wrr,bk,blr,brr=AI.possibleActions()
+                AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
             end2 = time.time()
             print(f'{str('korigovanje svih attributa :').ljust(33)}{(end2-end1)/n*ns:,.0f} ns')
             print('++'*66)
             XY = hover.text
             selfP = CurrentTableDict[XY]
             if isinstance(selfP,Chess):
-                print('moves',selfP.move)
+                if isinstance(selfP,King) or isinstance(selfP,Rook):
+                        print('castling',selfP.castling)
+                if isinstance(selfP,Pawn):
+                    print('passive move',selfP.passiv_move)
+                    print('attack',selfP.attack)
+                else:
+                    print('moves',selfP.move)
                 print('takes',selfP.take)
                 print('defends',selfP.defend)
-                if isinstance(selfP,Pawn):
-                    print('attack',selfP.attack)
+                
                 print('Defender',selfP.Defender)
                 print("check",Chess.Check)
                 print('++'*66)
                 if selfP.side=='w':
-                    print('whole team possible moves',Chess.whiteMove)
-                    print('whole team possible takes',Chess.whiteTake)
-                    print('whole team possible defends',Chess.whiteDefend)
-                    print('whole team possible attacks',Chess.whiteAttack)
+                    print('whole team possible moves',Chess.AllActions_W['move'])
+                    print('whole team passive moves',Chess.AllActions_W['passive_move'])
+                    print('whole team possible takes',Chess.AllActions_W['take'])
+                    print('whole team possible defends',Chess.AllActions_W['defend'])
+                    print('whole team possible attacks',Chess.AllActions_W['attack'])
                 else:
-                    print('whole team possible moves',Chess.blackMove)
-                    print('whole team possible takes',Chess.blackTake)
-                    print('whole team possible defends',Chess.blackDefend)
-                    print('whole team possible attacks',Chess.blackAttack)
+                    print('whole team possible moves',Chess.AllActions_B['move'])
+                    print('whole team passive moves',Chess.AllActions_B['passive_move'])
+                    print('whole team possible takes',Chess.AllActions_B['take'])
+                    print('whole team possible defends',Chess.AllActions_B['defend'])
+                    print('whole team possible attacks',Chess.AllActions_B['attack'])
 
             '''
             AllActions_Dict,AllActionsNum_Dict=ComputerAI.PositionAnalyze(Turn,CurrentTableDict,enPassant,ourTeam=True)

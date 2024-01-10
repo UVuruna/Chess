@@ -1,15 +1,18 @@
 from chess import Chess
+from actions import Actions
 from rook import Rook
 
 class King(Chess):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<   
-    def __init__(self,side,castling=None) -> None:
+    def __init__(self,side,castling=False) -> None:
         super().__init__(side,move=set(),take=set(),defend=set())
         self.type = 'Warrior'
+        self.castling = castling
         self.x = (0 if self.side == 'w' else 7)
         self.y = 4
-        self.castling = castling
+        
+        
     def __str__(self) -> str:
         white_king = '♔'
         black_king = '♚'

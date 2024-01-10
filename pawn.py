@@ -1,14 +1,16 @@
 from chess import Chess
+from actions import Actions
 import copy
 
 class Pawn(Chess):   
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<< 
     Name = ['L1','L2','L3','CL','CR','R3','R2','R1']  
-    def __init__(self,side,name=None,attack=None) -> None:
+    def __init__(self,side,name=None,passiv_move=None,attack=None) -> None:
         super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Warrior'
         self.name = name
+        self.passiv_move = passiv_move if passiv_move is not None else set()
         self.attack = attack if attack is not None else set()
         self.x = (1 if self.side == 'w' else 6)
         self.y = Pawn.Name.index(self.name)  if name else 0
@@ -53,7 +55,7 @@ class Pawn(Chess):
                 if tries == 0:
                     break
                 elif possMove.insideBorder() and polje(possMove) =='':
-                    possibleMove_List.append(possMove.position())
+                    possibleMove_List.append(possMove.getXY())
                     tries -= 1
                 else:
                     break 
@@ -64,13 +66,13 @@ class Pawn(Chess):
                 possMove.incrementation(dir)
                 if possMove.insideBorder():
                     if polje(possMove) !='' and possMove.side !=polje(possMove).side:
-                        possibleTake_List.append(possMove.position())
+                        possibleTake_List.append(possMove.getXY())
                         break
                     elif polje(possMove) !='' and possMove.side ==polje(possMove).side:
-                        possibleDefend_List.append(possMove.position())
+                        possibleDefend_List.append(possMove.getXY())
                         break
                     elif polje(possMove) =='':
-                        possibleAttack_List.append(possMove.position())
+                        possibleAttack_List.append(possMove.getXY())
                         break
                 
                 else:
