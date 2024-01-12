@@ -7,7 +7,6 @@ from AI import AI
 from transcript import Rewind
 from rendering import Rendering
 from computerAI import ComputerAI
-import threading
 import os
 
 ImagesLocation = os.path.join(os.path.dirname(__file__),'Slike')
@@ -22,14 +21,14 @@ window.geometry(f"{X}x{Y}")
 class Import():
     
     def ImageImport():
-        imageCount = 31
+        imageCount = 32
         ImageList = [] ; Img_wPwS = [] ; Img_wPbS = [] ; Img_bPwS = [] ; Img_bPbS = []
         for i in range(imageCount): # Image upload
             image = ImageTk.PhotoImage(Image.open(os.path.join(ImagesLocation,f"{i}.png")))
-            ImageList.append(image) if i<3 else \
-                (Img_wPwS.append(image) if i <10 else \
-                (Img_wPbS.append(image) if i < 17 else \
-                (Img_bPwS.append(image) if i < 24 else \
+            ImageList.append(image) if i<4 else \
+                (Img_wPwS.append(image) if i <11 else \
+                (Img_wPbS.append(image) if i < 18 else \
+                (Img_bPwS.append(image) if i < 25 else \
                 (Img_bPbS.append(image)))))
         return  ImageList,Img_wPwS,Img_wPbS,Img_bPwS,Img_bPbS
     Images,Img_wPwS,Img_wPbS,Img_bPwS,Img_bPbS = ImageImport()
@@ -38,28 +37,28 @@ class Import():
     def Hover(event,button):    # Green                          # Red                             # Light Blue                      # Yellow  
         global hover
         hover = event.widget
-        if button.cget('bg') !='#00BB00' and button.cget('bg') !='#FF0000' and button.cget('bg') !='#00AACC' and button.cget('bg') !='#FFFF00':
+        if button.cget('bg') !=Rendering.green and button.cget('bg') !=Rendering.red and button.cget('bg') !=Rendering.cyan and button.cget('bg') !=Rendering.yellow:
             button.config(background='silver')
-        elif button.cget('bg') =='#00BB00':
+        elif button.cget('bg') ==Rendering.green:
             button.config(background='#008800')
-        elif button.cget('bg') =='#FF0000':
+        elif button.cget('bg') ==Rendering.red:
             button.config(background='#AD0000')
-        elif button.cget('bg') =='#00AACC':
+        elif button.cget('bg') ==Rendering.cyan:
             button.config(background='#0066AD')
-        elif button.cget('bg') =='#FFFF00':
+        elif button.cget('bg') ==Rendering.yellow:
             button.config(background='#ADAD00')
 
     def ClearHover(event,button):
         if button.cget('bg') == 'silver':
             button.config(background='SystemButtonFace')
         elif button.cget('bg') =='#008800':
-            button.config(background='#00BB00')
+            button.config(background=Rendering.green)
         elif button.cget('bg') =='#AD0000':
-            button.config(background='#FF0000')
+            button.config(background=Rendering.red)
         elif button.cget('bg') =='#0066AD':
-            button.config(background='#00AACC')
+            button.config(background=Rendering.cyan)
         elif button.cget('bg') =='#ADAD00':
-            button.config(background='#FFFF00')
+            button.config(background=Rendering.yellow)
     # Icon   
     window.iconbitmap(os.path.join(ImagesLocation,"ico.ico"))   
 
@@ -72,7 +71,7 @@ class Import():
         # Canvas 2
         canvasSide = Canvas(window, width=550, height=1000)
         canvasSide.place(anchor=NW,x=1000,y=0)
-        canvasSide.create_image(0,0, anchor=NW)
+        canvasSide.create_image(0,0, anchor=NW, image=images[3])
 
             # Square buttons
         BorderDistance = 97 ; ButtonDimension = 101.7
@@ -108,7 +107,7 @@ class Import():
     def RightPanel_FirstScreen():
         global MoveOutput,ExecutionTime,ExecutionTime_window,buttonSG_window,buttonGM_window
         # Text
-        MoveOutput = Text(window, width= 550, height=22, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
+        MoveOutput = Text(window, width= 550, height=22, bg= '#535a5e', font=('Tahoma', 22))
         MoveOutput.place(anchor=NW,x=1000,y=2)
 
         exTiText = 'Standard Game:\nNormal Chess game\nwith all rules applied\n\nGod Mode:\nDelete: Remove Piece\nInsert: Freely move Piece\nRightClick: Change Turn '
@@ -270,12 +269,18 @@ class GamePlay():
     def movingDone(newXY):
         global Self,Turn
         if CurrentTableDict[newXY] =='':
-            if isinstance(Self,Pawn) and newXY in Self.passiv_move:
-                output,transcript = Self.Move(newXY)
-                return output,transcript,"#00BB00"
+            if isinstance(Self,Pawn):
+                if newXY in Self.passiv_move:
+                    output,transcript = Self.Move(newXY)
+                    return output,transcript,Rendering.green
+                elif newXY in Self.take:
+                    output,transcript = Self.enPassantTake(newXY,enPassantEnemy,CurrentTableDict,GamePlay.moveCounter)
+                    return output,transcript,Rendering.red
+                else:
+                    return False,False,False
             elif newXY in Self.move:
                 output,transcript = Self.Move(newXY)
-                return output,transcript,"#00BB00"
+                return output,transcript,Rendering.green
             else:
                 return False,False,False
         else:
@@ -286,7 +291,7 @@ class GamePlay():
         if CurrentTableDict[enemyXY].side != Self.side:
             if enemyXY in Self.take:
                 output,transcript = Self.Take(enemyXY,CurrentTableDict,GamePlay.moveCounter)
-                return output,transcript,"#FF0000"
+                return output,transcript,Rendering.red
             else:
                 return False,False,False  
         else:
@@ -297,7 +302,7 @@ class GamePlay():
         if isinstance(Self,King) and Self.castling and  rookXY in Self.castling:
             rook = CurrentTableDict[rookXY]
             output,transcript = Self.Castling(rook)
-            return output,transcript,"#00AACC"
+            return output,transcript,Rendering.cyan
         else:
             return None,None,None
 
@@ -337,7 +342,7 @@ class GamePlay():
             GamePlay.End_Turn()
             
             actionTime = time.time()
-            Rendering.printMovesDone(MoveOutput,"#0000FF",None,posInTransc)
+            Rendering.printMovesDone(MoveOutput,Rendering.blue,None,posInTransc)
             Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
             endTime = time.time()
             Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)  
@@ -351,7 +356,7 @@ class GamePlay():
             GamePlay.End_Turn()
             
             actionTime = time.time()
-            Rendering.printMovesDone(MoveOutput,"#0000FF",None,posInTransc)
+            Rendering.printMovesDone(MoveOutput,Rendering.blue,None,posInTransc)
             Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
             endTime = time.time()
             Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime) 
@@ -382,17 +387,19 @@ class GamePlay():
                     return output,transcript,color
 
     def End_Turn():
-        global posInTransc,CurrentTableDict,enPassant,enPassant_objPos
+        global posInTransc,CurrentTableDict,enPassantEnemy
         CurrentTableDict = Chess.currentTableDict()
-        try:
-            enPassant,enPassant_objPos = Rewind.EnPassant(TranscriptName)
-        except TypeError:
-            enPassant=None
 
         AI.ClearPossibleActions()
         for p in Chess.pieces:
             AI.AllActions(p,CurrentTableDict)
-        wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
+        try:
+            enPassant,enPassantEnemy = Rewind.EnPassant(TranscriptName)
+            side = CurrentTableDict[enPassantEnemy].side
+            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions(enPassant,side)
+        except TypeError:
+            enPassantEnemy=None
+            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
         AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
         gameover = AI.GameOverCheck(Turn)
         GameFlow.GameOver(Turn,gameover)
@@ -488,7 +495,7 @@ class GameFlow:
                 f.write(GameOver)
             Phase = 'Game Over'
             output = str(GameOver+winner)
-            Rendering.printMovesDone(MoveOutput,"#D2AA00",output,None)
+            Rendering.printMovesDone(MoveOutput,Rendering.gold,output,None)
 
     # Extra Methods
     def GodMode():

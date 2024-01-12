@@ -30,7 +30,7 @@ class Actions():
         moveOutput = f"{str(self).ljust(8)}{(tablePosition_OLD.ljust(4)+'❌').ljust(7)}{tablePosition_NEW} {enemy}"
         return moveOutput,transcript #-----------------------------------------------------------------------------------------------------
 
-    def enPassantTake(self,newXY,enemyXY,tableDict):
+    def enPassantTake(self,newXY,enemyXY,tableDict,moveCounter):
         enemy = tableDict[enemyXY] # ---------------------------------------------------- Work - Setter -----------------------------------
         tablePosition_OLD = Chess.NotationTableDict[self.getXY()] 
         tablePosition_ENEMY = Chess.NotationTableDict[enemyXY]
@@ -40,7 +40,7 @@ class Actions():
 
         if self not in Chess.TakenDict: # ------------------------------------------ Not Necessary ----------------------------------------
             Chess.TakenDict[self] = {}
-        Chess.TakenDict[self][Actions.moveCounter+1]=enemy # ------------------------------------------------------------------------------
+        Chess.TakenDict[self][moveCounter+1]=enemy # ------------------------------------------------------------------------------
 
         # ------------------------------------------------------------------------- Output - Print ----------------------------------------
         tablePosition_NEW = Chess.NotationTableDict[newXY]

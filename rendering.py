@@ -60,11 +60,11 @@ class Rendering():
             buttonDict[m].config(background='#00BB00')
             Rendering.ButtonChanged.append(buttonDict[m])
         for t in TakeColor:
-            buttonDict[t].config(background='#FF0000')
+            buttonDict[t].config(background=Rendering.red)
             Rendering.ButtonChanged.append(buttonDict[t])
         if isinstance(Self,King) and Self.castling:
             for c in Self.castling:
-                buttonDict[c].config(background='#00AACC')
+                buttonDict[c].config(background=Rendering.cyan)
                 Rendering.ButtonChanged.append(buttonDict[c])
 
     def borderCheck(buttonDict):
@@ -72,7 +72,7 @@ class Rendering():
             for k in Chess.Check.keys():
                 checkColor = k[2]
                 break
-            buttonDict[checkColor].config(background='#FFFF00')
+            buttonDict[checkColor].config(background=Rendering.yellow)
             Rendering.ButtonChanged.append(buttonDict[checkColor])
 
     def borderDefault():
@@ -116,16 +116,14 @@ class Rendering():
                 placeForColorEnd = f"end{rewindPos+1}l"
             else:
                 placeForColorEnd="end"
-            tags_to_remove = ["#FF0000","#00AACC","#FDD017","#00BB00","#7700FF","#0000FF"]
-            for tag in tags_to_remove:
+            for tag in Rendering.AllColors:
                 MoveOutput.tag_remove(tag, "1.0", END)
             MoveOutput.tag_add(color, placeForColorStart, placeForColorEnd)
             MoveOutput.tag_config(color, foreground=color)
             MoveOutput.see(END)
         try:
             MoveOutput.insert(END,'\n'+output)
-            tags_to_remove = ["#FF0000","#00AACC","#FDD017","#00BB00","#7700FF","#0000FF"]
-            for tag in tags_to_remove:
+            for tag in Rendering.AllColors:
                 MoveOutput.tag_remove(tag, "1.0", END)
             MoveOutput.tag_add(color, "end-1l", "end")
             MoveOutput.tag_config(color, foreground=color)
@@ -165,4 +163,14 @@ class Rendering():
         output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.getXY()].ljust(5)+'⛨').ljust(8)}{promote}"
         if posInTransc <-1:
             Rendering.delMovesDone(MoveOutput,posInTransc)
-        Rendering.printMovesDone(MoveOutput,"#7700FF",output,None)
+        Rendering.printMovesDone(MoveOutput,Rendering.purple,output,None)
+
+    red = "#FF6666"
+    green = "#00BB00"
+    cyan = "#00AACC"
+    blue = "#0000FF"
+    purple = "#8866CC"
+    gold = "#FDD017"
+    yellow = "#FFFF00"
+    
+    AllColors = [green,red,purple,cyan,blue]

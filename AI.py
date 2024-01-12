@@ -2,6 +2,7 @@ from tkinter import *
 import copy
 from chess import Chess
 from Pieces import *
+import time
 
 
 class AI():
@@ -97,14 +98,19 @@ class AI():
         possibleDefends = set()
         Defenders = {}
         for dir in Self_Copy.direction:
-            DefenderEnemy=None ; extLine = False ; possMove,extendedLine = set(),set()
+            DefenderEnemy=None ; extLine=False ; check=False
+            possMove,extendedLine = set(),set()
             Self_Copy.x,Self_Copy.y = Self.getXY()
             while AI.insideBorder(Self_Copy): 
                 Self_Copy.incrementation(dir)
                 if AI.insideBorder(Self_Copy):
                     if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
                         if not extLine:
-                            possMove.add(Self_Copy.getXY())
+                            if not check:
+                                possMove.add(Self_Copy.getXY()) 
+                            else:
+                                Self.move.add(Self_Copy.getXY())
+                                break    
                         else:
                             extendedLine.add(Self_Copy.getXY()) # ----------------------------------------------------------------------------------------
                     elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura ---------------------------------------------------
@@ -112,12 +118,15 @@ class AI():
                             enemy = tableDict[Self_Copy.getXY()]
                             possibleTakes.add(Self_Copy.getXY())                               
                             if isinstance(enemy,King):
+                                check=True
                                 Chess.Check[Self.side,Self.getXY(),Self_Copy.getXY()]=possMove
                                 possibleMoves.update(possMove)
-                                break
                             else:
-                                extLine=True
-                                DefenderEnemy = enemy
+                                if not check:
+                                    extLine=True
+                                    DefenderEnemy = enemy
+                                else:
+                                    break
                         else:
                             if isinstance(tableDict[Self_Copy.getXY()],King):
                                 Defenders=[DefenderEnemy,(extendedLine|possMove)]
@@ -130,9 +139,13 @@ class AI():
 
                     elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
                         if not extLine:
-                            possibleDefends.add(Self_Copy.getXY())
-                            possibleMoves.update(possMove)
-                            break
+                            if not check:
+                                possibleDefends.add(Self_Copy.getXY())
+                                possibleMoves.update(possMove)
+                                break
+                            else:
+                                Self.defend.add(Self_Copy.getXY())
+                                break
                         else:
                             DefenderEnemy=None
                             possibleMoves.update(possMove) 
@@ -215,11 +228,10 @@ class AI():
         AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,possibleAttacks)                   
 
     #@countExecutionMethod
-    def PossibleActions():
+    def PossibleActions(enPassantSquare=None,side=None):
         W_King=None ; B_King=None
         WL_Rook=None ; WR_Rook=None
         BL_Rook=None ; BR_Rook=None
-
         if Chess.Check:
             numOfAttackers = len(Chess.Check)
             for k,v in Chess.Check.items():
@@ -227,6 +239,7 @@ class AI():
                 enemyAttacker = k[1]
                 enemyLine = v
                 break
+           
         else:
             numOfAttackers=0
         for p in Chess.pieces:
@@ -250,6 +263,8 @@ class AI():
                     if not isinstance(p,Pawn):
                         Chess.AllActions_W['move'].extend(p.move)
                     else:
+                        if enPassantSquare in p.attack and side!='w':
+                            p.take.add(enPassantSquare)
                         Chess.AllActions_W['passive_move'].extend(p.passiv_move)
                         Chess.AllActions_W['attack'].extend(p.attack)
                     Chess.AllActions_W['take'].extend(p.take)
@@ -273,6 +288,8 @@ class AI():
                     if not isinstance(p,Pawn):
                         Chess.AllActions_B['move'].extend(p.move)
                     else:
+                        if enPassantSquare in p.attack and side!='b':
+                            p.take.add(enPassantSquare)
                         Chess.AllActions_B['passive_move'].extend(p.passiv_move)
                         Chess.AllActions_B['attack'].extend(p.attack)
                     Chess.AllActions_B['take'].extend(p.take)       
@@ -282,11 +299,11 @@ class AI():
 
         W = W_King.move.copy()
         B = B_King.move.copy()
-        W_King.move -= (set(Chess.AllActions_B['move']) | set(Chess.AllActions_B['attack']) | B)
-        B_King.move -= (set(Chess.AllActions_W['move']) | set(Chess.AllActions_W['attack']) | W)
+
+        W_King.move -= (set(Chess.AllActions_B['move']) | set(Chess.AllActions_B['attack']) | B )
+        B_King.move -= (set(Chess.AllActions_W['move']) | set(Chess.AllActions_W['attack']) | W )
         
         if numOfAttackers >1:
-            print('prosao b')
             AI.ClearPossibleActions(True,False,attackerSide)
 
         Chess.AllActions_W['move'].extend(W_King.move)
