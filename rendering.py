@@ -4,99 +4,106 @@ from bishop import Bishop
 from knight import Knight
 from pawn import Pawn
 from rook import Rook
-from AI import AI
+from chess import Chess
 from tkinter import *
 
 
 class Rendering():
 
-    # Images Rendering   
-    def RenderingScreen(tableDict,buttonDict,wPwS,wPbS,bPwS,bPbS,Images):
-        for k,v in tableDict.items():
-            if v != '': 
+    # AllImages[0] Rendering   
+    def RenderingScreen(tableDict,buttonDict,AllImages):
+        for k,v in tableDict.items(): # Ovo je glupo malo jer svaki put prolazi kroz All Images bes potrebe (moze da se izvuce ispred)
+            if v != '':  #          ali nema veze jer se to radi samo u igri (nakon odigravanja poteza), ne u izracunavanju poteza (ne usporava kalkulacije)
                 if isinstance(tableDict[k],King): # King
                     if tableDict[k].side == 'w':
-                        buttonDict[k].config(image=wPwS[0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[0])
+                        buttonDict[k].config(image=AllImages[1][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][0])
                     else:
-                        buttonDict[k].config(image=bPwS[0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[0])                 
+                        buttonDict[k].config(image=AllImages[3][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][0])                 
                 elif isinstance(tableDict[k],Queen): # Queen
                     if tableDict[k].side == 'w':
-                        buttonDict[k].config(image=wPwS[1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[1])
+                        buttonDict[k].config(image=AllImages[1][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][1])
                     else:
-                        buttonDict[k].config(image=bPwS[1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[1])           
+                        buttonDict[k].config(image=AllImages[3][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][1])           
                 elif isinstance(tableDict[k],Bishop): # Bishop
                     if tableDict[k].side == 'w':
-                        buttonDict[k].config(image=wPwS[2]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[2])
+                        buttonDict[k].config(image=AllImages[1][2]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][2])
                     else:
-                        buttonDict[k].config(image=bPwS[2]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[2])           
+                        buttonDict[k].config(image=AllImages[3][2]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][2])           
                 elif isinstance(tableDict[k],Knight): # Knight
                     if tableDict[k].y < 4:
                         if tableDict[k].side == 'w':
-                            buttonDict[k].config(image=wPwS[3]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[3])
+                            buttonDict[k].config(image=AllImages[1][3]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][3])
                         else:
-                            buttonDict[k].config(image=bPwS[3]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[3])
+                            buttonDict[k].config(image=AllImages[3][3]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][3])
                     else:
                         if tableDict[k].side == 'w':
-                            buttonDict[k].config(image=wPwS[4]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[4])
+                            buttonDict[k].config(image=AllImages[1][4]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][4])
                         else:
-                            buttonDict[k].config(image=bPwS[4]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[4])            
+                            buttonDict[k].config(image=AllImages[3][4]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][4])            
                 elif isinstance(tableDict[k],Rook): # Rook
                     if tableDict[k].side == 'w':
-                        buttonDict[k].config(image=wPwS[5]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[5])
+                        buttonDict[k].config(image=AllImages[1][5]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][5])
                     else:
-                        buttonDict[k].config(image=bPwS[5]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[5])           
+                        buttonDict[k].config(image=AllImages[3][5]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][5])           
                 elif isinstance(tableDict[k],Pawn): # Pawn
                     if tableDict[k].side == 'w':
-                        buttonDict[k].config(image=wPwS[6]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=wPbS[6])
+                        buttonDict[k].config(image=AllImages[1][6]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][6])
                     else:
-                        buttonDict[k].config(image=bPwS[6]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=bPbS[6])
+                        buttonDict[k].config(image=AllImages[3][6]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][6])
             else: # Empty Square
-                buttonDict[k].config(image=Images[1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=Images[2])
+                buttonDict[k].config(image=AllImages[0][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[0][2])
 
     # Button Borders Rendering
     ButtonChanged = []
-    def borderColors(square,buttonDict,Self,tableDict,possibleActionsDict,enPassant):
-        Move,Take = tableDict[square].possibleMoves(tableDict)[:2]
-        if isinstance(Self,Pawn) and enPassant in possibleActionsDict[Self]:
-            Take.append(enPassant)
-        for m in Move:
+    def borderColors(square,buttonDict,Self):
+        if not isinstance(Self,Pawn):
+            MoveColor,TakeColor = Self.move,Self.take
+        else:
+            MoveColor,TakeColor = Self.passiv_move,Self.take
+        for m in MoveColor:
             buttonDict[m].config(background='#00BB00')
             Rendering.ButtonChanged.append(buttonDict[m])
-        for t in Take:
+        for t in TakeColor:
             buttonDict[t].config(background='#FF0000')
             Rendering.ButtonChanged.append(buttonDict[t])
+        if isinstance(Self,King) and Self.castling:
+            for c in Self.castling:
+                buttonDict[c].config(background='#00AACC')
+                Rendering.ButtonChanged.append(buttonDict[c])
 
-    def borderCheck(PossibleCheck,buttonDict):
-        if PossibleCheck:
-            buttonDict[PossibleCheck].config(background='#FFFF00')
-            Rendering.ButtonChanged.append(buttonDict[PossibleCheck])
-
-    def borderCastling(buttonDict,Self,Turn,tableDict):
-        try:
-            if isinstance(Self,King):
-                squares,kW,qW,kB,qB = AI.CastlingCheck(Turn,tableDict,Self)
-                for v in squares:
-                    buttonDict[v].config(background='#00AACC')
-                    Rendering.ButtonChanged.append(buttonDict[v])
-                return kW,qW,kB,qB
-        except TypeError:
-            None
+    def borderCheck(buttonDict):
+        if Chess.Check:
+            for k in Chess.Check.keys():
+                checkColor = k[2]
+                break
+            buttonDict[checkColor].config(background='#FFFF00')
+            Rendering.ButtonChanged.append(buttonDict[checkColor])
 
     def borderDefault():
         for b in Rendering.ButtonChanged:
             b.config(background='SystemButtonFace')
         Rendering.ButtonChanged.clear()
 
+    def HidingButtons(canvas,*buttons):
+        for but in buttons:
+            current_state = canvas.itemcget(but, 'state')
+            if current_state != 'hidden':
+                canvas.itemconfigure(but, state='hidden')
+    def ShowingButtons(canvas,*buttons):
+        for but in buttons:
+            current_state = canvas.itemcget(but, 'state')
+            if current_state != 'normal':
+                canvas.itemconfigure(but, state='normal')
+
     def PreviousNextButtons(canvas,buttonNext_window,buttonBack_window,rewindButtonsManage):
         if rewindButtonsManage == None:
-            canvas.itemconfigure(buttonNext_window,state='normal')
-            canvas.itemconfigure(buttonBack_window,state='normal')
+            Rendering.ShowingButtons(canvas,buttonNext_window,buttonBack_window)
         if rewindButtonsManage == 'noBack':
-            canvas.itemconfigure(buttonBack_window,state='hidden')
-            canvas.itemconfigure(buttonNext_window,state='normal')
+            Rendering.HidingButtons(canvas,buttonBack_window)
+            Rendering.ShowingButtons(canvas,buttonNext_window)
         elif rewindButtonsManage == 'noNext':
-            canvas.itemconfigure(buttonNext_window,state='hidden')
-            canvas.itemconfigure(buttonBack_window,state='normal')
+            Rendering.HidingButtons(canvas,buttonNext_window)
+            Rendering.ShowingButtons(canvas,buttonBack_window)
 
     # Text Rendering
     def timeShowing(ExecutionTime,Turn,Self,sta,end,ver,act):

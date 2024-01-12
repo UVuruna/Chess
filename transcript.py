@@ -85,67 +85,73 @@ class Rewind():
         if len(lastPlay)==5: # Move
             startXY,endXY = Rewind.positionConverter(lastPlay,2)[:2]
             if direction == 'b':
-                Chess.MovesDict[Table[endXY]]-=1
-                Table[endXY].x,Table[endXY].y = startXY
+                self = Table[endXY]
+                self.actionsCounter -=1
+                self.setXY(startXY)
             elif direction == 'n':
-                Chess.MovesDict[Table[startXY]]+=1
-                Table[startXY].x,Table[startXY].y = endXY
+                self = Table[startXY]
+                self.actionsCounter +=1
+                self.setXY(endXY)
                 if nextPlayCheck[1] == 'promote':
                     Rewind.PosInTransc += 1
                     Rewind.AnalyzeTranscript('n',moveCounter)
         elif len(lastPlay)==6: # Take
             startXY,endXY = Rewind.positionConverter(lastPlay,2)[:2]
             if direction == 'b':
-                Chess.MovesDict[Table[endXY]]-=1
-                a = Chess.TakenDict[Table[endXY]][moveCounter]
-                Chess.pieces.append(a)
-                Table[endXY].x,Table[endXY].y = startXY
-                a.x,a.y = endXY 
+                self = Table[endXY]
+                self.actionsCounter -=1
+                enemy = Chess.TakenDict[Table[endXY]][moveCounter]
+                Chess.pieces.append(enemy)
+                self.setXY(startXY)
+                enemy.setXY(endXY)
             elif direction == 'n':
                 Chess.pieces.remove(Table[endXY])
-                Chess.MovesDict[Table[startXY]]+=1
-                Table[startXY].x,Table[startXY].y = endXY
+                self = Table[startXY]
+                self.actionsCounter +=1
+                self.setXY(endXY)
                 if nextPlayCheck[1] == 'promote':
                     Rewind.PosInTransc += 1
                     Rewind.AnalyzeTranscript('n',moveCounter)
         elif len(lastPlay)==3: # Castling
             kS,kE,rS,rE = Rewind.castlingConverter(lastPlay)
             if direction == 'b':
-                king = Table[kE] ; Chess.MovesDict[king]-=1 ; king.x,king.y = kS
-                rook = Table[rE] ; Chess.MovesDict[rook]-=1 ; rook.x,rook.y = rS
+                king = Table[kE] ; king.actionsCounter -=1 ; king.setXY(kS)
+                rook = Table[rE] ; rook.actionsCounter -=1 ; rook.setXY(rS)
             elif direction == 'n':
-                king = Table[kS] ; Chess.MovesDict[king]+=1 ; king.x,king.y = kE
-                rook = Table[rS] ; Chess.MovesDict[rook]+=1 ; rook.x,rook.y = rE
+                king = Table[kS] ; king.actionsCounter +=1 ; king.setXY(kE)
+                rook = Table[rS] ; rook.actionsCounter +=1 ; rook.setXY(rE)
         elif len(lastPlay)==4: # Promote
             xy = Rewind.positionConverter(lastPlay,3)[0]
             if direction == 'b':
-                a = Chess.PromoteDict[Table[xy]]
-                Chess.pieces.append(a)
-                a.x,a.y = xy
-                Chess.pieces.remove(Table[xy])
+                promote = Table[xy]
+                self = Chess.PromoteDict[promote]
+                Chess.pieces.append(self)
+                self.setXY(xy)
+                Chess.pieces.remove(promote)
                 Rewind.PosInTransc -= 1
                 Rewind.AnalyzeTranscript('b',moveCounter)
             elif direction == 'n':
-                a = next((k for k,v in Chess.PromoteDict.items() if v==Table[xy]),None)
-                Chess.pieces.append(a)
-                a.x,a.y = xy
-                Chess.pieces.remove(Table[xy])
+                self = Table[xy]
+                promote = next((k for k,v in Chess.PromoteDict.items() if v==self),None)
+                Chess.pieces.append(promote)
+                promote.setXY(xy)
+                Chess.pieces.remove(self)
         elif len(lastPlay)==7: # EnPassant
             startXY,endXY,objXY = Rewind.positionConverter(lastPlay,2)
             if direction == 'b':
-                Chess.MovesDict[Table[endXY]]-=1
-                a = Chess.TakenDict[Table[endXY]][moveCounter]
-                Chess.pieces.append(a)
-                Table[endXY].x,Table[endXY].y = startXY
-                a.x,a.y = objXY 
+                self = Table[endXY]
+                self.actionsCounter -=1
+                enemy = Chess.TakenDict[self][moveCounter]
+                Chess.pieces.append(enemy)
+                self.setXY(startXY)
+                enemy.setXY(objXY) 
             elif direction == 'n':
+                self = Table[startXY]
                 Chess.pieces.remove(Table[objXY])
-                Chess.MovesDict[Table[startXY]]+=1
-                Table[startXY].x,Table[startXY].y = endXY
+                self.actionsCounter +=1
+                self.setXY(endXY)
         return Table
         
-            
-
     def Previous(moveCounter):
         Table = Rewind.AnalyzeTranscript('b',moveCounter)
         Rewind.PosInTransc -= 1

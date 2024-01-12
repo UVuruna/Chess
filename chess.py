@@ -1,8 +1,5 @@
-from abc import ABC
-import copy
 
-
-class Chess(ABC):
+class Chess():
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Shared Initialization <<<
     pieces = [] 
@@ -15,19 +12,14 @@ class Chess(ABC):
         self.Defender=Defender
         self.actionsCounter =0
         Chess.pieces.append(self)
-        Chess.MovesDict[self] = 0
-
-        
-
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Hash TABLES  --  CORE MECHANIC <<<
-    MovesDict = {}
     TakenDict = {}
     PromoteDict = {}
     Check = {}
-    AllActions_W = {'move':set(),'take':set(),'defend':set(),'attack':set(),'passive_move':set()}
-    AllActions_B = {'move':set(),'take':set(),'defend':set(),'attack':set(),'passive_move':set()}
+    AllActions_W = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
+    AllActions_B = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
 
     def countExecutionMethod(method):
         def wrapper(*args, **kwargs):
@@ -61,7 +53,6 @@ class Chess(ABC):
     NotationTableDict = notationTableDict()
     
     # >>> DYNAMIC Dictionaries <<<
-
     #@countExecutionMethod
     def piecesDict():
         piecesDict = {}
@@ -69,7 +60,7 @@ class Chess(ABC):
             piecesDict[i.getXY()] = i
         return piecesDict
     
-    @countExecutionMethod
+    #@countExecutionMethod
     def currentTableDict():
         currentTableDict = Chess.EmptyTableDict.copy()
         piecesDict = Chess.piecesDict()
@@ -113,64 +104,3 @@ class Chess(ABC):
     # Setter
     def setXY(self,xy):
         self.x,self.y = xy
-    
-    #symbols = '☀☘☛☥☦☯♋♻♺⚔🗡️🠊🢂⚜⛌🢣⚔⛦⛥⛤⛧⛨✚✟✡✰❌❎❭❯❱➔➩➵➸➼⭕⭐🕊🗙'
-    #arrow = '➔'
-    #sword = '🗙'
-    # Setter #1
-    def Move(self,tableDict,square):
-        PossibleLines = self.possibleMoves(tableDict)[0]
-        if square in PossibleLines:
-            position = Chess.NotationTableDict[self.getXY()]
-            self.x,self.y = square
-            Chess.MovesDict[self] +=1
-            transcript = f"{str(self)[1:]} {position} move {Chess.NotationTableDict[square]}\n"   
-            moveOutput = f"{str(self).ljust(8)}{(position.ljust(5)+'➔').ljust(8)}{Chess.NotationTableDict[square]}"
-            return moveOutput,transcript
-    # Setter #2 
-    def Take(self,tableDict,obj,moveCounter):
-        PossibleTake = self.possibleMoves(tableDict)[1]
-        if obj.getXY() in PossibleTake:
-            position = Chess.NotationTableDict[self.getXY()]
-            self.x,self.y = obj.getXY()
-            if self not in Chess.TakenDict:
-                Chess.TakenDict[self] = {}
-            Chess.TakenDict[self][moveCounter+1] = obj
-            Chess.MovesDict[self] +=1
-            transcript = f"{str(self)[1:]} {position} took {Chess.NotationTableDict[obj.getXY()]} {str(obj)[1:]}\n"  
-            moveOutput = f"{str(self).ljust(8)}{(position.ljust(4)+'❌').ljust(7)}{Chess.NotationTableDict[obj.getXY()]} {obj}"
-            Chess.pieces.remove(obj)
-            return moveOutput,transcript 
-    
-    #@countExecutionMethod
-    def possibleMoves(self,tableDict):
-        def square(Self):
-            return tableDict[Self.x,Self.y]
-        
-        possibleMoveAttack_List = []
-        possibleTake_List = []
-        possibleDefend_List = []
-        
-        for dir in self.direction:
-            possMove = copy.deepcopy(self)
-            while possMove.insideBorder(): 
-                possMove.incrementation(dir)
-                if possMove.insideBorder() and square(possMove) == '':
-                    possibleMoveAttack_List.append(possMove.getXY())
-                    if possMove.type == 'Archer':
-                        None
-                    else:
-                        break
-                elif possMove.insideBorder() and possMove.side !=square(possMove).side:
-                    possibleTake_List.append(possMove.getXY())
-                    break
-                elif possMove.insideBorder() and possMove.side ==square(possMove).side:
-                    possibleDefend_List.append(possMove.getXY())
-                    break
-                else:
-                    break
-                         
-        return possibleMoveAttack_List, possibleTake_List, possibleDefend_List, possibleMoveAttack_List
-    
-    def insideBorder(self):
-        return (self.x <= 7 and self.x >= 0) and (self.y <= 7 and self.y >= 0)

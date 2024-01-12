@@ -1,7 +1,7 @@
 from chess import Chess
 from actions import Actions
 
-class Bishop(Chess):
+class Bishop(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
@@ -11,6 +11,7 @@ class Bishop(Chess):
         self.x = (0 if self.side == 'w' else 7)
         self.y = (2 if self.name == 'L' else 5)  if name else 0
         self.direction = Chess.direction[4:] 
+        
     def __str__(self) -> str:
         black_bishop = '♝'
         white_bishop = '♗'

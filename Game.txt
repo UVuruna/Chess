@@ -1,0 +1,36 @@
+1 Pawn C2 move C4
+2 Pawn C7 move C5
+3 Pawn D2 move D4
+4 Pawn D7 move D5
+5 Pawn E2 move E4
+6 Pawn E7 move E5
+7 Pawn F2 move F4
+8 Pawn F7 move F5
+9 Queen D1 move A4
+10 Bishop C8 move D7
+11 Bishop C1 move D2
+12 Queen D8 move A5
+13 Pawn D4 took C5 Pawn
+14 Pawn D5 took C4 Pawn
+15 Bishop F1 took C4 Pawn
+16 Bishop F8 took C5 Pawn
+17 Knight G1 move F3
+18 Knight G8 move F6
+19 Knight B1 move C3
+20 Knight B8 move C6
+21 Bishop C4 move E6
+22 Bishop C5 move E3
+23 Queenside: white
+24 Queenside: black
+25 Rook H1 move E1
+26 Rook H8 move E8
+27 Rook E1 move E2
+28 Rook E8 move E7
+29 Bishop D2 took E3 Bishop
+30 Bishop D7 took E6 Bishop
+31 Rook E2 move C2
+32 Rook E7 move C7
+33 Knight C3 move D5
+34 Knight C6 move D4
+35 Pawn B2 move B3
+36 Pawn B7 move B6

@@ -1,7 +1,7 @@
 from chess import Chess
 from actions import Actions
 
-class Knight(Chess):
+class Knight(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
@@ -10,13 +10,12 @@ class Knight(Chess):
         self.name = name
         self.x = (0 if self.side == 'w' else 7)
         self.y = (1 if self.name == 'L' else 6)  if name else 0
+        
     def __str__(self) -> str:
         white_knight = '♘'
         black_knight = '♞'
         return f"{white_knight if self.side == 'w' else black_knight}Knight"
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# >>> Moves - Game Mechanic <<<
     direction = ['U+R','UR+','U+L','UL+','D+R','DR+','D+L','DL+']  
     def incrementation(self, path):
         if path == self.direction[0]:
