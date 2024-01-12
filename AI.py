@@ -1,10 +1,7 @@
 from tkinter import *
 import copy
 from chess import Chess
-from king import King
-from queen import Queen
-from pawn import Pawn
-from rook import Rook
+from Pieces import *
 
 
 class AI():

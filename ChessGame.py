@@ -2,16 +2,12 @@ from tkinter import *
 from PIL import ImageTk, Image, ImageDraw, ImageFont
 import time
 from chess import Chess
-from king import King
-from queen import Queen
-from bishop import Bishop
-from knight import Knight
-from pawn import Pawn
-from rook import Rook
+from Pieces import *
 from AI import AI
 from transcript import Rewind
 from rendering import Rendering
 from computerAI import ComputerAI
+import threading
 import os
 
 ImagesLocation = os.path.join(os.path.dirname(__file__),'Slike')
@@ -68,11 +64,16 @@ class Import():
     window.iconbitmap(os.path.join(ImagesLocation,"ico.ico"))   
 
     def ButtonsCreating(images):
-        global canvas
-        # Canvas
-        canvas = Canvas(window, width=images[0].width()+550, height=images[0].height())
-        canvas.place(anchor=NW,x=0,y=0)
-        canvas.create_image(0,0, anchor=NW, image=images[0])
+        global canvasTable,canvasSide
+        # Canvas 1
+        canvasTable = Canvas(window, width=1000, height=1000)
+        canvasTable.place(anchor=NW,x=0,y=0)
+        canvasTable.create_image(0,0, anchor=NW, image=images[0])
+        # Canvas 2
+        canvasSide = Canvas(window, width=550, height=1000)
+        canvasSide.place(anchor=NW,x=1000,y=0)
+        canvasSide.create_image(0,0, anchor=NW)
+
             # Square buttons
         BorderDistance = 97 ; ButtonDimension = 101.7
         ButtonReferences = list(Chess.emptyTableDict().keys())
@@ -87,8 +88,8 @@ class Import():
             button.config(border=2,command=lambda text = button.text: (GameFlow.GameMechanic(text)))     # FUNKCIJA Buttona
             button.bind("<Enter>",lambda event, text = button: Import.Hover(event,text))                # Hover
             button.bind("<Leave>",lambda event, text = button: Import.ClearHover(event,text))         # Clear Hover
-            button_window = canvas.create_window(1,1, anchor=NW, window=button)               # kreiranje prozora buttona
-            canvas.coords(button_window,(BorderDistance+y*ButtonDimension),(BorderDistance+(7-x)*ButtonDimension))                                # postavljanje buttona na EKRAN
+            button_window = canvasTable.create_window(1,1, anchor=NW, window=button)               # kreiranje prozora buttona
+            canvasTable.coords(button_window,(BorderDistance+y*ButtonDimension),(BorderDistance+(7-x)*ButtonDimension))                                # postavljanje buttona na EKRAN
             ButtonDict[button.text] = button                                                  # Ubacivanje Buttona u RECNIK                            
 
             if x%2==0: # Default Square Color
@@ -112,42 +113,42 @@ class Import():
 
         exTiText = 'Standard Game:\nNormal Chess game\nwith all rules applied\n\nGod Mode:\nDelete: Remove Piece\nInsert: Freely move Piece\nRightClick: Change Turn '
         ExecutionTime = Label(window, font=('Eras Demi ITC', 16), width=24, height=8, bd=2, relief='groove', text=exTiText)
-        ExecutionTime_window = canvas.create_window(1220, 787, anchor=NW, window=ExecutionTime)
+        ExecutionTime_window = canvasSide.create_window(220, 787, anchor=NW, window=ExecutionTime)
 
         buttonSG = Button(window, border=3, font=('Eras Demi ITC', 24), width=9, height=2, text='Standard\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvas.create_window(1010,780, anchor=NW, window=buttonSG)
+        buttonSG_window = canvasSide.create_window(10,780, anchor=NW, window=buttonSG)
         buttonGM = Button(window, border=3, font=('Eras Demi ITC', 24), width=9, height=2, text='God Mode', command=lambda: GameFlow.GodMode())
-        buttonGM_window = canvas.create_window(1010,890, anchor=NW, window=buttonGM)
+        buttonGM_window = canvasSide.create_window(10,890, anchor=NW, window=buttonGM)
     
     def RightPanel_SecondScreen():
         global buttonNG_window,buttonBack_window,buttonNext_window
 
         buttonNG = Button(window, border=3, font=('Eras Demi ITC', 24), width=9, height=2, text='New Game', command=lambda: GameFlow.NewGame())
-        buttonNG_window = canvas.create_window(1010,780, anchor=NW, window=buttonNG)
+        buttonNG_window = canvasSide.create_window(10,780, anchor=NW, window=buttonNG)
 
-        buttonBack = Button(window, border=3, font=('Eras Demi ITC', 33), width=3, height=1, text='⯬🢠', command=lambda: Actions.Previous())
-        buttonBack_window = canvas.create_window(1010,900, anchor=NW, window=buttonBack)
-        buttonNext = Button(window, border=3, font=('Eras Demi ITC', 33), width=3, height=1, text='⯮🢡', command=lambda: Actions.Next())
-        buttonNext_window = canvas.create_window(1108,900, anchor=NW, window=buttonNext)
+        buttonBack = Button(window, border=3, font=('Eras Demi ITC', 33), width=3, height=1, text='⯬🢠', command=lambda: GamePlay.Previous())
+        buttonBack_window = canvasSide.create_window(10,900, anchor=NW, window=buttonBack)
+        buttonNext = Button(window, border=3, font=('Eras Demi ITC', 33), width=3, height=1, text='⯮🢡', command=lambda: GamePlay.Next())
+        buttonNext_window = canvasSide.create_window(108,900, anchor=NW, window=buttonNext)
 
-        Rendering.HidingButtons(canvas,buttonBack_window,buttonNext_window)
+        Rendering.HidingButtons(canvasSide,buttonBack_window,buttonNext_window)
 
     def StartingScreen():
         global FirstOpponent,SecondOpponent
         FirstOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
-        FirstOpponent_window = canvas.create_window(1280,900, anchor=NW, window=FirstOpponent)
+        FirstOpponent_window = canvasSide.create_window(280,900, anchor=NW, window=FirstOpponent)
         FirstOpponent.insert(1.0, "1stPlayer")
         Import.StartingScreenWindow.append(FirstOpponent_window)
 
         SecondOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
-        SecondOpponent_window = canvas.create_window(1280,945, anchor=NW, window=SecondOpponent)
+        SecondOpponent_window = canvasSide.create_window(280,945, anchor=NW, window=SecondOpponent)
         SecondOpponent.insert(1.0, "2ndPlayer")
         Import.StartingScreenWindow.append(SecondOpponent_window)
 
         SavingTranscript = Button(window, border=5, width=16, height=3, text='Saving Game\nTranscript', font=('Tahoma', 18), command=lambda: Import.SavedGames('players'))
-        SavingTranscript_window = canvas.create_window(1300,780, anchor=NW, window=SavingTranscript)
+        SavingTranscript_window = canvasSide.create_window(300,780, anchor=NW, window=SavingTranscript)
         NoTranscript = Button(window, border=5, width=12, height=4, text='Casual Game\nNo Transcript', font=('Tahoma', 27), command=lambda: Import.SavedGames(None))
-        NoTranscript_window = canvas.create_window(1010,780, anchor=NW, window=NoTranscript)
+        NoTranscript_window = canvasSide.create_window(10,780, anchor=NW, window=NoTranscript)
         Import.StartingScreenWindow.append(SavingTranscript_window)
         Import.StartingScreenWindow.append(NoTranscript_window)
     StartingScreenWindow = []
@@ -178,7 +179,7 @@ class Import():
         else:
             TranscriptName = 'Game'
 
-        Rendering.HidingButtons(canvas,*Import.StartingScreenWindow)
+        Rendering.HidingButtons(canvasSide,*Import.StartingScreenWindow)
         try:
             with open(f'{TranscriptName}.txt','x') as f:
                 pass
@@ -188,20 +189,20 @@ class Import():
 
     def PawnPromotionButtons():
         Import.ExtraPiecesButtons.clear()
-        buttonQueen = Button(window, border=5, command=lambda: Actions.PawnPromotion(Queen(Self.side,'extra')))
-        buttonQueen_window = canvas.create_window(1254,784, anchor=NW, window=buttonQueen)
+        buttonQueen = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Queen(Self.side,'extra')))
+        buttonQueen_window = canvasSide.create_window(254,784, anchor=NW, window=buttonQueen)
         Import.ExtraPiecesButtons.append(buttonQueen_window)
 
-        buttonBishop = Button(window, border=5, command=lambda: Actions.PawnPromotion(Bishop(Self.side,'extra')))
-        buttonBishop_window = canvas.create_window(1254,892, anchor=NW, window=buttonBishop)
+        buttonBishop = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Bishop(Self.side,'extra')))
+        buttonBishop_window = canvasSide.create_window(254,892, anchor=NW, window=buttonBishop)
         Import.ExtraPiecesButtons.append(buttonBishop_window)
 
-        buttonKnight = Button(window, border=5, command=lambda: Actions.PawnPromotion(Knight(Self.side,'extra')))
-        buttonKnight_window = canvas.create_window(1392,892, anchor=NW, window=buttonKnight)
+        buttonKnight = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Knight(Self.side,'extra')))
+        buttonKnight_window = canvasSide.create_window(392,892, anchor=NW, window=buttonKnight)
         Import.ExtraPiecesButtons.append(buttonKnight_window)
 
-        buttonRook = Button(window, border=5, command=lambda: Actions.PawnPromotion(Rook(Self.side,'extra')))
-        buttonRook_window = canvas.create_window(1392,784, anchor=NW, window=buttonRook)
+        buttonRook = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Rook(Self.side,'extra')))
+        buttonRook_window = canvasSide.create_window(392,784, anchor=NW, window=buttonRook)
         Import.ExtraPiecesButtons.append(buttonRook_window)
 
         if Turn == 1:
@@ -219,21 +220,21 @@ class Import():
     # Future Updated (Nothing for now)
     def ExtraButtons():    
         buttonNormalGame = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvas.create_window(1000,880, anchor=NW, window=buttonNormalGame)
+        buttonSG_window = canvasSide.create_window(0,880, anchor=NW, window=buttonNormalGame)
 
         buttonVSComputer = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvas.create_window(1000,880, anchor=NW, window=buttonVSComputer)
+        buttonSG_window = canvasSide.create_window(0,880, anchor=NW, window=buttonVSComputer)
 
         buttonMateInN = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvas.create_window(1000,880, anchor=NW, window=buttonMateInN)
+        buttonSG_window = canvasSide.create_window(0,880, anchor=NW, window=buttonMateInN)
 
     def freeModeButtons():
-        buttonKing = Button(window, border=5, command=lambda: Actions.PawnPromotion(King(Self.side)))
-        buttonKing_window = canvas.create_window(1392,892, anchor=NW, window=buttonKing)
+        buttonKing = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(King(Self.side)))
+        buttonKing_window = canvasSide.create_window(392,892, anchor=NW, window=buttonKing)
         Import.ExtraPiecesButtons.append(buttonKing_window)
 
-        buttonPawn = Button(window, border=5, command=lambda: Actions.PawnPromotion(Pawn(Self.side,'extra')))
-        buttonPawn_window = canvas.create_window(1392,784, anchor=NW, window=buttonPawn)
+        buttonPawn = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Pawn(Self.side,'extra')))
+        buttonPawn_window = canvasSide.create_window(392,784, anchor=NW, window=buttonPawn)
         Import.ExtraPiecesButtons.append(buttonPawn_window)
 
         if Turn == 1:
@@ -244,7 +245,7 @@ class Import():
             buttonPawn.config(image=Import.Img_bPwS[6])
 
 # >>> MOVES  <<<
-class Actions():
+class GamePlay():
     # Selecting Piece       
     def verification(position,startingTime): # Ovo je kada SELEKTUJEMO FIGURU  >>> First Click <<<
         def verify(xy):
@@ -284,7 +285,7 @@ class Actions():
         global Self,Turn
         if CurrentTableDict[enemyXY].side != Self.side:
             if enemyXY in Self.take:
-                output,transcript = Self.Take(enemyXY,CurrentTableDict,Actions.moveCounter)
+                output,transcript = Self.Take(enemyXY,CurrentTableDict,GamePlay.moveCounter)
                 return output,transcript,"#FF0000"
             else:
                 return False,False,False  
@@ -304,30 +305,23 @@ class Actions():
         global Self
         startingTime = time.time()
         if Self.side == CurrentTableDict[newSelf].side:
-            Actions.verification(newSelf,startingTime)
+            GamePlay.verification(newSelf,startingTime)
 
     def PawnPromotion(choice):  
         global Self,Phase
         if Phase == 'Pawn Promotion':
             startingTime = time.time()
-            Rendering.HidingButtons(canvas,*Import.ExtraPiecesButtons)
-            Rendering.ShowingButtons(canvas,ExecutionTime_window)
-
+        
             promote = choice
             promote.x,promote.y = Self.getXY()
             Chess.PromoteDict[promote]=Self
             Chess.pieces.remove(Self)
 
-            with open(f'{TranscriptName}.txt','a') as f:
-                f.write(f"{Actions.moveCounter} promote {str(promote)[1:]} {Chess.NotationTableDict[promote.getXY()]}\n")
-            output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.getXY()].ljust(5)+'⛨').ljust(8)}{promote}"
-            if posInTransc <-1:
-                Rendering.delMovesDone(MoveOutput,posInTransc)
-            Rendering.printMovesDone(MoveOutput,"#7700FF",output,None)
+            Rendering.printPawnPromotiong(Self,promote,posInTransc,TranscriptName,canvasSide,MoveOutput,Import.ExtraPiecesButtons,ExecutionTime_window,GamePlay.moveCounter)
             
             Self = None
             Phase = 'Game Mechanic'
-            Actions.End_Turn()
+            GamePlay.End_Turn()
 
             actionTime = time.time()
             Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
@@ -338,9 +332,9 @@ class Actions():
         global Self,Turn,CurrentTableDict
         startingTime = time.time()
         if Phase == 'Game Mechanic':
-            CurrentTableDict = Rewind.Previous(Actions.moveCounter)
-            Turn *=-1 ; Self =None ; Actions.moveCounter -=1
-            Actions.End_Turn()
+            CurrentTableDict = Rewind.Previous(GamePlay.moveCounter)
+            Turn *=-1 ; Self =None ; GamePlay.moveCounter -=1
+            GamePlay.End_Turn()
             
             actionTime = time.time()
             Rendering.printMovesDone(MoveOutput,"#0000FF",None,posInTransc)
@@ -352,9 +346,9 @@ class Actions():
         global Self,Turn,CurrentTableDict
         startingTime = time.time()
         if Phase == 'Game Mechanic':
-            CurrentTableDict = Rewind.Next(Actions.moveCounter)
-            Turn *=-1 ; Self =None ; Actions.moveCounter +=1
-            Actions.End_Turn()
+            CurrentTableDict = Rewind.Next(GamePlay.moveCounter)
+            Turn *=-1 ; Self =None ; GamePlay.moveCounter +=1
+            GamePlay.End_Turn()
             
             actionTime = time.time()
             Rendering.printMovesDone(MoveOutput,"#0000FF",None,posInTransc)
@@ -365,10 +359,10 @@ class Actions():
     # Finishing Turn
     ActionsDone = [movingDone, takingDone, castlingDone, pieceChange]
     def action(act):
-        global Phase,Self,Turn
+        global Phase,Self,Turn,posInTransc
         for a in range(4):
             try:
-                output,transcript,color = Actions.ActionsDone[a](act)
+                output,transcript,color = GamePlay.ActionsDone[a](act)
             except TypeError:
                 continue
             if output is None:
@@ -378,34 +372,14 @@ class Actions():
                 return
             else:
                 if isinstance(Self,Pawn) and (Self.x == 7 or Self.x == 0):
-                    Rendering.HidingButtons(canvas,ExecutionTime_window)
+                    Rendering.HidingButtons(canvasSide,ExecutionTime_window)
                     Import.PawnPromotionButtons()
-                    Actions.ActionResult(output,transcript,color)
+                    Turn,posInTransc,GamePlay.moveCounter=Rendering.printActionResult(Turn,posInTransc,TranscriptName,GamePlay.moveCounter,MoveOutput,output,transcript,color)
                     Phase = 'Pawn Promotion'
                     return
                 else:
                     Self=None
                     return output,transcript,color
-    
-    def ActionResult(output,transcript,color):
-        global Turn,posInTransc
-        Turn *=-1
-        Actions.moveCounter +=1  
-        with open(f'{TranscriptName}.txt','a') as f:
-            f.write(f'{Actions.moveCounter} {transcript}')
-        output = f"{(str(Actions.moveCounter)+'.').ljust(4)}{output}"
-        if posInTransc <-1:
-            Rendering.delMovesDone(MoveOutput,posInTransc)
-        Rendering.printMovesDone(MoveOutput,color,output,None)
-        if posInTransc < -1:
-            with open(f'{TranscriptName}.txt','r+') as f:
-                text = f.readlines()
-                lastAction = text[-1]
-                f.truncate(0)
-            with open(f'{TranscriptName}.txt','a') as f:
-                f.writelines(text[:posInTransc])
-                f.write(lastAction)
-                posInTransc = Rewind.ResetPosition() 
 
     def End_Turn():
         global posInTransc,CurrentTableDict,enPassant,enPassant_objPos
@@ -426,14 +400,14 @@ class Actions():
         Rendering.borderDefault()
         Rendering.borderCheck(Import.ButtonDict)
         rewindButtonsManage,posInTransc = Rewind.Get_Transcript_and_Position(TranscriptName)
-        Rendering.PreviousNextButtons(canvas,buttonNext_window,buttonBack_window,rewindButtonsManage)
+        Rendering.PreviousNextButtons(canvasSide,buttonNext_window,buttonBack_window,rewindButtonsManage)
         
 
 # >>> GAME <<<
 class GameFlow:
     def StartingPosition():
             # Senatus
-        king_W=King('w'); king_B=King('b') ; queen_W=Queen('w'); queen_B=Queen('b')
+        king_W=King('w'); king_B=King('b') ; queen_W=Queen('w'); queen_B=Queen('b') 
             # Hiereus
         bishop_wL=Bishop('w','L'); bishop_wR=Bishop('w','R'); bishop_bL=Bishop('b','L'); bishop_bR=Bishop('b','R')
             # Medjay
@@ -449,7 +423,7 @@ class GameFlow:
     def NewGame():
         global CurrentTableDict,posInTransc
         Import.StartingScreen()
-        Rendering.HidingButtons(canvas,ExecutionTime_window,buttonBack_window,buttonNext_window)
+        Rendering.HidingButtons(canvasSide,ExecutionTime_window,buttonBack_window,buttonNext_window)
 
         Chess.pieces.clear()
         Chess.TakenDict.clear()
@@ -465,7 +439,7 @@ class GameFlow:
         global Phase,Turn,Self,CurrentTableDict,posInTransc
         startingTime = time.time()
 
-        Phase = 'Game Mechanic' ; Turn=1 ; Self=None ; Actions.moveCounter = 0 ; posInTransc =-1
+        Phase = 'Game Mechanic' ; Turn=1 ; Self=None ; GamePlay.moveCounter = 0 ; posInTransc =-1
         GameFlow.StartingPosition()
         CurrentTableDict = Chess.currentTableDict()
 
@@ -477,26 +451,27 @@ class GameFlow:
             AI.AllActions(p,CurrentTableDict)
         AI.PossibleActions()
        
-        Rendering.HidingButtons(canvas,buttonGM_window,buttonSG_window)
+        Rendering.HidingButtons(canvasSide,buttonGM_window,buttonSG_window)
         Import.RightPanel_SecondScreen()
 
         verificationTime = time.time()
         Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
         endTime = time.time()
         Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,verificationTime,None)
-          
+
     def GameMechanic(xy):
+        global Turn,posInTransc
         startingTime = time.time()
         if Phase == 'Game Mechanic':
             if Self == None:
-                Actions.verification(xy,startingTime) 
+                GamePlay.verification(xy,startingTime) 
             else:
                 try:
-                    output,transcript,color=Actions.action(xy)
+                    output,transcript,color=GamePlay.action(xy)
                 except TypeError:
                     return
-                Actions.ActionResult(output,transcript,color)
-                Actions.End_Turn()
+                Turn,posInTransc,GamePlay.moveCounter=Rendering.printActionResult(Turn,posInTransc,TranscriptName,GamePlay.moveCounter,MoveOutput,output,transcript,color)
+                GamePlay.End_Turn()
                 actionTime = time.time()
                 Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
                 endTime = time.time()
@@ -607,7 +582,7 @@ class GameFlow:
                 startTime = time.time()
                 Turn *=-1
                 Self = None
-                Actions.End_Turn()
+                GamePlay.End_Turn()
 
                 verificationTime = time.time()
                 Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
@@ -623,7 +598,7 @@ class GameFlow:
                     Chess.pieces.remove(Self)
                     Self = None
                     Rendering.borderDefault()     
-                    Actions.End_Turn()
+                    GamePlay.End_Turn()
 
                     verificationTime = time.time()
                     Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
@@ -639,7 +614,7 @@ class GameFlow:
                 if Self is not None:
                     Self.x,Self.y = XY[0],XY[1]
                     Self = None
-                    Actions.End_Turn()
+                    GamePlay.End_Turn()
 
                     verificationTime = time.time()
                     Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)

@@ -1,11 +1,7 @@
-from king import King
-from queen import Queen
-from bishop import Bishop
-from knight import Knight
-from pawn import Pawn
-from rook import Rook
+from Pieces import *
 from chess import Chess
 from tkinter import *
+from transcript import Rewind
 
 
 class Rendering():
@@ -140,3 +136,33 @@ class Rendering():
     def delMovesDone(MoveOutput,delete):
         deleteFrom = f"end{delete+1}l"
         MoveOutput.delete(deleteFrom, END)
+
+    def printActionResult(Turn,posInTransc,TranscriptName,moveCounter,MoveOutput,output,transcript,color):
+        Turn *=-1
+        moveCounter +=1  
+        with open(f'{TranscriptName}.txt','a') as f:
+            f.write(f'{moveCounter} {transcript}')
+        output = f"{(str(moveCounter)+'.').ljust(4)}{output}"
+        if posInTransc <-1:
+            Rendering.delMovesDone(MoveOutput,posInTransc)
+        Rendering.printMovesDone(MoveOutput,color,output,None)
+        if posInTransc < -1:
+            with open(f'{TranscriptName}.txt','r+') as f:
+                text = f.readlines()
+                lastAction = text[-1]
+                f.truncate(0)
+            with open(f'{TranscriptName}.txt','a') as f:
+                f.writelines(text[:posInTransc])
+                f.write(lastAction)
+                posInTransc = Rewind.ResetPosition()
+        return Turn,posInTransc,moveCounter
+    
+    def printPawnPromotiong(Self,promote,posInTransc,TranscriptName,canvas,MoveOutput,ExtraPiecesButtons,ExecutionTime_window,moveCounter):
+        Rendering.HidingButtons(canvas,*ExtraPiecesButtons)
+        Rendering.ShowingButtons(canvas,ExecutionTime_window)
+        with open(f'{TranscriptName}.txt','a') as f:
+            f.write(f"{moveCounter} promote {str(promote)[1:]} {Chess.NotationTableDict[promote.getXY()]}\n")
+        output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.getXY()].ljust(5)+'⛨').ljust(8)}{promote}"
+        if posInTransc <-1:
+            Rendering.delMovesDone(MoveOutput,posInTransc)
+        Rendering.printMovesDone(MoveOutput,"#7700FF",output,None)

@@ -1,10 +1,5 @@
 from chess import Chess
-from king import King
-from queen import Queen
-from bishop import Bishop
-from knight import Knight
-from pawn import Pawn
-from rook import Rook
+from Pieces import *
 from AI import AI
 import time
 

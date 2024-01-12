@@ -104,3 +104,5 @@ class Chess():
     # Setter
     def setXY(self,xy):
         self.x,self.y = xy
+
+    
