@@ -1,4 +1,4 @@
-from chess import Chess
+from ChessParent import Chess
 
 class Actions():
     

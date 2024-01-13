@@ -1,11 +1,9 @@
-1 Pawn C7 move C5
-2 Queen D8 move C7
-3 Queen C7 move C6
-4 Kingside: white
-5 Queen D1 move F3
-6 Queen F3 move F4
-7 Queen F4 move B4
-8 Queen B4 move A5
-9 Queen C6 move E6
-10 Queen A5 took C5 Pawn
-11 Queen C5 move D5
+1 Pawn F2 move F4
+2 Pawn E7 move E5
+3 Pawn G2 move G4
+4 Pawn F7 move F5
+5 Pawn G4 took F5 Pawn
+6 Pawn E5 took F4 Pawn
+7 Pawn A2 move A4
+8 Queen D8 move H4
+CheckMate

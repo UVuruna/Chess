@@ -1,5 +1,5 @@
-from chess import Chess
-from actions import Actions
+from ChessParent import Chess
+from Actions import Actions
 
 class King(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -8,8 +8,8 @@ class King(Chess,Actions):
         super().__init__(side,move=set(),take=set(),defend=set())
         self.type = 'Warrior'
         self.castling = castling
-        self.x = (0 if self.side == 'w' else 7)
-        self.y = 4
+        self.x = (1 if self.side == 'w' else 8)
+        self.y = 5
  
     def __str__(self) -> str:
         white_king = '♔'
@@ -23,8 +23,8 @@ class Queen(Chess,Actions):
         super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Archer'
         self.name = name
-        self.x = (0 if self.side == 'w' else 7)
-        self.y = 3
+        self.x = (1 if self.side == 'w' else 8)
+        self.y = 4
         
     def __str__(self) -> str:
             black_queen = '♛'
@@ -38,14 +38,14 @@ class Rook(Chess,Actions):
         super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Archer'
         self.name = name
-        self.x = (0 if self.side == 'w' else 7)
-        self.y = (0 if self.name == 'L' else 7) if name else 0
+        self.x = (1 if self.side == 'w' else 8)
+        self.y = (1 if self.name == 'L' else 8)
         self.direction = Chess.direction[:4]
 
     def __str__(self) -> str:
         white_rook = '♖'
         black_rook = '♜'
-        return f"{white_rook if self.side == 'w' else black_rook}Rook"        
+        return f"{white_rook if self.side =='w' else black_rook}Rook"        
 
 class Bishop(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,8 +54,8 @@ class Bishop(Chess,Actions):
         super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Archer'
         self.name = name
-        self.x = (0 if self.side == 'w' else 7)
-        self.y = (2 if self.name == 'L' else 5)  if name else 0
+        self.x = (1 if self.side == 'w' else 8)
+        self.y = (3 if self.name == 'L' else 6)
         self.direction = Chess.direction[4:] 
         
     def __str__(self) -> str:
@@ -70,8 +70,8 @@ class Knight(Chess,Actions):
         super().__init__(side,move=set(),take=set(),defend=set(),Defender=False)
         self.type = 'Warrior'
         self.name = name
-        self.x = (0 if self.side == 'w' else 7)
-        self.y = (1 if self.name == 'L' else 6)  if name else 0
+        self.x = (1 if self.side == 'w' else 8)
+        self.y = (2 if self.name == 'L' else 7)
         
     def __str__(self) -> str:
         white_knight = '♘'
@@ -115,8 +115,8 @@ class Pawn(Chess,Actions):
         self.name = name
         self.passiv_move = passiv_move if passiv_move is not None else set()
         self.attack = attack if attack is not None else set()
-        self.x = (1 if self.side == 'w' else 6)
-        self.y = Pawn.Name.index(self.name)  if name else 0
+        self.x = (2 if self.side == 'w' else 7)
+        self.y = Pawn.Name.index(self.name)+1
         if self.side == 'w':
             self.directionMove = Chess.direction[0]
             self.directionAttack = Chess.direction[4:6]

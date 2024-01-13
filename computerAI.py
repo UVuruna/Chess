@@ -1,4 +1,4 @@
-from chess import Chess
+from ChessParent import Chess
 from Pieces import *
 from AI import AI
 import time

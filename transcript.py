@@ -1,18 +1,19 @@
-from chess import Chess
+from ChessParent import Chess
 
 class Rewind():
-    PosInTransc = -1
+    FullTranscript  = None
+    PosInTransc     = -1
     
     def EnPassant(TranscriptName): # zove je verifikacija # Pravi novi possible Take i novi Take move
         with open(f'{TranscriptName}.txt','r') as f:
             text = f.readlines()
         try:
             lastPlay = text[Rewind.PosInTransc].split()
-            xS =int(lastPlay[2][1])
-            xE =int(lastPlay[4][1])
-            if lastPlay[3]=='move' and lastPlay[1]=='Pawn' and abs(xS-xE) ==2:
+            XS =int(lastPlay[2][1])
+            XE =int(lastPlay[4][1])
+            if lastPlay[3]=='move' and lastPlay[1]=='Pawn' and abs(XS-XE) ==2:
                 Y =Rewind.letterToNum(lastPlay[2][0])
-                return ((xS+xE)//2-1,Y),(xE-1,Y)
+                return ((XS+XE)//2,Y),(XE,Y)
         except (IndexError,ValueError):
             return
 
@@ -20,56 +21,49 @@ class Rewind():
         Rewind.PosInTransc = -1
         return Rewind.PosInTransc
 
-    def Get_Transcript_and_Position(TranscriptName=None):
-        global actions
+    def UpdateTranscript(TranscriptName=None):
         if TranscriptName:
             with open(f'{TranscriptName}.txt','r') as f:
-                actions = f.readlines()
-        if Rewind.PosInTransc == -1:
-            return 'noNext',Rewind.PosInTransc
-        elif (len(actions)+Rewind.PosInTransc) == -1:
-            return 'noBack',Rewind.PosInTransc
-        else:
-            return None,Rewind.PosInTransc
-
+                Rewind.FullTranscript = f.readlines()
+        
     def letterToNum(sign):
-        return ord(sign) - ord('A')
+        return ord(sign)+1 - ord('A')
 
     def castlingConverter(play):
         if play[1][0] == 'K' and play[2][0] == 'b':
-            kingStartPos: tuple = (7,4)
-            rookStartPos: tuple = (7,7)
-            kingEndPos: tuple = (7,6)
-            rookEndPos: tuple = (7,5)
+            kingStartPos: tuple = (8,5)
+            rookStartPos: tuple = (8,8)
+            kingEndPos: tuple = (8,7)
+            rookEndPos: tuple = (8,6)
         elif play[1][0] == 'K' and play[2][0] == 'w':
-            kingStartPos: tuple = (0,4)
-            rookStartPos: tuple = (0,7)
-            kingEndPos: tuple = (0,6)
-            rookEndPos: tuple = (0,5)
+            kingStartPos: tuple = (1,5)
+            rookStartPos: tuple = (1,8)
+            kingEndPos: tuple = (1,7)
+            rookEndPos: tuple = (1,6)
         elif play[1][0] == 'Q' and play[2][0] == 'b':
-            kingStartPos: tuple = (7,4)
-            rookStartPos: tuple = (7,0)
-            kingEndPos: tuple = (7,2)
-            rookEndPos: tuple = (7,3)
+            kingStartPos: tuple = (8,5)
+            rookStartPos: tuple = (8,1)
+            kingEndPos: tuple = (8,3)
+            rookEndPos: tuple = (8,4)
         else:
-            kingStartPos: tuple = (0,4)
-            rookStartPos: tuple = (0,0)
-            kingEndPos: tuple = (0,2)
-            rookEndPos: tuple = (0,3)
+            kingStartPos: tuple = (1,5)
+            rookStartPos: tuple = (1,1)
+            kingEndPos: tuple = (1,3)
+            rookEndPos: tuple = (1,4)
         return kingStartPos,kingEndPos,rookStartPos,rookEndPos
 
     def positionConverter(play,num):
         EndingPos = None
         objPos = None
-        xS: int = int(play[num][1])-1
+        xS: int = int(play[num][1])
         yS: int = Rewind.letterToNum(play[num][0])
         StartingPos: tuple = (xS,yS)
         try:
-            xE: int = int(play[num+2][1])-1
+            xE: int = int(play[num+2][1])
             yE: int = Rewind.letterToNum(play[num+2][0])
             EndingPos: tuple = (xE,yE)
 
-            xO: int = int(play[num+4][1])-1
+            xO: int = int(play[num+4][1])
             yO: int = Rewind.letterToNum(play[num+4][0])
             objPos: tuple = (xO,yO)
         except IndexError:
@@ -78,11 +72,8 @@ class Rewind():
 
     def AnalyzeTranscript(direction,moveCounter):
         Table = Chess.currentTableDict()
-        try:
-            lastPlay = actions[Rewind.PosInTransc].split()
-            nextPlayCheck = actions[Rewind.PosInTransc+1].split()
-        except IndexError:
-            return
+        lastPlay = Rewind.FullTranscript[Rewind.PosInTransc].split()
+        nextPlayCheck = Rewind.FullTranscript[Rewind.PosInTransc+1].split()
         if len(lastPlay)==5: # Move
             startXY,endXY = Rewind.positionConverter(lastPlay,2)[:2]
             if direction == 'b':
@@ -129,7 +120,7 @@ class Rewind():
                 Chess.pieces.append(self)
                 self.setXY(xy)
                 Chess.pieces.remove(promote)
-                Rewind.PosInTransc -= 1
+                Rewind.PosInTransc -=1
                 Rewind.AnalyzeTranscript('b',moveCounter)
             elif direction == 'n':
                 self = Table[xy]

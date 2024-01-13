@@ -1,7 +1,7 @@
 from Pieces import *
-from chess import Chess
+from ChessParent import Chess
 from tkinter import *
-from transcript import Rewind
+from Transcript import Rewind
 
 
 class Rendering():
@@ -91,15 +91,15 @@ class Rendering():
             if current_state != 'normal':
                 canvas.itemconfigure(but, state='normal')
 
-    def PreviousNextButtons(canvas,buttonNext_window,buttonBack_window,rewindButtonsManage):
-        if rewindButtonsManage == None:
-            Rendering.ShowingButtons(canvas,buttonNext_window,buttonBack_window)
-        if rewindButtonsManage == 'noBack':
+    def PreviousNextButtons(canvas,buttonNext_window,buttonBack_window):
+        if (len(Rewind.FullTranscript)+Rewind.PosInTransc) == -1:
             Rendering.HidingButtons(canvas,buttonBack_window)
             Rendering.ShowingButtons(canvas,buttonNext_window)
-        elif rewindButtonsManage == 'noNext':
+        elif Rewind.PosInTransc == -1:
             Rendering.HidingButtons(canvas,buttonNext_window)
             Rendering.ShowingButtons(canvas,buttonBack_window)
+        else:
+            Rendering.ShowingButtons(canvas,buttonNext_window,buttonBack_window)
 
     # Text Rendering
     def timeShowing(ExecutionTime,Turn,Self,sta,end,ver,act):

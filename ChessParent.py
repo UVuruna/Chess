@@ -1,3 +1,4 @@
+from ImagesDecorators import Decorator
 
 class Chess():
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,19 +22,11 @@ class Chess():
     AllActions_W = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
     AllActions_B = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
 
-    def countExecutionMethod(method):
-        def wrapper(*args, **kwargs):
-            wrapper.counter += 1
-            print(f"{method}Ponavlja se {wrapper.counter}. put")
-            return method(*args, **kwargs)
-        wrapper.counter = 0
-        return wrapper
-
     # >>> STATIC Dictionaries <<<
     def emptyTableDict():  
         emptyTableDict = {}
-        for x in range(8):
-            for y in range(8):
+        for x in range(1,9):
+            for y in range(1,9):
                 emptyTableDict[x,y] = ''
         return emptyTableDict
     EmptyTableDict = emptyTableDict()
@@ -48,19 +41,19 @@ class Chess():
         notationTableDict = {}
         for x in range(8):
             for y in range(8):
-                notationTableDict[x,y] = NotationTable[x][y]
+                notationTableDict[x+1,y+1] = NotationTable[x][y]
         return notationTableDict
     NotationTableDict = notationTableDict()
     
     # >>> DYNAMIC Dictionaries <<<
-    #@countExecutionMethod
+    #@Decorator.countExecutionMethod
     def piecesDict():
         piecesDict = {}
         for i in Chess.pieces:
             piecesDict[i.getXY()] = i
         return piecesDict
     
-    #@countExecutionMethod
+    #@Decorator.countExecutionMethod
     def currentTableDict():
         currentTableDict = Chess.EmptyTableDict.copy()
         piecesDict = Chess.piecesDict()
