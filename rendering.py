@@ -116,14 +116,14 @@ class Rendering():
                 placeForColorEnd = f"end{rewindPos+1}l"
             else:
                 placeForColorEnd="end"
-            for tag in Rendering.AllColors:
+            for tag in Rendering.AllColors_forPrint:
                 MoveOutput.tag_remove(tag, "1.0", END)
             MoveOutput.tag_add(color, placeForColorStart, placeForColorEnd)
             MoveOutput.tag_config(color, foreground=color)
             MoveOutput.see(END)
         try:
             MoveOutput.insert(END,'\n'+output)
-            for tag in Rendering.AllColors:
+            for tag in Rendering.AllColors_forPrint:
                 MoveOutput.tag_remove(tag, "1.0", END)
             MoveOutput.tag_add(color, "end-1l", "end")
             MoveOutput.tag_config(color, foreground=color)
@@ -165,12 +165,12 @@ class Rendering():
             Rendering.delMovesDone(MoveOutput,posInTransc)
         Rendering.printMovesDone(MoveOutput,Rendering.purple,output,None)
 
-    red = "#FF6666"
-    green = "#00BB00"
-    cyan = "#00AACC"
-    blue = "#0000FF"
+    red    = "#FF6666" ; dark_red    = "#CC0000"
+    green  = "#00BB00" ; dark_green  = "#008800"
+    cyan   = "#00AACC" ; dark_cyan   = "#0066AD"
+    yellow = "#FFFF00" ; dark_yellow = "#ADAD00"
+    blue   = "#0000FF"
     purple = "#8866CC"
-    gold = "#FDD017"
-    yellow = "#FFFF00"
+    gold   = "#FDD017"
     
-    AllColors = [green,red,purple,cyan,blue]
+    AllColors_forPrint = [green,red,purple,cyan,blue]

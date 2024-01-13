@@ -8,11 +8,12 @@ class Rewind():
             text = f.readlines()
         try:
             lastPlay = text[Rewind.PosInTransc].split()
-            if lastPlay[3]=='move' and lastPlay[1]=='Pawn' and abs(int(lastPlay[2][1])-int(lastPlay[4][1])) == 2:
-                xy: tuple = ((int(lastPlay[2][1])+int(lastPlay[4][1]))//2-1),(Rewind.letterToNum(lastPlay[2][0]))
-                enemyXY: tuple = ((int(lastPlay[4][1])-1),(Rewind.letterToNum(lastPlay[2][0])))
-                return xy,enemyXY
-        except IndexError:
+            xS =int(lastPlay[2][1])
+            xE =int(lastPlay[4][1])
+            if lastPlay[3]=='move' and lastPlay[1]=='Pawn' and abs(xS-xE) ==2:
+                Y =Rewind.letterToNum(lastPlay[2][0])
+                return ((xS+xE)//2-1,Y),(xE-1,Y)
+        except (IndexError,ValueError):
             return
 
     def ResetPosition():
@@ -26,7 +27,7 @@ class Rewind():
                 actions = f.readlines()
         if Rewind.PosInTransc == -1:
             return 'noNext',Rewind.PosInTransc
-        elif (len(actions)+Rewind.PosInTransc) < 0:
+        elif (len(actions)+Rewind.PosInTransc) == -1:
             return 'noBack',Rewind.PosInTransc
         else:
             return None,Rewind.PosInTransc

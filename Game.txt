@@ -1,2 +1,11 @@
-1 King E8 move E7
-2 Queen D1 move E2
+1 Pawn C7 move C5
+2 Queen D8 move C7
+3 Queen C7 move C6
+4 Kingside: white
+5 Queen D1 move F3
+6 Queen F3 move F4
+7 Queen F4 move B4
+8 Queen B4 move A5
+9 Queen C6 move E6
+10 Queen A5 took C5 Pawn
+11 Queen C5 move D5

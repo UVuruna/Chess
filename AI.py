@@ -335,8 +335,8 @@ class AI():
                 if kingBPos in BR_Rook.defend and BR_Rook.actionsCounter==0:
                     B+=1
         if W or B:
-            castlingSquare = [{(0,4),(0,5),(0,6),(0,7)},{(0,4),(0,3),(0,2),(0,1),(0,0)},
-                                {(7,4),(7,5),(7,6),(7,7)},{(7,4),(7,3),(7,2),(7,1),(7,0)}]
+            castlingSquare = [{(0,4),(0,5),(0,6)},{(0,4),(0,3),(0,2)},
+                                {(7,4),(7,5),(7,6)},{(7,4),(7,3),(7,2)}]
             if W==1 or W==3:
                 if not (castlingSquare[0] & (set(Chess.AllActions_B['move']) | set(Chess.AllActions_B['attack']) | set(Chess.AllActions_B['take']))):
                     W_King.castling = {W_King.getXY()} if not W_King.castling else W_King.castling

@@ -20,19 +20,31 @@ window.geometry(f"{X}x{Y}")
 # >>> IMPORT <<<
 class Import():
     
+    def ListAppend(ListX):
+        def decorator(method):
+            def wrapper(*args, **kwargs):
+                result = method(*args, **kwargs)
+                ListX.extend(result)
+                return result
+            return wrapper
+        return decorator
+
+    AllImages=[]
+    @ListAppend(AllImages)
     def ImageImport():
         imageCount = 32
-        ImageList = [] ; Img_wPwS = [] ; Img_wPbS = [] ; Img_bPwS = [] ; Img_bPbS = []
+        Images = [] ; Img_wPwS = [] ; Img_wPbS = [] ; Img_bPwS = [] ; Img_bPbS = []
         for i in range(imageCount): # Image upload
             image = ImageTk.PhotoImage(Image.open(os.path.join(ImagesLocation,f"{i}.png")))
-            ImageList.append(image) if i<4 else \
+            Images.append(image) if i<4 else \
                 (Img_wPwS.append(image) if i <11 else \
                 (Img_wPbS.append(image) if i < 18 else \
                 (Img_bPwS.append(image) if i < 25 else \
                 (Img_bPbS.append(image)))))
-        return  ImageList,Img_wPwS,Img_wPbS,Img_bPwS,Img_bPbS
-    Images,Img_wPwS,Img_wPbS,Img_bPwS,Img_bPbS = ImageImport()
-    AllImages = [Images,Img_wPwS,Img_wPbS,Img_bPwS,Img_bPbS]
+        return  Images,Img_wPwS,Img_wPbS,Img_bPwS,Img_bPbS
+    ImageImport()
+
+class MainPanel():
 
     def Hover(event,button):    # Green                          # Red                             # Light Blue                      # Yellow  
         global hover
@@ -40,29 +52,29 @@ class Import():
         if button.cget('bg') !=Rendering.green and button.cget('bg') !=Rendering.red and button.cget('bg') !=Rendering.cyan and button.cget('bg') !=Rendering.yellow:
             button.config(background='silver')
         elif button.cget('bg') ==Rendering.green:
-            button.config(background='#008800')
+            button.config(background=Rendering.dark_green)
         elif button.cget('bg') ==Rendering.red:
-            button.config(background='#AD0000')
+            button.config(background=Rendering.dark_red)
         elif button.cget('bg') ==Rendering.cyan:
-            button.config(background='#0066AD')
+            button.config(background=Rendering.dark_cyan)
         elif button.cget('bg') ==Rendering.yellow:
-            button.config(background='#ADAD00')
+            button.config(background=Rendering.dark_yellow)
 
     def ClearHover(event,button):
         if button.cget('bg') == 'silver':
             button.config(background='SystemButtonFace')
-        elif button.cget('bg') =='#008800':
+        elif button.cget('bg') ==Rendering.dark_green:
             button.config(background=Rendering.green)
-        elif button.cget('bg') =='#AD0000':
+        elif button.cget('bg') ==Rendering.dark_red:
             button.config(background=Rendering.red)
-        elif button.cget('bg') =='#0066AD':
+        elif button.cget('bg') ==Rendering.dark_cyan:
             button.config(background=Rendering.cyan)
-        elif button.cget('bg') =='#ADAD00':
+        elif button.cget('bg') ==Rendering.dark_yellow:
             button.config(background=Rendering.yellow)
     # Icon   
     window.iconbitmap(os.path.join(ImagesLocation,"ico.ico"))   
 
-    def ButtonsCreating(images):
+    def MainCanvas_Parts(images):
         global canvasTable,canvasSide
         # Canvas 1
         canvasTable = Canvas(window, width=1000, height=1000)
@@ -85,8 +97,8 @@ class Import():
             button = Button(window)                                                           # kreiranje Buttona
             button.text = ButtonReferences[i]                                                 # ubacivanje Atributa koji opisuje poziciju. Improvizovana ButtonID
             button.config(border=2,command=lambda text = button.text: (GameFlow.GameMechanic(text)))     # FUNKCIJA Buttona
-            button.bind("<Enter>",lambda event, text = button: Import.Hover(event,text))                # Hover
-            button.bind("<Leave>",lambda event, text = button: Import.ClearHover(event,text))         # Clear Hover
+            button.bind("<Enter>",lambda event, text = button: MainPanel.Hover(event,text))                # Hover
+            button.bind("<Leave>",lambda event, text = button: MainPanel.ClearHover(event,text))         # Clear Hover
             button_window = canvasTable.create_window(1,1, anchor=NW, window=button)               # kreiranje prozora buttona
             canvasTable.coords(button_window,(BorderDistance+y*ButtonDimension),(BorderDistance+(7-x)*ButtonDimension))                                # postavljanje buttona na EKRAN
             ButtonDict[button.text] = button                                                  # Ubacivanje Buttona u RECNIK                            
@@ -104,8 +116,51 @@ class Import():
         return ButtonDict
     ButtonDict: dict = None
 
-    def RightPanel_FirstScreen():
-        global MoveOutput,ExecutionTime,ExecutionTime_window,buttonSG_window,buttonGM_window
+    def ShowcaseScreen():
+        global Showcase,gif,Phase
+        Phase = "Start"
+        gif = ImageTk.PhotoImage(Image.open(os.path.join(ImagesLocation,"ChessGame.png")))
+        Showcase = Label(window, image=gif)
+        Showcase.place(anchor=NW,x=0,y=0)
+        window.after(13000, MainPanel.hideShowcase)     
+
+    def hideShowcase():
+        global hideShowcase_executed
+        if not hideShowcase_executed:
+            Showcase.place_forget()
+            print(Import.AllImages[0])
+            MainPanel.ButtonDict = MainPanel.MainCanvas_Parts(Import.AllImages[0])
+            SidePanel.Screen_1()
+            hideShowcase_executed = True
+
+class SidePanel():
+
+    def SideCanvas_Parts(ObjType, bordeR, x,y, w=None,h=None, txt=None, fontStyle=None, method=None,args=None):
+        if ObjType ==Button:
+            button = ObjType(window, border=bordeR, font=fontStyle, width=w, height=h, text=txt, command=lambda: method(args) if args else method())
+            button_window = canvasSide.create_window(x,y, anchor=NW, window=button)
+            return button_window,button
+
+    Screen_1_Frames = []
+    @Import.ListAppend(Screen_1_Frames)
+    def Screen_1():
+        global FirstOpponent,SecondOpponent
+
+        FirstOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
+        text_FirstOpponent_win = canvasSide.create_window(280,900, anchor=NW, window=FirstOpponent)
+        FirstOpponent.insert(1.0, "1stPlayer")
+
+        SecondOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
+        text_SecondOpponent_win = canvasSide.create_window(280,945, anchor=NW, window=SecondOpponent)
+        SecondOpponent.insert(1.0, "2ndPlayer")
+
+        but_SaveTransc_win =SidePanel.SideCanvas_Parts(Button, 5, 300,780,  16,3, 'Saving Game\nTranscript',('Tahoma', 18), SidePanel.SavedGames,'players')[0]
+        but_GameTransc_win =SidePanel.SideCanvas_Parts(Button, 5,  10,780,  12,4, 'Casual Game\nNo Transcript',('Tahoma', 27), SidePanel.SavedGames)[0]
+
+        return text_FirstOpponent_win,text_SecondOpponent_win,but_SaveTransc_win,but_GameTransc_win
+
+    def Screen_2():
+        global MoveOutput,ExecutionTime,ExecutionTime_window,but_SG_win,but_GM_win
         # Text
         MoveOutput = Text(window, width= 550, height=22, bg= '#535a5e', font=('Tahoma', 22))
         MoveOutput.place(anchor=NW,x=1000,y=2)
@@ -114,61 +169,19 @@ class Import():
         ExecutionTime = Label(window, font=('Eras Demi ITC', 16), width=24, height=8, bd=2, relief='groove', text=exTiText)
         ExecutionTime_window = canvasSide.create_window(220, 787, anchor=NW, window=ExecutionTime)
 
-        buttonSG = Button(window, border=3, font=('Eras Demi ITC', 24), width=9, height=2, text='Standard\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvasSide.create_window(10,780, anchor=NW, window=buttonSG)
-        buttonGM = Button(window, border=3, font=('Eras Demi ITC', 24), width=9, height=2, text='God Mode', command=lambda: GameFlow.GodMode())
-        buttonGM_window = canvasSide.create_window(10,890, anchor=NW, window=buttonGM)
+        but_SG_win =SidePanel.SideCanvas_Parts(Button, 3, 10,780,  9,2, 'Standard\nGame',('Eras Demi ITC', 24), GameFlow.StandardGame)[0]
+        but_GM_win =SidePanel.SideCanvas_Parts(Button, 3, 10,890,  9,2, 'God Mode',('Eras Demi ITC', 24), GameFlow.GodMode)[0]
     
-    def RightPanel_SecondScreen():
-        global buttonNG_window,buttonBack_window,buttonNext_window
+    def Screen_Game():
+        global but_Back_win,but_Next_win
 
-        buttonNG = Button(window, border=3, font=('Eras Demi ITC', 24), width=9, height=2, text='New Game', command=lambda: GameFlow.NewGame())
-        buttonNG_window = canvasSide.create_window(10,780, anchor=NW, window=buttonNG)
+        NG           =SidePanel.SideCanvas_Parts(Button, 3,  10,780,  9,2, 'New Game',('Eras Demi ITC', 24), GameFlow.NewGame)[0]
+        but_Back_win =SidePanel.SideCanvas_Parts(Button, 3,  10,900,  3,1, '⯬🢠',('Eras Demi ITC', 33), GamePlay.Previous)[0]
+        but_Next_win =SidePanel.SideCanvas_Parts(Button, 3, 108,900,  3,1, '🢡⯮',('Eras Demi ITC', 33), GamePlay.Next)[0]
 
-        buttonBack = Button(window, border=3, font=('Eras Demi ITC', 33), width=3, height=1, text='⯬🢠', command=lambda: GamePlay.Previous())
-        buttonBack_window = canvasSide.create_window(10,900, anchor=NW, window=buttonBack)
-        buttonNext = Button(window, border=3, font=('Eras Demi ITC', 33), width=3, height=1, text='⯮🢡', command=lambda: GamePlay.Next())
-        buttonNext_window = canvasSide.create_window(108,900, anchor=NW, window=buttonNext)
+        Rendering.HidingButtons(canvasSide,but_Back_win,but_Next_win)
 
-        Rendering.HidingButtons(canvasSide,buttonBack_window,buttonNext_window)
-
-    def StartingScreen():
-        global FirstOpponent,SecondOpponent
-        FirstOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
-        FirstOpponent_window = canvasSide.create_window(280,900, anchor=NW, window=FirstOpponent)
-        FirstOpponent.insert(1.0, "1stPlayer")
-        Import.StartingScreenWindow.append(FirstOpponent_window)
-
-        SecondOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
-        SecondOpponent_window = canvasSide.create_window(280,945, anchor=NW, window=SecondOpponent)
-        SecondOpponent.insert(1.0, "2ndPlayer")
-        Import.StartingScreenWindow.append(SecondOpponent_window)
-
-        SavingTranscript = Button(window, border=5, width=16, height=3, text='Saving Game\nTranscript', font=('Tahoma', 18), command=lambda: Import.SavedGames('players'))
-        SavingTranscript_window = canvasSide.create_window(300,780, anchor=NW, window=SavingTranscript)
-        NoTranscript = Button(window, border=5, width=12, height=4, text='Casual Game\nNo Transcript', font=('Tahoma', 27), command=lambda: Import.SavedGames(None))
-        NoTranscript_window = canvasSide.create_window(10,780, anchor=NW, window=NoTranscript)
-        Import.StartingScreenWindow.append(SavingTranscript_window)
-        Import.StartingScreenWindow.append(NoTranscript_window)
-    StartingScreenWindow = []
-
-    def ShowcaseScreen():
-        global Showcase,gif,Phase
-        Phase = "Start"
-        gif = ImageTk.PhotoImage(Image.open(os.path.join(ImagesLocation,"ChessGame.png")))
-        Showcase = Label(window, image=gif)
-        Showcase.place(anchor=NW,x=0,y=0)
-        window.after(13000, Import.hideShowcase)     
-
-    def hideShowcase():
-        global hideShowcase_executed
-        if not hideShowcase_executed:
-            Showcase.place_forget()
-            Import.ButtonDict = Import.ButtonsCreating(Import.Images)
-            Import.StartingScreen()
-            hideShowcase_executed = True
-
-    def SavedGames(option):
+    def SavedGames(option=None):
         global TranscriptName
         Player1,Player2 = None,None
         if option is not None:
@@ -178,70 +191,58 @@ class Import():
         else:
             TranscriptName = 'Game'
 
-        Rendering.HidingButtons(canvasSide,*Import.StartingScreenWindow)
+        Rendering.HidingButtons(canvasSide,*SidePanel.Screen_1_Frames)
         try:
             with open(f'{TranscriptName}.txt','x') as f:
                 pass
         except FileExistsError:
             pass
-        Import.RightPanel_FirstScreen()
+        SidePanel.Screen_2()
 
+    ExtraPiecesButtons = []
+    @Import.ListAppend(ExtraPiecesButtons)
     def PawnPromotionButtons():
-        Import.ExtraPiecesButtons.clear()
-        buttonQueen = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Queen(Self.side,'extra')))
-        buttonQueen_window = canvasSide.create_window(254,784, anchor=NW, window=buttonQueen)
-        Import.ExtraPiecesButtons.append(buttonQueen_window)
+        SidePanel.ExtraPiecesButtons.clear()
 
-        buttonBishop = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Bishop(Self.side,'extra')))
-        buttonBishop_window = canvasSide.create_window(254,892, anchor=NW, window=buttonBishop)
-        Import.ExtraPiecesButtons.append(buttonBishop_window)
-
-        buttonKnight = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Knight(Self.side,'extra')))
-        buttonKnight_window = canvasSide.create_window(392,892, anchor=NW, window=buttonKnight)
-        Import.ExtraPiecesButtons.append(buttonKnight_window)
-
-        buttonRook = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Rook(Self.side,'extra')))
-        buttonRook_window = canvasSide.create_window(392,784, anchor=NW, window=buttonRook)
-        Import.ExtraPiecesButtons.append(buttonRook_window)
+        but_Q_win,but_Q =SidePanel.SideCanvas_Parts(Button, 5, 254,784, method =GamePlay.PawnPromotion, args=Queen(Self.side,'extra'))
+        but_B_win,but_B =SidePanel.SideCanvas_Parts(Button, 5, 254,892, method =GamePlay.PawnPromotion, args=Bishop(Self.side,'extra'))
+        but_K_win,but_K =SidePanel.SideCanvas_Parts(Button, 5, 392,892, method =GamePlay.PawnPromotion, args=Knight(Self.side,'extra'))
+        but_R_win,but_R =SidePanel.SideCanvas_Parts(Button, 5, 392,784, method =GamePlay.PawnPromotion, args=Rook(Self.side,'extra'))
 
         if Turn == 1:
-            buttonQueen.config(image=Import.Img_wPbS[1])
-            buttonBishop.config(image=Import.Img_wPbS[2])
-            buttonKnight.config(image=Import.Img_wPbS[3])
-            buttonRook.config(image=Import.Img_wPbS[5])
-        else:
-            buttonQueen.config(image=Import.Img_bPwS[1])
-            buttonBishop.config(image=Import.Img_bPwS[2])
-            buttonKnight.config(image=Import.Img_bPwS[3])
-            buttonRook.config(image=Import.Img_bPwS[5])
-    ExtraPiecesButtons = []
+            but_Q.config(image=Import.AllImages[2][1] if Turn==1 else Import.AllImages[3][1])
+            but_B.config(image=Import.AllImages[2][2] if Turn==1 else Import.AllImages[3][2])
+            but_K.config(image=Import.AllImages[2][3] if Turn==1 else Import.AllImages[3][3])
+            but_R.config(image=Import.AllImages[2][5] if Turn==1 else Import.AllImages[3][5])
 
+        return but_Q_win,but_B_win,but_K_win,but_R_win
+    
     # Future Updated (Nothing for now)
     def ExtraButtons():    
         buttonNormalGame = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvasSide.create_window(0,880, anchor=NW, window=buttonNormalGame)
+        but_SG_win = canvasSide.create_window(0,880, anchor=NW, window=buttonNormalGame)
 
         buttonVSComputer = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvasSide.create_window(0,880, anchor=NW, window=buttonVSComputer)
+        but_SG_win = canvasSide.create_window(0,880, anchor=NW, window=buttonVSComputer)
 
         buttonMateInN = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        buttonSG_window = canvasSide.create_window(0,880, anchor=NW, window=buttonMateInN)
+        but_SG_win = canvasSide.create_window(0,880, anchor=NW, window=buttonMateInN)
 
     def freeModeButtons():
         buttonKing = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(King(Self.side)))
         buttonKing_window = canvasSide.create_window(392,892, anchor=NW, window=buttonKing)
-        Import.ExtraPiecesButtons.append(buttonKing_window)
+        SidePanel.ExtraPiecesButtons.append(buttonKing_window)
 
         buttonPawn = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Pawn(Self.side,'extra')))
         buttonPawn_window = canvasSide.create_window(392,784, anchor=NW, window=buttonPawn)
-        Import.ExtraPiecesButtons.append(buttonPawn_window)
+        SidePanel.ExtraPiecesButtons.append(buttonPawn_window)
 
         if Turn == 1:
-            buttonKing.config(image=Import.Img_wPbS[0])
-            buttonPawn.config(image=Import.Img_wPbS[6])
+            buttonKing.config(image=Import.AllImages[2][0])
+            buttonPawn.config(image=Import.AllImages[2][6])
         else:
-            buttonKing.config(image=Import.Img_bPwS[0])
-            buttonPawn.config(image=Import.Img_bPwS[6])
+            buttonKing.config(image=Import.AllImages[3][0])
+            buttonPawn.config(image=Import.AllImages[3][6])
 
 # >>> MOVES  <<<
 class GamePlay():
@@ -252,7 +253,7 @@ class GamePlay():
             if isinstance(CurrentTableDict[xy],Chess):
                 Self = CurrentTableDict[xy]
                 Rendering.borderDefault()
-                Rendering.borderColors(xy,Import.ButtonDict,Self)
+                Rendering.borderColors(xy,MainPanel.ButtonDict,Self)
         try:
             if (Turn == 1 and CurrentTableDict[position].side == 'w') or \
                 (Turn == -1 and CurrentTableDict[position].side == 'b'):
@@ -260,7 +261,7 @@ class GamePlay():
         except AttributeError:
             None
         verificationTime = time.time()
-        Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+        Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
         endTime = time.time()
         Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,verificationTime,None) 
 
@@ -322,14 +323,14 @@ class GamePlay():
             Chess.PromoteDict[promote]=Self
             Chess.pieces.remove(Self)
 
-            Rendering.printPawnPromotiong(Self,promote,posInTransc,TranscriptName,canvasSide,MoveOutput,Import.ExtraPiecesButtons,ExecutionTime_window,GamePlay.moveCounter)
+            Rendering.printPawnPromotiong(Self,promote,posInTransc,TranscriptName,canvasSide,MoveOutput,SidePanel.ExtraPiecesButtons,ExecutionTime_window,GamePlay.moveCounter)
             
             Self = None
             Phase = 'Game Mechanic'
             GamePlay.End_Turn()
 
             actionTime = time.time()
-            Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+            Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
             endTime = time.time()
             Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)
 
@@ -343,7 +344,7 @@ class GamePlay():
             
             actionTime = time.time()
             Rendering.printMovesDone(MoveOutput,Rendering.blue,None,posInTransc)
-            Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+            Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
             endTime = time.time()
             Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)  
 
@@ -357,7 +358,7 @@ class GamePlay():
             
             actionTime = time.time()
             Rendering.printMovesDone(MoveOutput,Rendering.blue,None,posInTransc)
-            Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+            Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
             endTime = time.time()
             Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime) 
 
@@ -373,12 +374,12 @@ class GamePlay():
             if output is None:
                 continue
             elif output is False:
-                Self=None ; Rendering.borderDefault() ; Rendering.borderCheck(Import.ButtonDict)
+                Self=None ; Rendering.borderDefault() ; Rendering.borderCheck(MainPanel.ButtonDict)
                 return
             else:
                 if isinstance(Self,Pawn) and (Self.x == 7 or Self.x == 0):
                     Rendering.HidingButtons(canvasSide,ExecutionTime_window)
-                    Import.PawnPromotionButtons()
+                    SidePanel.PawnPromotionButtons()
                     Turn,posInTransc,GamePlay.moveCounter=Rendering.printActionResult(Turn,posInTransc,TranscriptName,GamePlay.moveCounter,MoveOutput,output,transcript,color)
                     Phase = 'Pawn Promotion'
                     return
@@ -405,11 +406,10 @@ class GamePlay():
         GameFlow.GameOver(Turn,gameover)
         
         Rendering.borderDefault()
-        Rendering.borderCheck(Import.ButtonDict)
+        Rendering.borderCheck(MainPanel.ButtonDict)
         rewindButtonsManage,posInTransc = Rewind.Get_Transcript_and_Position(TranscriptName)
-        Rendering.PreviousNextButtons(canvasSide,buttonNext_window,buttonBack_window,rewindButtonsManage)
+        Rendering.PreviousNextButtons(canvasSide,but_Next_win,but_Back_win,rewindButtonsManage)
         
-
 # >>> GAME <<<
 class GameFlow:
     def StartingPosition():
@@ -429,8 +429,8 @@ class GameFlow:
         
     def NewGame():
         global CurrentTableDict,posInTransc
-        Import.StartingScreen()
-        Rendering.HidingButtons(canvasSide,ExecutionTime_window,buttonBack_window,buttonNext_window)
+        SidePanel.Screen_1()
+        Rendering.HidingButtons(canvasSide,ExecutionTime_window,but_Back_win,but_Next_win)
 
         Chess.pieces.clear()
         Chess.TakenDict.clear()
@@ -440,7 +440,7 @@ class GameFlow:
         MoveOutput.delete('1.0', END)
         Rendering.borderDefault()
         posInTransc = Rewind.ResetPosition()
-        Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+        Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
 
     def StandardGame():
         global Phase,Turn,Self,CurrentTableDict,posInTransc
@@ -458,11 +458,11 @@ class GameFlow:
             AI.AllActions(p,CurrentTableDict)
         AI.PossibleActions()
        
-        Rendering.HidingButtons(canvasSide,buttonGM_window,buttonSG_window)
-        Import.RightPanel_SecondScreen()
+        Rendering.HidingButtons(canvasSide,but_GM_win,but_SG_win)
+        SidePanel.Screen_Game()
 
         verificationTime = time.time()
-        Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+        Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
         endTime = time.time()
         Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,verificationTime,None)
 
@@ -480,7 +480,7 @@ class GameFlow:
                 Turn,posInTransc,GamePlay.moveCounter=Rendering.printActionResult(Turn,posInTransc,TranscriptName,GamePlay.moveCounter,MoveOutput,output,transcript,color)
                 GamePlay.End_Turn()
                 actionTime = time.time()
-                Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+                Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
                 endTime = time.time()
                 Rendering.timeShowing(ExecutionTime,Turn,Self,startingTime,endTime,None,actionTime)  
 
@@ -506,7 +506,7 @@ class GameFlow:
         def escPressed(event):
             global Self
             if Phase == "Start":
-                Import.hideShowcase()
+                MainPanel.hideShowcase()
             elif Phase == "Game Mechanic":
                 startTime = time.time()
                 Self = None
@@ -592,7 +592,7 @@ class GameFlow:
                 GamePlay.End_Turn()
 
                 verificationTime = time.time()
-                Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+                Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
                 endTime = time.time()
                 Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
             window.bind("<Button-3>", rightClick)
@@ -608,7 +608,7 @@ class GameFlow:
                     GamePlay.End_Turn()
 
                     verificationTime = time.time()
-                    Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+                    Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
                     endTime = time.time()
                     Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
             window.bind("<Delete>", deletePressed)
@@ -624,7 +624,7 @@ class GameFlow:
                     GamePlay.End_Turn()
 
                     verificationTime = time.time()
-                    Rendering.RenderingScreen(CurrentTableDict,Import.ButtonDict,Import.AllImages)
+                    Rendering.RenderingScreen(CurrentTableDict,MainPanel.ButtonDict,Import.AllImages)
                     endTime = time.time()
                     Rendering.timeShowing(ExecutionTime,Turn,Self,startTime,endTime,verificationTime,None)
             window.bind("<Insert>", insertPressed)
@@ -648,6 +648,6 @@ class GameFlow:
 
 GameFlow.MouseKeyboard()
 hideShowcase_executed = False
-Import.ShowcaseScreen()
+MainPanel.ShowcaseScreen()
 
 window.mainloop()
