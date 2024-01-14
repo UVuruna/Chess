@@ -97,6 +97,11 @@ class Rendering():
             current_state = canvas.itemcget(but, 'state')
             if current_state != 'normal':
                 canvas.itemconfigure(but, state='normal')
+    def ToggleVisibility(canvas,*frames):
+        for but in frames:
+            current_state = canvas.itemcget(but, 'state')
+            new_state = "hidden" if current_state == "normal" else "normal"
+            canvas.itemconfigure(but, state=new_state)
 
     def PreviousNextButtons(canvas,buttonNext_window,buttonBack_window):
         if (len(Rewind.FullTranscript)+Rewind.PosInTransc) == -1:

@@ -1,28 +1,5 @@
 1 Pawn F2 move F4
 2 Pawn E7 move E5
-3 Pawn E2 move E3
-4 Pawn F7 move F6
-5 Bishop F1 move C4
-6 Bishop F8 move C5
-7 Queen D1 move F3
-8 Pawn F6 move F5
-9 Pawn B2 move B3
-10 Queen D8 move G5
-11 Bishop C1 move A3
-12 Knight B8 move C6
-13 Knight G1 move E2
-14 Pawn D7 move D6
-15 Knight B1 move C3
-16 Bishop C8 move E6
-17 Queenside: white
-18 Queenside: black
-19 Rook H1 move F1
-20 Queen G5 move F6
-21 Queen F3 took C6 Knight
-22 Pawn B7 took C6 Queen
-23 Knight E2 move D4
-24 Queen F6 move G5
-25 Knight D4 took C6 Pawn
-26 Rook D8 move D7
-27 Bishop C4 move A6
-CheckMate
+3 Pawn F4 took E5 Pawn
+4 Pawn F7 move F5
+5 Pawn E5 take F6 Pawn F5

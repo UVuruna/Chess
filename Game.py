@@ -101,15 +101,17 @@ class MainPanel():
             MainPanel.ShowcaseHidden =True
 
 class SidePanel():
-    FirstOpponent       =None
-    SecondOpponent      =None
-    MoveOutput          =None
-    ExecutionTime       =None
-    ExecutionTime_win   =None
-    but_SG_win          =None
-    but_GM_win          =None
-    but_Back_win        =None
-    but_Next_win        =None
+    FirstOpponent       = None
+    SecondOpponent      = None
+    MoveOutput          = None
+    ExecutionTime       = None
+    ExecutionTime_win   = None
+    StatisticFrame      = None
+    StatisticFrame_win  = None
+    but_SG_win          = None
+    but_GM_win          = None
+    but_Back_win        = None
+    but_Next_win        = None
 
     def SideCanvas_Parts(ObjType, bordeR, x,y, w=None,h=None, txt=None, fontStyle=None, method=None,args=None):
         if ObjType ==Button:
@@ -167,6 +169,10 @@ class SidePanel():
         except FileExistsError:
             pass
         SidePanel.Screen_2()
+
+    def Statistic(StatisticText):
+        SidePanel.StatisticFrame = Label(window, font=('Eras Demi ITC', 15), width=45, height=33, bd=2, text=StatisticText, anchor="w", justify="left", wraplength=544)
+        SidePanel.StatisticFrame_win = MainPanel.canvasSide.create_window(1, 1, anchor=NW, window=SidePanel.StatisticFrame)
 
     ExtraPiecesButtons = []
     @Decorator.ListAppend(ExtraPiecesButtons)
@@ -516,70 +522,89 @@ class MouseKeyboard():
                                     GamePlay.Self,startTime,endTime,verificationTime,None)
 
     def spacePressed(event):
-        if MouseKeyboard.Space=='Statistic':
-            _ = os.system('cls')
-            n = 1000
-            ns = 1000000
+        def StatisticCalculate():
+                n = 1000
+                ns = 1000000
 
-            timingsAllActionsSET = []
-            timingsPossibleActionsSET = []
-            timingsResetActionsSET = []
-            for _ in range(n):
-                start = time.time()
+                timingsAllActionsSET = []
+                timingsPossibleActionsSET = []
+                timingsResetActionsSET = []
+                for _ in range(n):
+                    start = time.time()
+                    for p in Chess.pieces:
+                        AI.AllActions(p,GameFlow.TablePosition)
+                    end = time.time()
+                    timingsAllActionsSET.append(end-start)
+
+                    wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
+                    AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
+                    end1 = time.time()
+                    timingsPossibleActionsSET.append(end1-end)
+
+                    AI.ClearPossibleActions()
+                    end2 = time.time()
+                    timingsResetActionsSET.append(end2-end1)
+
+                a = sum(timingsAllActionsSET)/len(timingsAllActionsSET)
+                b = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
+                c = sum(timingsResetActionsSET)/len(timingsResetActionsSET)
+
                 for p in Chess.pieces:
-                    AI.AllActions(p,GameFlow.TablePosition)
-                end = time.time()
-                timingsAllActionsSET.append(end-start)
+                        AI.AllActions(p,GameFlow.TablePosition)
                 wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
                 AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
-                end1 = time.time()
-                timingsPossibleActionsSET.append(end1-end)
-                AI.ClearPossibleActions()
-                end2 = time.time()
-                timingsResetActionsSET.append(end2-end1)
 
-            a = sum(timingsAllActionsSET)/len(timingsAllActionsSET)
-            b = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
-            c = sum(timingsResetActionsSET)/len(timingsResetActionsSET)
+                L11="\tTIMINGS for ANALYZING whole TABLE\n\n"
+                L12=f'{str('  postavljanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns\n'
+                L13=f'{str('  korigovanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns\n'
+                L14=f'{str('  brisanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns\n\n'
+                
+                XY = MainPanel.hover.text
+                selfP = GameFlow.TablePosition[XY]
+                NAME = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
 
-            print('++'*66) ; print('\t'*2,'TIMINGS for ANALYZING whole TABLE','\n')  
-            print(f'{str('postavljanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns')
-            print(f'{str('korigovanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns')
-            print(f'{str('brisanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns')
+                L21=f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
+                L22=f"  Moves: {selfP.move}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
+                L23=f"  Castling: {selfP.castling}\n" if isinstance(selfP,King) else ""
+                L24=f"  Passive Move: {selfP.passiv_move}\n" if isinstance(selfP,Pawn) else ""
+                L25=f"  Attack: {selfP.attack}\n" if isinstance(selfP,Pawn) else ""
+                L26=f"  Takes: {selfP.take}\n" if isinstance(selfP,Chess) else ""
+                L27=f"  Defends: {selfP.defend}\n" if isinstance(selfP,Chess) else ""
+                L28=f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
+                L29=f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
 
-            for p in Chess.pieces:
-                AI.AllActions(p,GameFlow.TablePosition)
-            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
-            AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
-            
-            XY = MainPanel.hover.text
-            selfP = GameFlow.TablePosition[XY]
-            a = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
-            print('++'*66)  ; print('\t'*2,'Selected PIECE',str(selfP)[1:],a,'\n') 
-            if isinstance(selfP,Chess):
-                if isinstance(selfP,King):
-                        print('castling: ',selfP.castling)
-                if isinstance(selfP,Pawn):
-                    print('passive move: ',selfP.passiv_move)
-                    print('attack: ',selfP.attack)
+                SIDE = "WHITE" if selfP.side=='w' else "BLACK"
+                team = Chess.AllActions_W if selfP.side=='w'else Chess.AllActions_B
+
+                L30=f"\tALL possible ACTIONS {SIDE}\n\n"
+                L31=f"  Check: {Chess.Check}\n\n" if Chess.Check else ""
+                L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n"
+                L33=f"  whole team possible moves: {team['move']}\n"
+                L34=f"  whole team passive moves: {team['passive_move']}\n"
+                L35=f"  whole team possible takes: {team['take']}\n"
+                L36=f"  whole team possible attacks: {team['attack']}\n"
+                L37=f"  whole team possible defends: {team['defend']}\n"
+
+                StatisticTextList = [ L11, L12, L13, L14,
+                                L21, L22, L23, L24, L25, L26, L27, L28, L29,
+                                L30, L31, L32, L33, L34, L35, L36, L37]
+                StatisticText = str()
+                for l in StatisticTextList:
+                    StatisticText+=l
+                return StatisticText
+        
+        if MouseKeyboard.Space=='Statistic':
+            if not SidePanel.StatisticFrame:
+                StatisticText=StatisticCalculate()
+                SidePanel.Statistic(StatisticText)
+            else:
+                current_state = MainPanel.canvasSide.itemcget(SidePanel.StatisticFrame_win, 'state')
+                if current_state == 'hidden':
+                    Rendering.ShowingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
+                    StatisticText=StatisticCalculate()
                 else:
-                    print('moves: ',selfP.move)
-                print('takes: ',selfP.take)
-                print('defends: ',selfP.defend)
-                print('action Counter: ',selfP.actionsCounter)
-                print('Defender: ',selfP.Defender)
-                print("check: ",Chess.Check)
-
-            a = "WHITE" if selfP.side=='w' else "BLACK"
-            print('++'*66)  ; print('\t'*2,'ALL possible ACTIONS\t',a,'\n') 
-            team = Chess.AllActions_W if selfP.side=='w'else Chess.AllActions_B
-            print("Number of POSSIBLE ACTIONS: ",(len(team['move'])+len(team['passive_move'])+len(team['take'])),'\n')
-            print('whole team possible moves: ',team['move'])
-            print('whole team passive moves: ',team['passive_move'])
-            print('whole team possible takes: ',team['take'])
-            print('whole team possible defends: ',team['defend'])
-            print('whole team possible attacks: ',team['attack'])
-            print('++'*66)   
+                    Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
+            
 
     def rightClick(event):
         if MouseKeyboard.RightClick == 'Change_Turn':

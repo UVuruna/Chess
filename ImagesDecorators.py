@@ -47,9 +47,9 @@ class Import():
         cls.blackKnight = '♞'
         cls.blackPawn = '♟'
 
-    ImagesLocation = os.path.join(os.path.dirname(__file__),'Slike')
-    TranscriptName=None
-    AllImages=[]
+    ImagesLocation  = os.path.join(os.path.dirname(__file__),'Slike')
+    TranscriptName  = None
+    AllImages       = []
     @Decorator.ListAppend(AllImages)
     def ImageImport():
         imageCount = 32
