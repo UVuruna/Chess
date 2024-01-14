@@ -1,5 +1,5 @@
-from ChessParent import Chess
-from Actions import Actions
+from ChessParent import Chess,Actions
+from ImagesDecorators import Import
 
 class King(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -12,9 +12,7 @@ class King(Chess,Actions):
         self.y = 5
  
     def __str__(self) -> str:
-        white_king = '♔'
-        black_king = '♚'
-        return f"{white_king if self.side == 'w' else black_king}King"
+        return f"{Import.whiteKing if self.side == 'w' else Import.blackKing}King"
 
 class Queen(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,9 +25,7 @@ class Queen(Chess,Actions):
         self.y = 4
         
     def __str__(self) -> str:
-            black_queen = '♛'
-            white_queen = '♕'
-            return f"{white_queen if self.side == 'w' else black_queen}Queen"
+        return f"{Import.whiteQueen if self.side == 'w' else Import.blackQueen}Queen"
 
 class Rook(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,12 +36,10 @@ class Rook(Chess,Actions):
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
         self.y = (1 if self.name == 'L' else 8)
-        self.direction = Chess.direction[:4]
+        self.direction = Actions.direction[:4]
 
     def __str__(self) -> str:
-        white_rook = '♖'
-        black_rook = '♜'
-        return f"{white_rook if self.side =='w' else black_rook}Rook"        
+        return f"{Import.whiteRook if self.side =='w' else Import.blackRook}Rook"        
 
 class Bishop(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,12 +50,10 @@ class Bishop(Chess,Actions):
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
         self.y = (3 if self.name == 'L' else 6)
-        self.direction = Chess.direction[4:] 
+        self.direction = Actions.direction[4:] 
         
     def __str__(self) -> str:
-        black_bishop = '♝'
-        white_bishop = '♗'
-        return f"{white_bishop if self.side == 'w' else black_bishop}Bishop"
+        return f"{Import.whiteBishop if self.side == 'w' else Import.blackBishop}Bishop"
 
 class Knight(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,9 +66,7 @@ class Knight(Chess,Actions):
         self.y = (2 if self.name == 'L' else 7)
         
     def __str__(self) -> str:
-        white_knight = '♘'
-        black_knight = '♞'
-        return f"{white_knight if self.side == 'w' else black_knight}Knight"
+        return f"{Import.whiteKnight if self.side == 'w' else Import.blackKnight}Knight"
 
     direction = ['U+R','UR+','U+L','UL+','D+R','DR+','D+L','DL+']  
     def incrementation(self, path):
@@ -118,13 +108,11 @@ class Pawn(Chess,Actions):
         self.x = (2 if self.side == 'w' else 7)
         self.y = Pawn.Name.index(self.name)+1
         if self.side == 'w':
-            self.directionMove = Chess.direction[0]
-            self.directionAttack = Chess.direction[4:6]
+            self.directionMove = Actions.direction[0]
+            self.directionAttack = Actions.direction[4:6]
         else:
-            self.directionMove = Chess.direction[1]
-            self.directionAttack = Chess.direction[6:]
+            self.directionMove = Actions.direction[1]
+            self.directionAttack = Actions.direction[6:]
 
     def __str__(self) -> str:
-        white_pawn = '♙'
-        black_pawn = '♟'
-        return f"{white_pawn if self.side == 'w' else black_pawn}Pawn"      
+        return f"{Import.whitePawn if self.side == 'w' else Import.blackPawn}Pawn"      

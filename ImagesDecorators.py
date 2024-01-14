@@ -24,10 +24,32 @@ class Decorator():
         return decorator
 
 class Import():
+    moveSign = None ; takeSign = None  ; castlingSign = None ; promoteSign = None
+    whiteKing = None ; whiteQueen = None ; whiteRook = None ; whiteBishop = None ; whiteKnight = None ; whitePawn = None
+    blackKing = None ; blackQueen = None ; blackRook = None ; blackBishop = None ; blackKnight = None ; blackPawn = None
+
+    @classmethod
+    def InitializeSigns(cls):
+        cls.moveSign = '➔'
+        cls.takeSign = '❌'
+        cls.castlingSign = '⚜'
+        cls.promoteSign = '⛨'
+        cls.whiteKing = '♔'
+        cls.whiteQueen = '♕'
+        cls.whiteRook = '♖'
+        cls.whiteBishop = '♗'
+        cls.whiteKnight = '♘'
+        cls.whitePawn = '♙'
+        cls.blackKing = '♚'
+        cls.blackQueen = '♛'
+        cls.blackRook = '♜'
+        cls.blackBishop = '♝'
+        cls.blackKnight = '♞'
+        cls.blackPawn = '♟'
+
     ImagesLocation = os.path.join(os.path.dirname(__file__),'Slike')
     TranscriptName=None
     AllImages=[]
-
     @Decorator.ListAppend(AllImages)
     def ImageImport():
         imageCount = 32

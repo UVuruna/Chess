@@ -623,7 +623,8 @@ class MouseKeyboard():
                 endTime = time.time()
                 Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
                                         GamePlay.Self,startTime,endTime,verificationTime,None)
-        
+
+Import.InitializeSigns()        
 MouseKeyboard()
 MainPanel.ShowcaseScreen()
 

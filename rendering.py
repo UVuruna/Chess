@@ -5,9 +5,17 @@ from Transcript import Rewind
 
 
 class Rendering():
-
-    # AllImages[0] Rendering   
-    def RenderingScreen(tableDict,buttonDict,AllImages):
+    red    = "#FF6666" ; dark_red    = "#CC0000"
+    green  = "#00BB00" ; dark_green  = "#008800"
+    cyan   = "#00AACC" ; dark_cyan   = "#0066AD"
+    yellow = "#FFFF00" ; dark_yellow = "#ADAD00"
+    blue   = "#0000FF"
+    purple = "#8866CC"
+    gold   = "#FDD017"
+    
+    AllColors_forPrint = [green,red,purple,cyan,blue]
+        
+    def RenderingScreen(tableDict,buttonDict,AllImages): # Table Screen Rendering
         for k,v in tableDict.items(): # Ovo je glupo malo jer svaki put prolazi kroz All Images bes potrebe (moze da se izvuce ispred)
             if v != '':  #          ali nema veze jer se to radi samo u igri (nakon odigravanja poteza), ne u izracunavanju poteza (ne usporava kalkulacije)
                 if isinstance(tableDict[k],King): # King
@@ -48,9 +56,8 @@ class Rendering():
                         buttonDict[k].config(image=AllImages[3][6]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][6])
             else: # Empty Square
                 buttonDict[k].config(image=AllImages[0][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[0][2])
-
-    # Button Borders Rendering
-    ButtonChanged = []
+          
+    ButtonChanged = [] # Button Borders Rendering
     def borderColors(square,buttonDict,Self):
         if not isinstance(Self,Pawn):
             MoveColor,TakeColor = Self.move,Self.take
@@ -164,13 +171,3 @@ class Rendering():
         if posInTransc <-1:
             Rendering.delMovesDone(MoveOutput,posInTransc)
         Rendering.printMovesDone(MoveOutput,Rendering.purple,output,None)
-
-    red    = "#FF6666" ; dark_red    = "#CC0000"
-    green  = "#00BB00" ; dark_green  = "#008800"
-    cyan   = "#00AACC" ; dark_cyan   = "#0066AD"
-    yellow = "#FFFF00" ; dark_yellow = "#ADAD00"
-    blue   = "#0000FF"
-    purple = "#8866CC"
-    gold   = "#FDD017"
-    
-    AllColors_forPrint = [green,red,purple,cyan,blue]
