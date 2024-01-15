@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from PIL import ImageTk, Image
 import time
 from ChessParent import Chess
@@ -6,16 +7,20 @@ from Pieces import *
 from AI import AI
 from Transcript import Rewind
 from Rendering import Rendering
-from ImagesDecorators import *
+from ImagesDecorators import Import,Decorator
 import os
+import Frames as f
 
 window = Tk()
 window.title("Chess")
 window.resizable(False,False)
 X=1550 ; Y=1000
 window.geometry(f"{X}x{Y}")
+
 Import.ImageImport()
 
+# Icon   
+window.iconbitmap(os.path.join(Import.ImagesLocation,"ico.ico")) 
 
 class MainPanel():
     ButtonDict      = None
@@ -115,7 +120,7 @@ class SidePanel():
 
     def SideCanvas_Parts(ObjType, bordeR, x,y, w=None,h=None, txt=None, fontStyle=None, method=None,args=None):
         if ObjType ==Button:
-            button = ObjType(window, border=bordeR, font=fontStyle, width=w, height=h, text=txt, command=lambda: method(args) if args else method())
+            button = ObjType(window, background='#969696', border=bordeR, font=fontStyle, width=w, height=h, text=txt, command=lambda: method(args) if args else method())
             button_window = MainPanel.canvasSide.create_window(x,y, anchor=NW, window=button)
             return button_window,button
 
@@ -130,8 +135,8 @@ class SidePanel():
         text_SecondOpponent_win = MainPanel.canvasSide.create_window(280,945, anchor=NW, window=SidePanel.SecondOpponent)
         SidePanel.SecondOpponent.insert(1.0, "2ndPlayer")
 
-        but_SaveTransc_win =SidePanel.SideCanvas_Parts(Button, 5, 300,780,  16,3, 'Saving Game\nTranscript',('Tahoma', 18), SidePanel.SavedGames,'players')[0]
-        but_GameTransc_win =SidePanel.SideCanvas_Parts(Button, 5,  10,780,  12,4, 'Casual Game\nNo Transcript',('Tahoma', 27), SidePanel.SavedGames)[0]
+        but_SaveTransc_win =SidePanel.SideCanvas_Parts(Button, 5, 300,780,  16,3, 'Saving Game\nwith\nTranscript',('Tahoma', 18), SidePanel.SavedGames,'players')[0]
+        but_GameTransc_win =SidePanel.SideCanvas_Parts(Button, 5,  10,780,  8,3, 'Casual\nGame',('Tahoma', 33, 'bold'), SidePanel.SavedGames)[0]
 
         return text_FirstOpponent_win,text_SecondOpponent_win,but_SaveTransc_win,but_GameTransc_win
 
@@ -139,8 +144,8 @@ class SidePanel():
         SidePanel.MoveOutput = Text(window, width= 550, height=22, bg= '#535a5e', font=('Tahoma', 22))
         SidePanel.MoveOutput.place(anchor=NW,x=1000,y=2)
 
-        exTiText = 'Standard Game:\nNormal Chess game\nwith all rules applied\n\nGod Mode:\nDelete: Remove Piece\nInsert: Freely move Piece\nRightClick: Change GamePlay.Turn '
-        SidePanel.ExecutionTime = Label(window, font=('Eras Demi ITC', 16), width=24, height=8, bd=2, relief='groove', text=exTiText)
+        exTiText = 'Standard Game:\nNormal Chess game\nwith all rules applied\n\nGod Mode:\nDelete: Remove Piece\nInsert: Freely move Piece\nRightClick: Change Turn'
+        SidePanel.ExecutionTime = Label(window, font=('Eras Demi ITC', 16), width=24, height=8, bd=2, background='#969696', text=exTiText)
         SidePanel.ExecutionTime_win = MainPanel.canvasSide.create_window(220, 787, anchor=NW, window=SidePanel.ExecutionTime)
 
         SidePanel.but_SG_win =SidePanel.SideCanvas_Parts(Button, 3, 10,780,  9,2, 'Standard\nGame',('Eras Demi ITC', 24), GameFlow.StandardGame)[0]
@@ -171,7 +176,7 @@ class SidePanel():
         SidePanel.Screen_2()
 
     def Statistic(StatisticText):
-        SidePanel.StatisticFrame = Label(window, font=('Eras Demi ITC', 15), width=45, height=33, bd=2, text=StatisticText, anchor="w", justify="left", wraplength=544)
+        SidePanel.StatisticFrame = Label(window, font=('Eras Demi ITC', 15), background= '#535a5e', width=45, height=33, bd=2, text=StatisticText, anchor="w", justify="left", wraplength=544)
         SidePanel.StatisticFrame_win = MainPanel.canvasSide.create_window(1, 1, anchor=NW, window=SidePanel.StatisticFrame)
 
     ExtraPiecesButtons = []
@@ -404,18 +409,22 @@ class GameFlow:
         pawn_wCR=Pawn('w', 'CR'); pawn_wR3=Pawn('w', 'R3'); pawn_wR2=Pawn('w', 'R2'); pawn_wR1=Pawn('w', 'R1')
         
     def NewGame():
-        SidePanel.Screen_1()
-        Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.ExecutionTime_win,SidePanel.but_Back_win,SidePanel.but_Next_win)
+        result = messagebox.askyesno("New Game", "Are you sure you want to quit Current Game?")
+        if result:
+            SidePanel.Screen_1()
+            Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.ExecutionTime_win,SidePanel.but_Back_win,SidePanel.but_Next_win)
 
-        Chess.pieces.clear()
-        Chess.TakenDict.clear()
-        AI.ClearPossibleActions()
-        GameFlow.TablePosition = Chess.currentTableDict()
+            Chess.pieces.clear()
+            Chess.TakenDict.clear()
+            AI.ClearPossibleActions()
+            GameFlow.TablePosition = Chess.currentTableDict()
 
-        SidePanel.MoveOutput.delete('1.0', END)
-        Rendering.borderDefault()
-        Rewind.PosInTransc = Rewind.ResetPosition()
-        Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
+            SidePanel.MoveOutput.delete('1.0', END)
+            Rendering.borderDefault()
+            Rewind.PosInTransc = Rewind.ResetPosition()
+            Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
+        else:
+            None
 
     def StandardGame():
         startingTime = time.time()
@@ -491,9 +500,14 @@ class MouseKeyboard():
         window.bind('\u0076\u0075'  ,MouseKeyboard.UVStatistic)
         window.bind("<Escape>"      ,MouseKeyboard.escPressed)
         window.bind("<Button-3>"    ,MouseKeyboard.rightClick)
+        window.bind("<Button-1>"    ,MouseKeyboard.leftClick)
         window.bind("<Delete>"      ,MouseKeyboard.deletePressed)
         window.bind("<Insert>"      ,MouseKeyboard.insertPressed)
         window.bind("<space>"       ,MouseKeyboard.spacePressed)
+
+    def leftClick(event):
+        if SidePanel.StatisticFrame:
+            Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
 
     def UVStatistic(event):
         if GameFlow.Phase == 'Game Over':
@@ -522,76 +536,99 @@ class MouseKeyboard():
                                     GamePlay.Self,startTime,endTime,verificationTime,None)
 
     def spacePressed(event):
+        def xy_to_TableNotation(*args):
+            ChangedXY=[]
+            for A in args:
+                fixedA=[]
+                if A:
+                    for xy in A:
+                        try:
+                            fixedA.append(Chess.NotationTableDict[xy])
+                        except KeyError:
+                            fixedA.append(xy)
+                ChangedXY.append(', '.join(fixedA))
+            return ChangedXY
+        
         def StatisticCalculate():
-                n = 1000
-                ns = 1000000
+            n = 1000
+            ns = 1000000
 
-                timingsAllActionsSET = []
-                timingsPossibleActionsSET = []
-                timingsResetActionsSET = []
-                for _ in range(n):
-                    start = time.time()
-                    for p in Chess.pieces:
-                        AI.AllActions(p,GameFlow.TablePosition)
-                    end = time.time()
-                    timingsAllActionsSET.append(end-start)
-
-                    wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
-                    AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
-                    end1 = time.time()
-                    timingsPossibleActionsSET.append(end1-end)
-
-                    AI.ClearPossibleActions()
-                    end2 = time.time()
-                    timingsResetActionsSET.append(end2-end1)
-
-                a = sum(timingsAllActionsSET)/len(timingsAllActionsSET)
-                b = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
-                c = sum(timingsResetActionsSET)/len(timingsResetActionsSET)
-
+            timingsAllActionsSET = []
+            timingsPossibleActionsSET = []
+            timingsResetActionsSET = []
+            for _ in range(n):
+                start = time.time()
                 for p in Chess.pieces:
-                        AI.AllActions(p,GameFlow.TablePosition)
+                    AI.AllActions(p,GameFlow.TablePosition)
+                end = time.time()
+                timingsAllActionsSET.append(end-start)
+
                 wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
                 AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
+                end1 = time.time()
+                timingsPossibleActionsSET.append(end1-end)
 
-                L11="\tTIMINGS for ANALYZING whole TABLE\n\n"
-                L12=f'{str('  postavljanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns\n'
-                L13=f'{str('  korigovanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns\n'
-                L14=f'{str('  brisanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns\n\n'
-                
-                XY = MainPanel.hover.text
-                selfP = GameFlow.TablePosition[XY]
-                NAME = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
+                AI.ClearPossibleActions()
+                end2 = time.time()
+                timingsResetActionsSET.append(end2-end1)
 
-                L21=f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
-                L22=f"  Moves: {selfP.move}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
-                L23=f"  Castling: {selfP.castling}\n" if isinstance(selfP,King) else ""
-                L24=f"  Passive Move: {selfP.passiv_move}\n" if isinstance(selfP,Pawn) else ""
-                L25=f"  Attack: {selfP.attack}\n" if isinstance(selfP,Pawn) else ""
-                L26=f"  Takes: {selfP.take}\n" if isinstance(selfP,Chess) else ""
-                L27=f"  Defends: {selfP.defend}\n" if isinstance(selfP,Chess) else ""
-                L28=f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
-                L29=f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
+            a = sum(timingsAllActionsSET)/len(timingsAllActionsSET)
+            b = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
+            c = sum(timingsResetActionsSET)/len(timingsResetActionsSET)
 
-                SIDE = "WHITE" if selfP.side=='w' else "BLACK"
-                team = Chess.AllActions_W if selfP.side=='w'else Chess.AllActions_B
+            for p in Chess.pieces:
+                    AI.AllActions(p,GameFlow.TablePosition)
+            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
+            AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
 
-                L30=f"\tALL possible ACTIONS {SIDE}\n\n"
-                L31=f"  Check: {Chess.Check}\n\n" if Chess.Check else ""
-                L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n"
-                L33=f"  whole team possible moves: {team['move']}\n"
-                L34=f"  whole team passive moves: {team['passive_move']}\n"
-                L35=f"  whole team possible takes: {team['take']}\n"
-                L36=f"  whole team possible attacks: {team['attack']}\n"
-                L37=f"  whole team possible defends: {team['defend']}\n"
+            L11="\tTIMINGS for ANALYZING whole TABLE\n\n"
+            L12=f'{str('  postavljanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns\n'
+            L13=f'{str('  korigovanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns\n'
+            L14=f'{str('  brisanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns\n\n'
+            
+            XY = MainPanel.hover.text
+            selfP = GameFlow.TablePosition[XY]
+            NAME = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
 
-                StatisticTextList = [ L11, L12, L13, L14,
-                                L21, L22, L23, L24, L25, L26, L27, L28, L29,
-                                L30, L31, L32, L33, L34, L35, L36, L37]
-                StatisticText = str()
-                for l in StatisticTextList:
-                    StatisticText+=l
-                return StatisticText
+            if isinstance(selfP,King):
+                FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend, selfP.castling)
+            elif isinstance(selfP,Pawn):
+                FixedPositions = xy_to_TableNotation(selfP.passiv_move ,selfP.take, selfP.defend, selfP.attack)
+            elif isinstance(selfP,Chess):
+                FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend)
+
+            L21=f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
+            L22=f"  Moves: {FixedPositions[0]}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
+            L23=f"  Castling: {FixedPositions[3]}\n" if isinstance(selfP,King) else ""
+            L24=f"  Passive Move: {FixedPositions[0]}\n" if isinstance(selfP,Pawn) else ""
+            L25=f"  Attack: {FixedPositions[3]}\n" if isinstance(selfP,Pawn) else ""
+            L26=f"  Takes: {FixedPositions[1]}\n" if isinstance(selfP,Chess) else ""
+            L27=f"  Defends: {FixedPositions[2]}\n" if isinstance(selfP,Chess) else ""
+            L28=f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
+            L29=f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
+
+            SIDE = "WHITE" if selfP.side=='w' else "BLACK"
+            team = Chess.AllActions_W if selfP.side=='w'else Chess.AllActions_B
+
+            M=team['move'] ; PM=team['passive_move'] ; T=team['take'] ; A=team['attack'] ; D=team['defend']
+            TeamFixedPositions = xy_to_TableNotation(M,PM,T,A,D,*Chess.Check)
+
+            L30=f"\tALL possible ACTIONS {SIDE}\n\n"
+            L31=f"  Check: {TeamFixedPositions[5:]}\n" if Chess.Check else ""
+            L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n\n"
+            L33=f"  Team possible Moves: {TeamFixedPositions[0]}\n"
+            L34=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
+            L35=f"  Team possible Takes: {TeamFixedPositions[2]}\n"
+            L36=f"  Team possible Attacks: {TeamFixedPositions[3]}\n"
+            L37=f"  Team possible Defends: {TeamFixedPositions[4]}\n"
+
+            StatisticTextList = [ L11, L12, L13, L14,
+                            L21, L22, L23, L24, L25, L26, L27, L28, L29,
+                            L30, L31, L32, L33, L34, L35, L36, L37]
+            StatisticText = str()
+            for l in StatisticTextList:
+                StatisticText+=l
+            return StatisticText
         
         if MouseKeyboard.Space=='Statistic':
             if not SidePanel.StatisticFrame:
@@ -602,9 +639,9 @@ class MouseKeyboard():
                 if current_state == 'hidden':
                     Rendering.ShowingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
                     StatisticText=StatisticCalculate()
+                    SidePanel.StatisticFrame.config(text=StatisticText)
                 else:
-                    Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
-            
+                    Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)          
 
     def rightClick(event):
         if MouseKeyboard.RightClick == 'Change_Turn':
