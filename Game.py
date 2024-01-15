@@ -9,7 +9,7 @@ from Transcript import Rewind
 from Rendering import Rendering
 from ImagesDecorators import Import,Decorator
 import os
-import Frames as f
+from Frames import *
 
 window = Tk()
 window.title("Chess")
@@ -21,206 +21,6 @@ Import.ImageImport()
 
 # Icon   
 window.iconbitmap(os.path.join(Import.ImagesLocation,"ico.ico")) 
-
-class MainPanel():
-    ButtonDict      = None
-    hover           = None
-    canvasTable     = None
-    canvasSide      = None
-    Showcase        = None
-    ShowcaseImage   = None
-    ShowcaseHidden  = False
-    
-    def Hover(event,button):    # Green                          # Red                             # Light Blue                      # Yellow  
-        MainPanel.hover = event.widget
-        if button.cget('bg') !=Rendering.green and button.cget('bg') !=Rendering.red and button.cget('bg') !=Rendering.cyan and button.cget('bg') !=Rendering.yellow:
-            button.config(background='silver')
-        elif button.cget('bg') ==Rendering.green:
-            button.config(background=Rendering.dark_green)
-        elif button.cget('bg') ==Rendering.red:
-            button.config(background=Rendering.dark_red)
-        elif button.cget('bg') ==Rendering.cyan:
-            button.config(background=Rendering.dark_cyan)
-        elif button.cget('bg') ==Rendering.yellow:
-            button.config(background=Rendering.dark_yellow)
-
-    def ClearHover(event,button):
-        if button.cget('bg') == 'silver':
-            button.config(background='SystemButtonFace')
-        elif button.cget('bg') ==Rendering.dark_green:
-            button.config(background=Rendering.green)
-        elif button.cget('bg') ==Rendering.dark_red:
-            button.config(background=Rendering.red)
-        elif button.cget('bg') ==Rendering.dark_cyan:
-            button.config(background=Rendering.cyan)
-        elif button.cget('bg') ==Rendering.dark_yellow:
-            button.config(background=Rendering.yellow)
-    # Icon   
-    window.iconbitmap(os.path.join(Import.ImagesLocation,"ico.ico"))   
-
-    def MainPanel_Parts(images):
-        # Canvas 1
-        MainPanel.canvasTable = Canvas(window, width=1000, height=1000)
-        MainPanel.canvasTable.place(anchor=NW,x=0,y=0)
-        MainPanel.canvasTable.create_image(0,0, anchor=NW, image=images[0])
-        # Canvas 2
-        MainPanel.canvasSide = Canvas(window, width=550, height=1000)
-        MainPanel.canvasSide.place(anchor=NW,x=1000,y=0)
-        MainPanel.canvasSide.create_image(0,0, anchor=NW, image=images[3])
-
-            # Square buttons
-        border_Dist = 97 ; butt_Dimension = 101.7
-        ButtonReferences = list(Chess.emptyTableDict().keys())
-        ButtonDict = {}
-        for i in range(64): 
-            n=8             # Ovaj deo je da se napravi matrica (8*8) od liste 
-            x = i//n        # zbog postavke BUTTONA na CANVAS (pozicije XY)
-            y = i-x*n       # Radi izracunavanja koordinata preko FORMULE
-                                        
-            button = Button(window)               # kreiranje Buttona
-            button.text = ButtonReferences[i]     # ubacivanje Atributa koji opisuje poziciju. Improvizovana ButtonID
-            button.config(border=2,command=lambda text = button.text: (GameFlow.GameMechanic(text)))                       # FUNKCIJA Buttona
-            button.bind("<Enter>",lambda event, text = button: MainPanel.Hover(event,text))                                # Set Hover
-            button.bind("<Leave>",lambda event, text = button: MainPanel.ClearHover(event,text))                           # Clear Hover
-            button_window = MainPanel.canvasTable.create_window(1,1, anchor=NW, window=button)                             # kreiranje prozora buttona
-            MainPanel.canvasTable.coords(button_window,(border_Dist+y*butt_Dimension),(border_Dist+(7-x)*butt_Dimension))  # postavljanje buttona na EKRAN
-            ButtonDict[button.text] = button     # Ubacivanje Buttona u RECNIK                            
-
-                # Default Square Color
-            button.config(image=images[2]) if (x%2==0 and y%2==0) or (x%2==1 and y%2==1) else button.config(image=images[1])
-            button.color =             'b' if (x%2==0 and y%2==0) or (x%2==1 and y%2==1) else 'w'
-        return ButtonDict
-
-    def ShowcaseScreen():
-        GameFlow.Phase = "Start"
-        MainPanel.ShowcaseImage = ImageTk.PhotoImage(Image.open(os.path.join(Import.ImagesLocation,"ChessGame.png")))
-        MainPanel.Showcase = Label(window, image=MainPanel.ShowcaseImage)
-        MainPanel.Showcase.place(anchor=NW,x=0,y=0)
-        window.after(13000, MainPanel.hideShowcase)     
-
-    def hideShowcase():
-        if not MainPanel.ShowcaseHidden:
-            MainPanel.Showcase.place_forget()
-            MainPanel.ButtonDict = MainPanel.MainPanel_Parts(Import.AllImages[0])
-            SidePanel.Screen_1()
-            MainPanel.ShowcaseHidden =True
-
-class SidePanel():
-    FirstOpponent       = None
-    SecondOpponent      = None
-    MoveOutput          = None
-    ExecutionTime       = None
-    ExecutionTime_win   = None
-    StatisticFrame      = None
-    StatisticFrame_win  = None
-    but_SG_win          = None
-    but_GM_win          = None
-    but_Back_win        = None
-    but_Next_win        = None
-
-    def SideCanvas_Parts(ObjType, bordeR, x,y, w=None,h=None, txt=None, fontStyle=None, method=None,args=None):
-        if ObjType ==Button:
-            button = ObjType(window, background='#969696', border=bordeR, font=fontStyle, width=w, height=h, text=txt, command=lambda: method(args) if args else method())
-            button_window = MainPanel.canvasSide.create_window(x,y, anchor=NW, window=button)
-            return button_window,button
-
-    Screen_1_Frames = []
-    @Decorator.ListAppend(Screen_1_Frames)
-    def Screen_1():
-        SidePanel.FirstOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
-        text_FirstOpponent_win = MainPanel.canvasSide.create_window(280,900, anchor=NW, window=SidePanel.FirstOpponent)
-        SidePanel.FirstOpponent.insert(1.0, "1stPlayer")
-
-        SidePanel.SecondOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
-        text_SecondOpponent_win = MainPanel.canvasSide.create_window(280,945, anchor=NW, window=SidePanel.SecondOpponent)
-        SidePanel.SecondOpponent.insert(1.0, "2ndPlayer")
-
-        but_SaveTransc_win =SidePanel.SideCanvas_Parts(Button, 5, 300,780,  16,3, 'Saving Game\nwith\nTranscript',('Tahoma', 18), SidePanel.SavedGames,'players')[0]
-        but_GameTransc_win =SidePanel.SideCanvas_Parts(Button, 5,  10,780,  8,3, 'Casual\nGame',('Tahoma', 33, 'bold'), SidePanel.SavedGames)[0]
-
-        return text_FirstOpponent_win,text_SecondOpponent_win,but_SaveTransc_win,but_GameTransc_win
-
-    def Screen_2():
-        SidePanel.MoveOutput = Text(window, width= 550, height=22, bg= '#535a5e', font=('Tahoma', 22))
-        SidePanel.MoveOutput.place(anchor=NW,x=1000,y=2)
-
-        exTiText = 'Standard Game:\nNormal Chess game\nwith all rules applied\n\nGod Mode:\nDelete: Remove Piece\nInsert: Freely move Piece\nRightClick: Change Turn'
-        SidePanel.ExecutionTime = Label(window, font=('Eras Demi ITC', 16), width=24, height=8, bd=2, background='#969696', text=exTiText)
-        SidePanel.ExecutionTime_win = MainPanel.canvasSide.create_window(220, 787, anchor=NW, window=SidePanel.ExecutionTime)
-
-        SidePanel.but_SG_win =SidePanel.SideCanvas_Parts(Button, 3, 10,780,  9,2, 'Standard\nGame',('Eras Demi ITC', 24), GameFlow.StandardGame)[0]
-        SidePanel.but_GM_win =SidePanel.SideCanvas_Parts(Button, 3, 10,890,  9,2, 'God Mode',('Eras Demi ITC', 24), GameFlow.GodMode)[0]
-    
-    def Screen_Game():
-        SidePanel.SideCanvas_Parts(Button, 3,  10,780,  9,2, 'New Game',('Eras Demi ITC', 24), GameFlow.NewGame)[0]
-        SidePanel.but_Back_win =SidePanel.SideCanvas_Parts(Button, 3,  10,900,  3,1, '⯬🢠',('Eras Demi ITC', 33), GamePlay.Previous)[0]
-        SidePanel.but_Next_win =SidePanel.SideCanvas_Parts(Button, 3, 108,900,  3,1, '🢡⯮',('Eras Demi ITC', 33), GamePlay.Next)[0]
-
-        Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.but_Back_win,SidePanel.but_Next_win)
-
-    def SavedGames(option=None):
-        Player1,Player2 = None,None
-        if option is not None:
-            Player1 = SidePanel.FirstOpponent.get("1.0", "end-1c")
-            Player2 = SidePanel.SecondOpponent.get("1.0", "end-1c")
-            Import.TranscriptName = f"{Player1}vs{Player2}"
-        else:
-            Import.TranscriptName = 'Game'
-
-        Rendering.HidingButtons(MainPanel.canvasSide,*SidePanel.Screen_1_Frames)
-        try:
-            with open(f'{Import.TranscriptName}.txt','x') as f:
-                pass
-        except FileExistsError:
-            pass
-        SidePanel.Screen_2()
-
-    def Statistic(StatisticText):
-        SidePanel.StatisticFrame = Label(window, font=('Eras Demi ITC', 15), background= '#535a5e', width=45, height=33, bd=2, text=StatisticText, anchor="w", justify="left", wraplength=544)
-        SidePanel.StatisticFrame_win = MainPanel.canvasSide.create_window(1, 1, anchor=NW, window=SidePanel.StatisticFrame)
-
-    ExtraPiecesButtons = []
-    @Decorator.ListAppend(ExtraPiecesButtons)
-    def PawnPromotionButtons():
-        SidePanel.ExtraPiecesButtons.clear()
-        but_Q_win,but_Q =SidePanel.SideCanvas_Parts(Button, 5, 254,784, method =GamePlay.PawnPromotion, args=Queen(GamePlay.Self.side,'extra'))
-        but_B_win,but_B =SidePanel.SideCanvas_Parts(Button, 5, 254,892, method =GamePlay.PawnPromotion, args=Bishop(GamePlay.Self.side,'extra'))
-        but_K_win,but_K =SidePanel.SideCanvas_Parts(Button, 5, 392,892, method =GamePlay.PawnPromotion, args=Knight(GamePlay.Self.side,'extra'))
-        but_R_win,but_R =SidePanel.SideCanvas_Parts(Button, 5, 392,784, method =GamePlay.PawnPromotion, args=Rook(GamePlay.Self.side,'extra'))
-
-        if GamePlay.Turn == 1:
-            but_Q.config(image=Import.AllImages[2][1] if GamePlay.Turn==1 else Import.AllImages[3][1])
-            but_B.config(image=Import.AllImages[2][2] if GamePlay.Turn==1 else Import.AllImages[3][2])
-            but_K.config(image=Import.AllImages[2][3] if GamePlay.Turn==1 else Import.AllImages[3][3])
-            but_R.config(image=Import.AllImages[2][5] if GamePlay.Turn==1 else Import.AllImages[3][5])
-        return but_Q_win,but_B_win,but_K_win,but_R_win
-    
-    # Future Updated (Nothing for now)
-    def ExtraButtons():    
-        buttonNormalGame = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        SidePanel.but_SG_win = MainPanel.canvasSide.create_window(0,880, anchor=NW, window=buttonNormalGame)
-
-        buttonVSComputer = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        SidePanel.but_SG_win = MainPanel.canvasSide.create_window(0,880, anchor=NW, window=buttonVSComputer)
-
-        buttonMateInN = Button(window, border=5, font=('Arial', 27), width=13, height=2, text='New\nGame', command=lambda: GameFlow.StandardGame())
-        SidePanel.but_SG_win = MainPanel.canvasSide.create_window(0,880, anchor=NW, window=buttonMateInN)
-
-    def freeModeButtons():
-        buttonKing = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(King(GamePlay.Self.side)))
-        buttonKing_window = MainPanel.canvasSide.create_window(392,892, anchor=NW, window=buttonKing)
-        SidePanel.ExtraPiecesButtons.append(buttonKing_window)
-
-        buttonPawn = Button(window, border=5, command=lambda: GamePlay.PawnPromotion(Pawn(GamePlay.Self.side,'extra')))
-        buttonPawn_window = MainPanel.canvasSide.create_window(392,784, anchor=NW, window=buttonPawn)
-        SidePanel.ExtraPiecesButtons.append(buttonPawn_window)
-
-        if GamePlay.Turn == 1:
-            buttonKing.config(image=Import.AllImages[2][0])
-            buttonPawn.config(image=Import.AllImages[2][6])
-        else:
-            buttonKing.config(image=Import.AllImages[3][0])
-            buttonPawn.config(image=Import.AllImages[3][6])
 
 # >>> MOVES  <<<
 class GamePlay():
@@ -291,27 +91,33 @@ class GamePlay():
             GamePlay.verification(newSelf,startingTime)
 
     def PawnPromotion(choice):  
-        if GameFlow.Phase == 'Pawn Promotion':
-            startingTime = time.time()
+        startingTime = time.time()
+        if choice =='Q':
+            promote = Queen(GamePlay.Self.side,'extra')
+        elif choice =='B':
+            promote = Bishop(GamePlay.Self.side,'extra')
+        elif choice =='K':
+            promote = Knight(GamePlay.Self.side,'extra')
+        elif choice =='R':
+            promote = Rook(GamePlay.Self.side,'extra')
+
+        promote.x,promote.y = GamePlay.Self.getXY()
+        Chess.PromoteDict[promote]=GamePlay.Self
+        Chess.pieces.remove(GamePlay.Self)
+
+        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_2_Frames[1])
+        Rendering.printPawnPromoting(GamePlay.Self,promote,Rewind.PosInTransc,
+                                        Import.TranscriptName,SidePanel.MoveOutput,GamePlay.moveCounter)
         
-            promote = choice
-            promote.x,promote.y = GamePlay.Self.getXY()
-            Chess.PromoteDict[promote]=GamePlay.Self
-            Chess.pieces.remove(GamePlay.Self)
+        GamePlay.Self = None
+        GameFlow.Phase = 'Game Mechanic'
+        GamePlay.End_Turn()
 
-            Rendering.printPawnPromotiong(GamePlay.Self,promote,Rewind.PosInTransc,Import.TranscriptName,
-                                          MainPanel.canvasSide,SidePanel.MoveOutput,SidePanel.ExtraPiecesButtons,
-                                          SidePanel.ExecutionTime_win,GamePlay.moveCounter)
-            
-            GamePlay.Self = None
-            GameFlow.Phase = 'Game Mechanic'
-            GamePlay.End_Turn()
-
-            actionTime = time.time()
-            Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
-            endTime = time.time()
-            Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
-                                  GamePlay.Self,startingTime,endTime,None,actionTime)
+        actionTime = time.time()
+        Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
+        endTime = time.time()
+        Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
+                                GamePlay.Self,startingTime,endTime,None,actionTime)
 
     def Previous():
         startingTime = time.time()
@@ -356,8 +162,8 @@ class GamePlay():
                 return
             else:
                 if isinstance(GamePlay.Self,Pawn) and (GamePlay.Self.x ==8 or GamePlay.Self.x ==1):
-                    Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.ExecutionTime_win)
-                    SidePanel.PawnPromotionButtons()
+                    SidePanel.PawnPromotionButtons(window,GamePlay.PawnPromotion,GamePlay.Turn)
+                    Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_2_Frames[1])
                     GamePlay.Turn,Rewind.PosInTransc,GamePlay.moveCounter =Rendering.printActionResult(GamePlay.Turn,Rewind.PosInTransc,Import.TranscriptName,
                                                                                                 GamePlay.moveCounter,SidePanel.MoveOutput,output,transcript,color)
                     GameFlow.Phase = 'Pawn Promotion'
@@ -386,12 +192,29 @@ class GamePlay():
         Rendering.borderDefault()
         Rendering.borderCheck(MainPanel.ButtonDict)
         Rewind.UpdateTranscript(Import.TranscriptName)
-        Rendering.PreviousNextButtons(MainPanel.canvasSide,SidePanel.but_Next_win,SidePanel.but_Back_win)
+        Rendering.PreviousNextButtons(MainPanel.canvasSide,SidePanel.Screen_Game_Frames[1:])
         
 # >>> GAME <<<
 class GameFlow:
     Phase           =None
     TablePosition   =None
+
+    def SavedGames(option=None):
+        Player1,Player2 = None,None
+        if option is not None:
+            Player1 = SidePanel.FirstOpponent.get("1.0", "end-1c")
+            Player2 = SidePanel.SecondOpponent.get("1.0", "end-1c")
+            Import.TranscriptName = f"{Player1}vs{Player2}"
+        else:
+            Import.TranscriptName = 'Game'
+        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_1_Frames,*SidePanel.Screen_2_Frames[1:])
+        if not MainPanel.ButtonDict:
+            MainPanel.ButtonDict = MainPanel.TableButtons(window,Import.AllImages[0],GameFlow.GameMechanic)
+        try:
+            with open(f'{Import.TranscriptName}.txt','x') as f:
+                pass
+        except FileExistsError:
+            pass
 
     def StartingPosition():
             # Senatus
@@ -411,8 +234,8 @@ class GameFlow:
     def NewGame():
         result = messagebox.askyesno("New Game", "Are you sure you want to quit Current Game?")
         if result:
-            SidePanel.Screen_1()
-            Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.ExecutionTime_win,SidePanel.but_Back_win,SidePanel.but_Next_win)
+            Rendering.ToggleVisibility(MainPanel.canvasSide,'hidden',*SidePanel.Screen_Game_Frames)
+            Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_1_Frames,*SidePanel.Screen_2_Frames[:2])
 
             Chess.pieces.clear()
             Chess.TakenDict.clear()
@@ -439,11 +262,9 @@ class GameFlow:
         for p in Chess.pieces:
             AI.AllActions(p,GameFlow.TablePosition)
         AI.PossibleActions()
-       
-        Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.but_GM_win,SidePanel.but_SG_win)
-        SidePanel.Screen_Game()
 
         verificationTime = time.time()
+        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_2_Frames[2:],SidePanel.Screen_2_Frames[0],SidePanel.Screen_Game_Frames[0])
         Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
         endTime = time.time()
         Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
@@ -506,8 +327,11 @@ class MouseKeyboard():
         window.bind("<space>"       ,MouseKeyboard.spacePressed)
 
     def leftClick(event):
-        if SidePanel.StatisticFrame:
-            Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
+        if MouseKeyboard.Space=='Statistic' and SidePanel.StatisticFrame:
+            current_state = MainPanel.canvasSide.itemcget(SidePanel.StatisticFrame_win, 'state')
+            if current_state != 'hidden':
+                Rendering.ToggleVisibility(MainPanel.canvasSide,'hidden',SidePanel.StatisticFrame_win)
+                Rendering.ToggleVisibility(MainPanel.canvasSide,'normal',SidePanel.Screen_2_Frames[0])
 
     def UVStatistic(event):
         if GameFlow.Phase == 'Game Over':
@@ -524,9 +348,9 @@ class MouseKeyboard():
                 MouseKeyboard.Space='Statistic'
 
     def escPressed(event):
-        if GameFlow.Phase == "Start":
+        if not MainPanel.ShowcaseHidden:
             MainPanel.hideShowcase()
-        elif GameFlow.Phase == "Game Mechanic":
+        if GameFlow.Phase == "Game Mechanic":
             startTime = time.time()
             GamePlay.Self = None
             Rendering.borderDefault()
@@ -552,50 +376,45 @@ class MouseKeyboard():
         def StatisticCalculate():
             n = 1000
             ns = 1000000
-
+            timingsResetActionsSET = []
             timingsAllActionsSET = []
             timingsPossibleActionsSET = []
-            timingsResetActionsSET = []
+            
             for _ in range(n):
                 start = time.time()
+                AI.ClearPossibleActions()
+                end = time.time()
+                
                 for p in Chess.pieces:
                     AI.AllActions(p,GameFlow.TablePosition)
-                end = time.time()
-                timingsAllActionsSET.append(end-start)
-
+                end1 = time.time()
+                
                 wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
                 AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
-                end1 = time.time()
-                timingsPossibleActionsSET.append(end1-end)
-
-                AI.ClearPossibleActions()
                 end2 = time.time()
-                timingsResetActionsSET.append(end2-end1)
 
-            a = sum(timingsAllActionsSET)/len(timingsAllActionsSET)
-            b = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
-            c = sum(timingsResetActionsSET)/len(timingsResetActionsSET)
-
-            for p in Chess.pieces:
-                    AI.AllActions(p,GameFlow.TablePosition)
-            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
-            AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
+                timingsResetActionsSET.append(end-start)
+                timingsAllActionsSET.append(end1-end)
+                timingsPossibleActionsSET.append(end2-end1)
+            a = sum(timingsResetActionsSET)/len(timingsResetActionsSET)
+            b = sum(timingsAllActionsSET)/len(timingsAllActionsSET)
+            c = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
 
             L11="\tTIMINGS for ANALYZING whole TABLE\n\n"
-            L12=f'{str('  postavljanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns\n'
-            L13=f'{str('  korigovanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns\n'
-            L14=f'{str('  brisanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns\n\n'
+            L12=f'{str('  brisanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns\n'
+            L13=f'{str('  postavljanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns\n'
+            L14=f'{str('  korigovanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns\n\n'
             
             XY = MainPanel.hover.text
             selfP = GameFlow.TablePosition[XY]
-            NAME = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
-
-            if isinstance(selfP,King):
-                FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend, selfP.castling)
-            elif isinstance(selfP,Pawn):
-                FixedPositions = xy_to_TableNotation(selfP.passiv_move ,selfP.take, selfP.defend, selfP.attack)
-            elif isinstance(selfP,Chess):
-                FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend)
+            if isinstance(selfP,Chess):
+                NAME = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
+                if isinstance(selfP,King):
+                    FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend, selfP.castling)
+                elif isinstance(selfP,Pawn):
+                    FixedPositions = xy_to_TableNotation(selfP.passiv_move ,selfP.take, selfP.defend, selfP.attack)
+                elif isinstance(selfP,Chess):
+                    FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend)
 
             L21=f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
             L22=f"  Moves: {FixedPositions[0]}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
@@ -607,8 +426,13 @@ class MouseKeyboard():
             L28=f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
             L29=f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
 
-            SIDE = "WHITE" if selfP.side=='w' else "BLACK"
-            team = Chess.AllActions_W if selfP.side=='w'else Chess.AllActions_B
+            try:
+                SIDE = "WHITE" if selfP.side=='w' else "BLACK"
+                team = Chess.AllActions_W if selfP.side=='w'else Chess.AllActions_B
+            except AttributeError:
+                SIDE = "WHITE" if GamePlay.Turn==1 else "BLACK"
+                team = Chess.AllActions_W if GamePlay.Turn==1 else Chess.AllActions_B
+            
 
             M=team['move'] ; PM=team['passive_move'] ; T=team['take'] ; A=team['attack'] ; D=team['defend']
             TeamFixedPositions = xy_to_TableNotation(M,PM,T,A,D,*Chess.Check)
@@ -617,9 +441,9 @@ class MouseKeyboard():
             L31=f"  Check: {TeamFixedPositions[5:]}\n" if Chess.Check else ""
             L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n\n"
             L33=f"  Team possible Moves: {TeamFixedPositions[0]}\n"
-            L34=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
-            L35=f"  Team possible Takes: {TeamFixedPositions[2]}\n"
-            L36=f"  Team possible Attacks: {TeamFixedPositions[3]}\n"
+            L35=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
+            L34=f"  Team possible Takes: {TeamFixedPositions[2]}\n\n"
+            L36=f"  Team possible Attacks: {TeamFixedPositions[3]}\n\n"
             L37=f"  Team possible Defends: {TeamFixedPositions[4]}\n"
 
             StatisticTextList = [ L11, L12, L13, L14,
@@ -633,15 +457,14 @@ class MouseKeyboard():
         if MouseKeyboard.Space=='Statistic':
             if not SidePanel.StatisticFrame:
                 StatisticText=StatisticCalculate()
-                SidePanel.Statistic(StatisticText)
+                SidePanel.Statistic(window,StatisticText)
+                Rendering.ToggleVisibility(MainPanel.canvasSide,None,SidePanel.Screen_2_Frames[0])
             else:
                 current_state = MainPanel.canvasSide.itemcget(SidePanel.StatisticFrame_win, 'state')
                 if current_state == 'hidden':
-                    Rendering.ShowingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)
                     StatisticText=StatisticCalculate()
                     SidePanel.StatisticFrame.config(text=StatisticText)
-                else:
-                    Rendering.HidingButtons(MainPanel.canvasSide,SidePanel.StatisticFrame_win)          
+                Rendering.ToggleVisibility(MainPanel.canvasSide,None,SidePanel.StatisticFrame_win,SidePanel.Screen_2_Frames[0])
 
     def rightClick(event):
         if MouseKeyboard.RightClick == 'Change_Turn':
@@ -686,8 +509,13 @@ class MouseKeyboard():
                 Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
                                         GamePlay.Self,startTime,endTime,verificationTime,None)
 
+
+MainPanel.CanvasCreate(window,Import.AllImages[0])
+MainPanel.ShowcaseScreen(window)
+SidePanel.Screen_1(window,GameFlow.SavedGames)
+SidePanel.Screen_2(window,GameFlow.StandardGame,GameFlow.GodMode)
+SidePanel.Screen_Game(window,GameFlow.NewGame,GamePlay.Previous,GamePlay.Next)
 Import.InitializeSigns()        
 MouseKeyboard()
-MainPanel.ShowcaseScreen()
 
 window.mainloop()

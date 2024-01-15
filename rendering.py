@@ -93,21 +93,24 @@ class Rendering():
     def ShowingButtons(canvas,*buttons):
         for but in buttons:
             canvas.itemconfigure(but, state='normal')
-    def ToggleVisibility(canvas,*frames):
+    def ToggleVisibility(canvas,State,*frames):
         for but in frames:
-            current_state = canvas.itemcget(but, 'state')
-            new_state = "noramal" if current_state == "hidden" else "hidden"
-            canvas.itemconfigure(but, state=new_state)
+            if not State:
+                current_state = canvas.itemcget(but, 'state')
+                new_state = "normal" if current_state == "hidden" else "hidden"
+                canvas.itemconfigure(but, state=new_state)
+            else:
+                canvas.itemconfigure(but, state=State)
 
-    def PreviousNextButtons(canvas,buttonNext_window,buttonBack_window):
+    def PreviousNextButtons(canvas,buttonBackNext):
         if (len(Rewind.FullTranscript)+Rewind.PosInTransc) == -1:
-            Rendering.HidingButtons(canvas,buttonBack_window)
-            Rendering.ShowingButtons(canvas,buttonNext_window)
+            Rendering.ToggleVisibility(canvas,'hidden',buttonBackNext[0])
+            Rendering.ToggleVisibility(canvas,'normal',buttonBackNext[1])
         elif Rewind.PosInTransc == -1:
-            Rendering.HidingButtons(canvas,buttonNext_window)
-            Rendering.ShowingButtons(canvas,buttonBack_window)
+            Rendering.ToggleVisibility(canvas,'hidden',buttonBackNext[1])
+            Rendering.ToggleVisibility(canvas,'normal',buttonBackNext[0])
         else:
-            Rendering.ShowingButtons(canvas,buttonNext_window,buttonBack_window)
+            Rendering.ToggleVisibility(canvas,'normal',buttonBackNext[1],buttonBackNext[0])
 
     # Text Rendering
     def timeShowing(ExecutionTime,Turn,Self,sta,end,ver,act):
@@ -163,9 +166,7 @@ class Rendering():
                 posInTransc = Rewind.ResetPosition()
         return Turn,posInTransc,moveCounter
     
-    def printPawnPromotiong(Self,promote,posInTransc,TranscriptName,canvas,MoveOutput,ExtraPiecesButtons,ExecutionTime_window,moveCounter):
-        Rendering.HidingButtons(canvas,*ExtraPiecesButtons)
-        Rendering.ShowingButtons(canvas,ExecutionTime_window)
+    def printPawnPromoting(Self,promote,posInTransc,TranscriptName,MoveOutput,moveCounter):
         with open(f'{TranscriptName}.txt','a') as f:
             f.write(f"{moveCounter} promote {str(promote)[1:]} {Chess.NotationTableDict[promote.getXY()]}\n")
         output = f"{' -'.ljust(4)}{str(Self).ljust(8)}{(Chess.NotationTableDict[promote.getXY()].ljust(5)+'⛨').ljust(8)}{promote}"
