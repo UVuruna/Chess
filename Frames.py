@@ -33,7 +33,7 @@ class MainPanel():
 
     def hideShowcase():
         if not MainPanel.ShowcaseHidden:
-            Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_1_Frames)
+            Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_Start_Frames[:4])
             MainPanel.Showcase.place_forget()
             MainPanel.ShowcaseHidden =True
 
@@ -98,35 +98,29 @@ class SidePanel():
             button_window = MainPanel.canvasSide.create_window(x,y, state='hidden', anchor=NW, window=button)
             return button_window,button
 
-    Screen_1_Frames = []
-    @Decorator.ListAppend(Screen_1_Frames)
-    def Screen_1(window,SavedGames):
+    Screen_Start_Frames = []
+    @Decorator.ListAppend(Screen_Start_Frames)
+    def Screen_Start(window,SavedGames,StandardGame,GodMode):
         SidePanel.FirstOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
         SidePanel.FirstOpponent.insert(1.0, "1stPlayer")
 
         SidePanel.SecondOpponent = Text(window, width= 16, height=1, bg= '#CCCCCC', fg='black', font=('Tahoma', 22))
         SidePanel.SecondOpponent.insert(1.0, "2ndPlayer")
 
-        text_FirstOpponent_win = MainPanel.canvasSide.create_window(280,900, state='hidden', anchor=NW, window=SidePanel.FirstOpponent)
-        text_SecondOpponent_win = MainPanel.canvasSide.create_window(280,945, state='hidden', anchor=NW, window=SidePanel.SecondOpponent)
-        but_SaveTransc_win =SidePanel.SideCanvas_Parts(window,Button, 5, 300,780,  16,3, 'Saving Game\nwith\nTranscript',('Tahoma', 18), SavedGames,'players')[0]
-        but_GameTransc_win =SidePanel.SideCanvas_Parts(window,Button, 5,  10,780,  8,3, 'Casual\nGame',('Tahoma', 33, 'bold'), SavedGames)[0]
-
-        return text_FirstOpponent_win,text_SecondOpponent_win,but_SaveTransc_win,but_GameTransc_win
-
-    Screen_2_Frames = []
-    @Decorator.ListAppend(Screen_2_Frames)
-    def Screen_2(window,StandardGame,GodMode):
         exTiText = 'Standard Game:\nNormal Chess game\nwith all rules applied\n\nGod Mode:\nDelete: Remove Piece\nInsert: Freely move Piece\nRightClick: Change Turn'
         SidePanel.MoveOutput = Text(window, width= 550, height=22, bg= '#535a5e', font=('Tahoma', 22))
         SidePanel.ExecutionTime = Label(window, font=('Eras Demi ITC', 16), width=24, height=8, bd=2, background='#969696', text=exTiText)
 
-        MoveOutput_win = MainPanel.canvasSide.create_window(0,2, state='hidden', anchor=NW, window=SidePanel.MoveOutput)
-        ExecutionTime_win = MainPanel.canvasSide.create_window(220, 787, state='hidden', anchor=NW, window=SidePanel.ExecutionTime)
-        but_SG_win =SidePanel.SideCanvas_Parts(window,Button, 3, 10,780,  9,2, 'Standard\nGame',('Eras Demi ITC', 24), StandardGame)[0]
-        but_GM_win =SidePanel.SideCanvas_Parts(window,Button, 3, 10,890,  9,2, 'God Mode',('Eras Demi ITC', 24), GodMode)[0]
+        P1 = MainPanel.canvasSide.create_window(280,900, state='hidden', anchor=NW, window=SidePanel.FirstOpponent)
+        P2 = MainPanel.canvasSide.create_window(280,945, state='hidden', anchor=NW, window=SidePanel.SecondOpponent)
+        TR =SidePanel.SideCanvas_Parts(window,Button, 5, 300,780,  16,3, 'Saving Game\nwith\nTranscript',('Tahoma', 18), SavedGames,'players')[0]
+        CA =SidePanel.SideCanvas_Parts(window,Button, 5,  10,780,  8,3, 'Casual\nGame',('Tahoma', 33, 'bold'), SavedGames)[0]
+        ET = MainPanel.canvasSide.create_window(220, 787, state='hidden', anchor=NW, window=SidePanel.ExecutionTime)
+        MO = MainPanel.canvasSide.create_window(0,2, state='hidden', anchor=NW, window=SidePanel.MoveOutput)
+        SG =SidePanel.SideCanvas_Parts(window,Button, 3, 10,780,  9,2, 'Standard\nGame',('Eras Demi ITC', 24), StandardGame)[0]
+        GM =SidePanel.SideCanvas_Parts(window,Button, 3, 10,890,  9,2, 'God Mode',('Eras Demi ITC', 24), GodMode)[0]
 
-        return MoveOutput_win,ExecutionTime_win,but_SG_win,but_GM_win
+        return P1,P2,TR,CA,ET,MO,SG,GM
     
     Screen_Game_Frames = []
     @Decorator.ListAppend(Screen_Game_Frames)

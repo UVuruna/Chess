@@ -105,7 +105,7 @@ class GamePlay():
         Chess.PromoteDict[promote]=GamePlay.Self
         Chess.pieces.remove(GamePlay.Self)
 
-        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_2_Frames[1])
+        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_Start_Frames[4])
         Rendering.printPawnPromoting(GamePlay.Self,promote,Rewind.PosInTransc,
                                         Import.TranscriptName,SidePanel.MoveOutput,GamePlay.moveCounter)
         
@@ -163,7 +163,7 @@ class GamePlay():
             else:
                 if isinstance(GamePlay.Self,Pawn) and (GamePlay.Self.x ==8 or GamePlay.Self.x ==1):
                     SidePanel.PawnPromotionButtons(window,GamePlay.PawnPromotion,GamePlay.Turn)
-                    Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_2_Frames[1])
+                    Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_Start_Frames[4])
                     GamePlay.Turn,Rewind.PosInTransc,GamePlay.moveCounter =Rendering.printActionResult(GamePlay.Turn,Rewind.PosInTransc,Import.TranscriptName,
                                                                                                 GamePlay.moveCounter,SidePanel.MoveOutput,output,transcript,color)
                     GameFlow.Phase = 'Pawn Promotion'
@@ -207,7 +207,7 @@ class GameFlow:
             Import.TranscriptName = f"{Player1}vs{Player2}"
         else:
             Import.TranscriptName = 'Game'
-        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_1_Frames,*SidePanel.Screen_2_Frames[1:])
+        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_Start_Frames[:5],*SidePanel.Screen_Start_Frames[6:])
         if not MainPanel.ButtonDict:
             MainPanel.ButtonDict = MainPanel.TableButtons(window,Import.AllImages[0],GameFlow.GameMechanic)
         try:
@@ -235,7 +235,7 @@ class GameFlow:
         result = messagebox.askyesno("New Game", "Are you sure you want to quit Current Game?")
         if result:
             Rendering.ToggleVisibility(MainPanel.canvasSide,'hidden',*SidePanel.Screen_Game_Frames)
-            Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_1_Frames,*SidePanel.Screen_2_Frames[:2])
+            Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_Start_Frames[:6])
 
             Chess.pieces.clear()
             Chess.TakenDict.clear()
@@ -264,7 +264,7 @@ class GameFlow:
         AI.PossibleActions()
 
         verificationTime = time.time()
-        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_2_Frames[2:],SidePanel.Screen_2_Frames[0],SidePanel.Screen_Game_Frames[0])
+        Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_Start_Frames[5:],SidePanel.Screen_Game_Frames[0])
         Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
         endTime = time.time()
         Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
@@ -331,7 +331,7 @@ class MouseKeyboard():
             current_state = MainPanel.canvasSide.itemcget(SidePanel.StatisticFrame_win, 'state')
             if current_state != 'hidden':
                 Rendering.ToggleVisibility(MainPanel.canvasSide,'hidden',SidePanel.StatisticFrame_win)
-                Rendering.ToggleVisibility(MainPanel.canvasSide,'normal',SidePanel.Screen_2_Frames[0])
+                Rendering.ToggleVisibility(MainPanel.canvasSide,'normal',SidePanel.Screen_Start_Frames[5])
 
     def UVStatistic(event):
         if GameFlow.Phase == 'Game Over':
@@ -458,13 +458,13 @@ class MouseKeyboard():
             if not SidePanel.StatisticFrame:
                 StatisticText=StatisticCalculate()
                 SidePanel.Statistic(window,StatisticText)
-                Rendering.ToggleVisibility(MainPanel.canvasSide,None,SidePanel.Screen_2_Frames[0])
+                Rendering.ToggleVisibility(MainPanel.canvasSide,None,SidePanel.Screen_Start_Frames[5])
             else:
                 current_state = MainPanel.canvasSide.itemcget(SidePanel.StatisticFrame_win, 'state')
                 if current_state == 'hidden':
                     StatisticText=StatisticCalculate()
                     SidePanel.StatisticFrame.config(text=StatisticText)
-                Rendering.ToggleVisibility(MainPanel.canvasSide,None,SidePanel.StatisticFrame_win,SidePanel.Screen_2_Frames[0])
+                Rendering.ToggleVisibility(MainPanel.canvasSide,None,SidePanel.StatisticFrame_win,SidePanel.Screen_Start_Frames[5])
 
     def rightClick(event):
         if MouseKeyboard.RightClick == 'Change_Turn':
@@ -512,8 +512,7 @@ class MouseKeyboard():
 
 MainPanel.CanvasCreate(window,Import.AllImages[0])
 MainPanel.ShowcaseScreen(window)
-SidePanel.Screen_1(window,GameFlow.SavedGames)
-SidePanel.Screen_2(window,GameFlow.StandardGame,GameFlow.GodMode)
+SidePanel.Screen_Start(window,GameFlow.SavedGames,GameFlow.StandardGame,GameFlow.GodMode)
 SidePanel.Screen_Game(window,GameFlow.NewGame,GamePlay.Previous,GamePlay.Next)
 Import.InitializeSigns()        
 MouseKeyboard()
