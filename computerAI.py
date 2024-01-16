@@ -3,7 +3,7 @@ from Pieces import *
 from AI import AI
 import time
 
-class Computer():
+class Computer:
     def __init__(self,Table,Score) -> None:
         self.table = Table
         self.score = Score

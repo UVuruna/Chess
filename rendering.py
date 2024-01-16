@@ -4,7 +4,7 @@ from tkinter import *
 from Transcript import Rewind
 
 
-class Rendering():
+class Rendering:
     red    = "#FF6666" ; dark_red    = "#CC0000"
     green  = "#00BB00" ; dark_green  = "#008800"
     cyan   = "#00AACC" ; dark_cyan   = "#0066AD"

@@ -1,6 +1,6 @@
 from ChessParent import Chess
 
-class Rewind():
+class Rewind:
     FullTranscript  = None
     PosInTransc     = -1
     

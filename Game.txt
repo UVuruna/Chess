@@ -1,2 +1,2 @@
-1 Pawn G2 move G4
-2 Pawn F7 move F5
+1 Pawn F2 move F4
+2 Pawn G7 move G5

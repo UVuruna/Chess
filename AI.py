@@ -5,7 +5,7 @@ from Pieces import *
 from ImagesDecorators import Decorator
 
 
-class AI():
+class AI:
 
     def ClearPossibleActions(everything=True,check=True,TwoCheck=False):
         def side(piece,TwoCheck):

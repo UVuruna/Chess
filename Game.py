@@ -16,6 +16,8 @@ window.title("Chess")
 window.resizable(False,False)
 X=1550 ; Y=1000
 window.geometry(f"{X}x{Y}")
+MainPanel(X,Y)
+
 
 Import.ImageImport()
 
@@ -23,7 +25,7 @@ Import.ImageImport()
 window.iconbitmap(os.path.join(Import.ImagesLocation,"ico.ico")) 
 
 # >>> MOVES  <<<
-class GamePlay():
+class GamePlay:
     Self            =None
     Turn            =None
     EnPassantPawn   =None
@@ -308,7 +310,7 @@ class GameFlow:
         MouseKeyboard.Delete='Free_Remove'
         MouseKeyboard.Insert='Free_Moving'
 
-class MouseKeyboard():
+class MouseKeyboard:
     RightClick  =None
     Delete      =None
     Insert      =None
@@ -508,7 +510,6 @@ class MouseKeyboard():
                 endTime = time.time()
                 Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
                                         GamePlay.Self,startTime,endTime,verificationTime,None)
-
 
 MainPanel.CanvasCreate(window,Import.AllImages[0])
 MainPanel.ShowcaseScreen(window)

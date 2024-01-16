@@ -4,7 +4,7 @@ import os
 
 
 
-class Decorator():
+class Decorator:
     
     def countExecutionMethod(method):
         def wrapper(*args, **kwargs):
@@ -23,7 +23,7 @@ class Decorator():
             return wrapper
         return decorator
 
-class Import():
+class Import:
     moveSign = None ; takeSign = None  ; castlingSign = None ; promoteSign = None
     whiteKing = None ; whiteQueen = None ; whiteRook = None ; whiteBishop = None ; whiteKnight = None ; whitePawn = None
     blackKing = None ; blackQueen = None ; blackRook = None ; blackBishop = None ; blackKnight = None ; blackPawn = None

@@ -1,6 +1,6 @@
 from ImagesDecorators import Decorator,Import
 
-class Chess():
+class Chess:
 #------------------------------------------------------------------------------------------------------------------------------------------  
 # >>> Shared Initialization <<<
     pieces = [] 
@@ -64,7 +64,7 @@ class Chess():
 
 #------------------------------------------------------------------------------------------------------------------------------------------ 
 # >>> Moves - Game Mechanic <<<
-class Actions():
+class Actions:
     direction = ['U','D','L','R','UL','UR','DL','DR']
     # Getter
     def getXY(self): 

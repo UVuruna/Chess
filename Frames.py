@@ -6,14 +6,21 @@ from ImagesDecorators import *
 import os
 
 
-class MainPanel():
+class MainPanel:
     ButtonDict          = None
     hover               = None
     canvasTable         = None
     canvasSide          = None
     Showcase            = None
     ShowcaseImage       = None
-    ShowcaseHidden      = False  
+    ShowcaseHidden      = False
+    X                   = None
+    Y                   = None
+
+    @classmethod
+    def __init__(cls,x,y):
+        cls.X = x
+        cls.Y = y
 
     def CanvasCreate(window,images):
         # Canvas 1
@@ -84,7 +91,7 @@ class MainPanel():
         elif button.cget('bg') ==Rendering.dark_yellow:
             button.config(background=Rendering.yellow)
 
-class SidePanel():
+class SidePanel:
     FirstOpponent       = None
     SecondOpponent      = None
     MoveOutput          = None
