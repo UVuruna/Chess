@@ -1,0 +1,64 @@
+1 Pawn G2 move G4
+2 Pawn F7 move F5
+3 Pawn G4 move G5
+4 Pawn H7 move H5
+5 Pawn G5 take H6 Pawn H5
+6 Pawn F5 move F4
+7 Pawn E2 move E4
+8 Pawn F4 take E3 Pawn E4
+9 Pawn H6 took G7 Pawn
+10 Pawn E3 took F2 Pawn
+11 King E1 move E2
+12 Knight G8 move F6
+13 Pawn G7 took H8 Rook
+13 promote Queen H8
+14 Pawn F2 took G1 Knight
+14 promote Queen G1
+15 Queen H8 took F6 Knight
+16 Queen G1 took H1 Rook
+17 Queen F6 took F8 Bishop
+18 King E8 took F8 Queen
+19 Bishop F1 move H3
+20 Queen H1 took H2 Pawn
+21 Bishop H3 move G2
+22 Pawn E7 move E5
+23 Pawn D2 move D3
+24 King F8 move G7
+25 Pawn D3 move D4
+26 King G7 move G6
+27 Pawn D4 move D5
+28 King G6 move H5
+29 Pawn D5 move D6
+30 King H5 move G4
+31 Pawn D6 took C7 Pawn
+32 Queen D8 took C7 Pawn
+33 Queen D1 took D7 Pawn
+34 Queen C7 took D7 Queen
+35 Pawn C2 move C4
+36 Queen D7 move D5
+37 Pawn C4 took D5 Queen
+38 Bishop C8 move E6
+39 Bishop C1 move F4
+40 Bishop E6 took D5 Pawn
+41 Bishop F4 took E5 Pawn
+42 Bishop D5 took A2 Pawn
+43 Bishop E5 took B8 Knight
+44 Bishop A2 took B1 Knight
+45 Bishop B8 took A7 Pawn
+46 Bishop B1 move C2
+47 Pawn B2 move B3
+48 Bishop C2 took B3 Pawn
+49 Rook A1 move B1
+50 Pawn B7 move B6
+51 Bishop A7 took B6 Pawn
+52 Bishop B3 move C2
+53 Bishop B6 move C5
+54 Bishop C2 took B1 Rook
+55 Bishop C5 move B6
+56 Rook A8 move A7
+57 Bishop B6 took A7 Rook
+58 Queen H2 took G2 Bishop
+59 King E2 move E1
+60 Queen G2 move F2
+61 Bishop A7 took F2 Queen
+62 King G4 move H3

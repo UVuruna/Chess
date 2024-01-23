@@ -5,7 +5,7 @@ class King(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<   
     def __init__(self,side,castling=False) -> None:
-        super().__init__(side,move=set(),take=set(),kingAttack=set(),defend=set())
+        super().__init__(side)
         self.type = 'Warrior'
         self.castling = castling
         self.x = (1 if self.side == 'w' else 8)
@@ -18,7 +18,7 @@ class Queen(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
-        super().__init__(side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False)
+        super().__init__(side)
         self.type = 'Archer'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
@@ -31,7 +31,7 @@ class Rook(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<< 
     def __init__(self,side,name=None) -> None:
-        super().__init__(side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False)
+        super().__init__(side)
         self.type = 'Archer'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
@@ -45,7 +45,7 @@ class Bishop(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
-        super().__init__(side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False)
+        super().__init__(side)
         self.type = 'Archer'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
@@ -59,7 +59,7 @@ class Knight(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
-        super().__init__(side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False)
+        super().__init__(side)
         self.type = 'Warrior'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
@@ -99,12 +99,12 @@ class Pawn(Chess,Actions):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<< 
     Name = ['L1','L2','L3','CL','CR','R3','R2','R1']  
-    def __init__(self,side,name=None,passiv_move=None,attack=None) -> None:
-        super().__init__(side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False)
-        self.type = 'Warrior'
+    def __init__(self,side,name=None) -> None:
+        super().__init__(side)
+        self.type = 'Pawn'
         self.name = name
-        self.passiv_move = passiv_move if passiv_move is not None else set()
-        self.attack = attack if attack is not None else set()
+        self.passiv_move = set()
+        self.attack = set()
         self.x = (2 if self.side == 'w' else 7)
         self.y = Pawn.Name.index(self.name)+1
         if self.side == 'w':

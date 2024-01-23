@@ -4,15 +4,15 @@ class Chess:
 #------------------------------------------------------------------------------------------------------------------------------------------  
 # >>> Shared Initialization <<<
     pieces = [] 
-    def __init__(self,side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False) -> None:
+    def __init__(self,side) -> None:
         super().__init__()
-        self.side = side
-        self.move=move
-        self.take=take
-        self.kingAttack = kingAttack
-        self.defend=defend
-        self.Defender=Defender
-        self.actionsCounter =0
+        self.side       =side
+        self.move       =set()
+        self.take       =set()
+        self.kingAttack =set()
+        self.defend     =set()
+        self.Defender   =False
+        self.actionsCounter=0
         Chess.pieces.append(self)
 
 #------------------------------------------------------------------------------------------------------------------------------------------ 

@@ -77,7 +77,7 @@ class AI:
         Self_Copy = copy.deepcopy(Self)
         if Self.type == 'Archer':
             AI.AllActionsArcher(Self,Self_Copy,tableDict)
-        elif isinstance(Self,Pawn):
+        elif Self.type == 'Pawn':
             AI.AllActionsPawn(Self,Self_Copy,tableDict)
         else:
             AI.AllActionsWarrior(Self,Self_Copy,tableDict)
