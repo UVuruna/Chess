@@ -257,6 +257,9 @@ class GameFlow:
         GameFlow.Phase = 'Game Mechanic' ; GamePlay.Turn=1 ; GamePlay.Self=None ; GamePlay.moveCounter = 0 ; Rewind.PosInTransc =-1
         GameFlow.StartingPosition()
         GameFlow.TablePosition = Chess.currentTableDict()
+        MouseKeyboard.RightClick=None
+        MouseKeyboard.Delete=None
+        MouseKeyboard.Insert=None
 
         with open('Game.txt','w') as f:
             f.truncate(0)
@@ -377,7 +380,7 @@ class MouseKeyboard:
         
         def StatisticCalculate():
             n = 1000
-            ns = 1000000
+            microS = 1000000
             timingsResetActionsSET = []
             timingsAllActionsSET = []
             timingsPossibleActionsSET = []
@@ -403,9 +406,9 @@ class MouseKeyboard:
             c = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
 
             L11="\tTIMINGS for ANALYZING whole TABLE\n\n"
-            L12=f'{str('  brisanje svih attributa :').ljust(33)}{(a)*ns:,.0f} ns\n'
-            L13=f'{str('  postavljanje svih attributa :').ljust(33)}{(b)*ns:,.0f} ns\n'
-            L14=f'{str('  korigovanje svih attributa :').ljust(33)}{(c)*ns:,.0f} ns\n\n'
+            L12=f'{str('  brisanje svih attributa :').ljust(33)}{(a)*microS:,.0f} {Import.microsecondSign}\n'
+            L13=f'{str('  postavljanje svih attributa :').ljust(33)}{(b)*microS:,.0f} {Import.microsecondSign}\n'
+            L14=f'{str('  korigovanje svih attributa :').ljust(33)}{(c)*microS:,.0f} {Import.microsecondSign}\n\n'
             
             XY = MainPanel.hover.text
             selfP = GameFlow.TablePosition[XY]
@@ -418,15 +421,15 @@ class MouseKeyboard:
                 elif isinstance(selfP,Chess):
                     FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend)
 
-            L21=f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
-            L22=f"  Moves: {FixedPositions[0]}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
-            L23=f"  Castling: {FixedPositions[3]}\n" if isinstance(selfP,King) else ""
-            L24=f"  Passive Move: {FixedPositions[0]}\n" if isinstance(selfP,Pawn) else ""
-            L25=f"  Attack: {FixedPositions[3]}\n" if isinstance(selfP,Pawn) else ""
-            L26=f"  Takes: {FixedPositions[1]}\n" if isinstance(selfP,Chess) else ""
-            L27=f"  Defends: {FixedPositions[2]}\n" if isinstance(selfP,Chess) else ""
-            L28=f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
-            L29=f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
+            L21 =f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
+            L22 =f"  Moves: {FixedPositions[0]}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
+            L23 =f"  Castling: {FixedPositions[3]}\n" if isinstance(selfP,King) else ""
+            L24 =f"  Passive Move: {FixedPositions[0]}\n" if isinstance(selfP,Pawn) else ""
+            L25 =f"  Attack: {FixedPositions[3]}\n" if isinstance(selfP,Pawn) else ""
+            L26 =f"  Takes: {FixedPositions[1]}\n" if isinstance(selfP,Chess) else ""
+            L27 =f"  Defends: {FixedPositions[2]}\n" if isinstance(selfP,Chess) else ""
+            L28 =f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
+            L29 =f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
 
             try:
                 SIDE = "WHITE" if selfP.side=='w' else "BLACK"
@@ -436,17 +439,18 @@ class MouseKeyboard:
                 team = Chess.AllActions_W if GamePlay.Turn==1 else Chess.AllActions_B
             
 
-            M=team['move'] ; PM=team['passive_move'] ; T=team['take'] ; A=team['attack'] ; D=team['defend']
+            M=team['move'] ; PM=team['passive_move'] ; T=team['take'] ; A=team['attack'] ; D=team['defend'] ; KA=team['kingAttack']
             TeamFixedPositions = xy_to_TableNotation(M,PM,T,A,D,*Chess.Check)
 
             L30=f"\tALL possible ACTIONS {SIDE}\n\n"
             L31=f"  Check: {TeamFixedPositions[5:]}\n" if Chess.Check else ""
             L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n\n"
             L33=f"  Team possible Moves: {TeamFixedPositions[0]}\n"
-            L35=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
-            L34=f"  Team possible Takes: {TeamFixedPositions[2]}\n\n"
-            L36=f"  Team possible Attacks: {TeamFixedPositions[3]}\n\n"
+            L34=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
+            L35=f"  Team possible Attacks: {TeamFixedPositions[3]}\n\n"
+            L36=f"  Team possible Takes: {TeamFixedPositions[2]}\n\n"
             L37=f"  Team possible Defends: {TeamFixedPositions[4]}\n"
+            
 
             StatisticTextList = [ L11, L12, L13, L14,
                             L21, L22, L23, L24, L25, L26, L27, L28, L29,

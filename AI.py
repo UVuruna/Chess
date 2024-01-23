@@ -29,7 +29,7 @@ class AI:
                         p.move.clear()
                     else:
                         p.attack.clear() ; p.passiv_move.clear()
-                    p.take.clear() ; p.defend.clear() ; p.Defender=False
+                    p.take.clear() ; p.defend.clear() ; p.Defender=False ; p.kingAttack.clear()
 
     def insideBorder(Self):
         return (8>= Self.x >=1) and (8>= Self.y >=1)
@@ -48,12 +48,8 @@ class AI:
                     defender.passiv_move.update(De[1])
                     defender.attack.update(De[1])
                 defender.take.update([Self.getXY()])
-            else: 
-                if not isinstance(defender,Pawn):
-                     defender.move &= De[1]
-                else: # ovo ne moze da se desi sa Pawn jer se ubaciju posle Archera u START GAME (ali neka ostane)
-                    defender.passiv_move &= De[1]
-                    defender.attack &= De[1]
+            else:
+                defender.move &= De[1]
                 defender.take &= set([Self.getXY()])
 
         if Self.Defender is False:
@@ -61,17 +57,20 @@ class AI:
             Self.defend.update(d)
             if not isinstance(Self,Pawn):
                 Self.move.update(m)
+                Self.kingAttack.update(m)
             else:
                 Self.passiv_move.update(m)
                 Self.attack.update(a)
+                Self.kingAttack.update(a)
         else:
             Self.take &= t
-            Self.defend.clear()
             if not isinstance(Self,Pawn):
                 Self.move &= m
+                Self.kingAttack.update(m)
             else:
                 Self.passiv_move &= m
                 Self.attack &= a
+                Self.kingAttack.update(a)
 
     #@Decorator.countExecutionMethod 
     def AllActions(Self,tableDict):
@@ -259,6 +258,7 @@ class AI:
                             p.take.add(enPassantSquare)
                         Chess.AllActions_W['passive_move'].extend(p.passiv_move)
                         Chess.AllActions_W['attack'].extend(p.attack)
+                    Chess.AllActions_W['kingAttack'].extend(p.kingAttack)
                     Chess.AllActions_W['take'].extend(p.take)
             else:
                 Chess.AllActions_B['defend'].extend(p.defend)
@@ -284,6 +284,7 @@ class AI:
                             p.take.add(enPassantSquare)
                         Chess.AllActions_B['passive_move'].extend(p.passiv_move)
                         Chess.AllActions_B['attack'].extend(p.attack)
+                    Chess.AllActions_B['kingAttack'].extend(p.kingAttack)
                     Chess.AllActions_B['take'].extend(p.take)       
 
         W_King.take -= set(Chess.AllActions_B['defend'])
@@ -292,8 +293,8 @@ class AI:
         W = W_King.move.copy()
         B = B_King.move.copy()
 
-        W_King.move -= (set(Chess.AllActions_B['move']) | set(Chess.AllActions_B['attack']) | B )
-        B_King.move -= (set(Chess.AllActions_W['move']) | set(Chess.AllActions_W['attack']) | W )
+        W_King.move -= (set(Chess.AllActions_B['kingAttack']) | B )
+        B_King.move -= (set(Chess.AllActions_W['kingAttack']) | W )
         
         if numOfAttackers >1:
             AI.ClearPossibleActions(True,False,attackerSide)

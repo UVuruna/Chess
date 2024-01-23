@@ -30,22 +30,23 @@ class Import:
 
     @classmethod
     def InitializeSigns(cls):
-        cls.moveSign = '➔'
-        cls.takeSign = '❌'
-        cls.castlingSign = '⚜'
-        cls.promoteSign = '⛨'
-        cls.whiteKing = '♔'
-        cls.whiteQueen = '♕'
-        cls.whiteRook = '♖'
-        cls.whiteBishop = '♗'
-        cls.whiteKnight = '♘'
-        cls.whitePawn = '♙'
-        cls.blackKing = '♚'
-        cls.blackQueen = '♛'
-        cls.blackRook = '♜'
-        cls.blackBishop = '♝'
-        cls.blackKnight = '♞'
-        cls.blackPawn = '♟'
+        cls.microsecondSign     = "μs"
+        cls.moveSign            = '➔'
+        cls.takeSign            = '❌'
+        cls.castlingSign        = '⚜'
+        cls.promoteSign         = '⛨'
+        cls.whiteKing           = '♔'
+        cls.whiteQueen          = '♕'
+        cls.whiteRook           = '♖'
+        cls.whiteBishop         = '♗'
+        cls.whiteKnight         = '♘'
+        cls.whitePawn           = '♙'
+        cls.blackKing           = '♚'
+        cls.blackQueen          = '♛'
+        cls.blackRook           = '♜'
+        cls.blackBishop         = '♝'
+        cls.blackKnight         = '♞'
+        cls.blackPawn           = '♟'
 
     ImagesLocation  = os.path.join(os.path.dirname(__file__),'Slike')
     TranscriptName  = None

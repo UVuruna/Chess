@@ -4,11 +4,12 @@ class Chess:
 #------------------------------------------------------------------------------------------------------------------------------------------  
 # >>> Shared Initialization <<<
     pieces = [] 
-    def __init__(self,side,move=set(),take=set(),defend=set(),Defender=False) -> None:
+    def __init__(self,side,move=set(),take=set(),kingAttack=set(),defend=set(),Defender=False) -> None:
         super().__init__()
         self.side = side
         self.move=move
         self.take=take
+        self.kingAttack = kingAttack
         self.defend=defend
         self.Defender=Defender
         self.actionsCounter =0
@@ -19,8 +20,8 @@ class Chess:
     TakenDict = {}
     PromoteDict = {}
     Check = {}
-    AllActions_W = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
-    AllActions_B = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
+    AllActions_W = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[],'kingAttack':[]}
+    AllActions_B = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[],'kingAttack':[]}
 
     # >>> STATIC Dictionaries <<<
     def emptyTableDict():  
