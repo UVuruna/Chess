@@ -380,23 +380,22 @@ class MouseKeyboard:
         
         def StatisticCalculate():
             n = 1000
-            microS = 1000000
             timingsResetActionsSET = []
             timingsAllActionsSET = []
             timingsPossibleActionsSET = []
             
             for _ in range(n):
-                start = time.time()
+                start = time.time_ns()
                 AI.ClearPossibleActions()
-                end = time.time()
+                end = time.time_ns()
                 
                 for p in Chess.pieces:
                     AI.AllActions(p,GameFlow.TablePosition)
-                end1 = time.time()
+                end1 = time.time_ns()
                 
                 wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
                 AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
-                end2 = time.time()
+                end2 = time.time_ns()
 
                 timingsResetActionsSET.append(end-start)
                 timingsAllActionsSET.append(end1-end)
@@ -406,9 +405,9 @@ class MouseKeyboard:
             c = sum(timingsPossibleActionsSET)/len(timingsPossibleActionsSET)
 
             L11="\tTIMINGS for ANALYZING whole TABLE\n\n"
-            L12=f'{str('  brisanje svih attributa :').ljust(33)}{(a)*microS:,.0f} {Import.microsecondSign}\n'
-            L13=f'{str('  postavljanje svih attributa :').ljust(33)}{(b)*microS:,.0f} {Import.microsecondSign}\n'
-            L14=f'{str('  korigovanje svih attributa :').ljust(33)}{(c)*microS:,.0f} {Import.microsecondSign}\n\n'
+            L12=f'{str('  brisanje svih attributa :').ljust(33)}{(a/1000):,.0f} {Import.microsecondSign}\n'
+            L13=f'{str('  postavljanje svih attributa :').ljust(33)}{(b/1000):,.0f} {Import.microsecondSign}\n'
+            L14=f'{str('  korigovanje svih attributa :').ljust(33)}{(c/1000):,.0f} {Import.microsecondSign}\n\n'
             
             XY = MainPanel.hover.text
             selfP = GameFlow.TablePosition[XY]
