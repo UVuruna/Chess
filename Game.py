@@ -10,6 +10,7 @@ from Rendering import Rendering
 from ImagesDecorators import Import,Decorator
 import os
 from Frames import *
+import multiprocessing
 
 window = Tk()
 window.title("Chess")
@@ -53,11 +54,11 @@ class GamePlay:
     def movingDone(newXY):
         if GameFlow.TablePosition[newXY] =='':
             if isinstance(GamePlay.Self,Pawn):
-                if newXY in GamePlay.Self.passiv_move:
+                if newXY in GamePlay.Self.passive_move:
                     output,transcript = GamePlay.Self.Move(newXY)
                     return output,transcript,Rendering.green
                 elif newXY in GamePlay.Self.take:
-                    output,transcript = GamePlay.Self.enPassantTake(newXY,GamePlay.EnPassantPawn,GameFlow.TablePosition,GamePlay.moveCounter)
+                    output,transcript = GamePlay.Self.enPassantTake(newXY,GamePlay.Self.enpassant,GameFlow.TablePosition,GamePlay.moveCounter)
                     return output,transcript,Rendering.red
                 else:
                     return False,False,False
@@ -105,7 +106,7 @@ class GamePlay:
 
         promote.x,promote.y = GamePlay.Self.getXY()
         Chess.PromoteDict[promote]=GamePlay.Self
-        Chess.pieces.remove(GamePlay.Self)
+        Chess.piecesW.remove(GamePlay.Self) if GamePlay.Self.side=='w' else Chess.piecesB.remove(GamePlay.Self)
 
         Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.ExtraPiecesButtons,SidePanel.Screen_Start_Frames[4])
         Rendering.printPawnPromoting(GamePlay.Self,promote,Rewind.PosInTransc,
@@ -160,7 +161,7 @@ class GamePlay:
             if output is None:
                 continue
             elif output is False:
-                GamePlay.Self=None ; Rendering.borderDefault() ; Rendering.borderCheck(MainPanel.ButtonDict)
+                GamePlay.Self=None ; Rendering.borderDefault()
                 return
             else:
                 if isinstance(GamePlay.Self,Pawn) and (GamePlay.Self.x ==8 or GamePlay.Self.x ==1):
@@ -178,21 +179,18 @@ class GamePlay:
         GameFlow.TablePosition = Chess.currentTableDict()
 
         AI.ClearPossibleActions()
-        for p in Chess.pieces:
-            AI.AllActions(p,GameFlow.TablePosition)
-        try:
-            enPassant,GamePlay.EnPassantPawn = Rewind.EnPassant(Import.TranscriptName)
-            side = GameFlow.TablePosition[GamePlay.EnPassantPawn].side
-            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions(enPassant,side)
-        except TypeError:
-            GamePlay.EnPassantPawn=None
-            wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
+        for p in Chess.piecesW:
+            p.AllActions(GameFlow.TablePosition)
+        for p in Chess.piecesB:
+            p.AllActions(GameFlow.TablePosition)
+     
+        wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
         AI.castlingCheck(wk,wlr,wrr,bk,blr,brr)
+
         gameover = AI.GameOverCheck(GamePlay.Turn)
         GameFlow.GameOver(GamePlay.Turn,gameover)
         
         Rendering.borderDefault()
-        Rendering.borderCheck(MainPanel.ButtonDict)
         Rewind.UpdateTranscript(Import.TranscriptName)
         Rendering.PreviousNextButtons(MainPanel.canvasSide,SidePanel.Screen_Game_Frames[1:])
         
@@ -239,7 +237,8 @@ class GameFlow:
             Rendering.ToggleVisibility(MainPanel.canvasSide,'hidden',*SidePanel.Screen_Game_Frames)
             Rendering.ToggleVisibility(MainPanel.canvasSide,None,*SidePanel.Screen_Start_Frames[:6])
 
-            Chess.pieces.clear()
+            Chess.piecesW.clear()
+            Chess.piecesB.clear()
             Chess.TakenDict.clear()
             AI.ClearPossibleActions()
             GameFlow.TablePosition = Chess.currentTableDict()
@@ -264,8 +263,10 @@ class GameFlow:
         with open('Game.txt','w') as f:
             f.truncate(0)
         
-        for p in Chess.pieces:
-            AI.AllActions(p,GameFlow.TablePosition)
+        for p in Chess.piecesW:
+            p.AllActions(GameFlow.TablePosition)
+        for p in Chess.piecesB:
+            p.AllActions(GameFlow.TablePosition)
         AI.PossibleActions()
 
         verificationTime = time.time()
@@ -388,9 +389,10 @@ class MouseKeyboard:
                 start = time.time_ns()
                 AI.ClearPossibleActions()
                 end = time.time_ns()
-                
-                for p in Chess.pieces:
-                    AI.AllActions(p,GameFlow.TablePosition)
+
+                pieces = Chess.piecesB + Chess.piecesW
+                for piece in pieces:
+                    piece.AllActions(GameFlow.TablePosition)
                 end1 = time.time_ns()
                 
                 wk,wlr,wrr,bk,blr,brr=AI.PossibleActions()
@@ -414,21 +416,23 @@ class MouseKeyboard:
             if isinstance(selfP,Chess):
                 NAME = "" if (isinstance(selfP,King) or isinstance(selfP,Queen)) else str(':'+selfP.name)
                 if isinstance(selfP,King):
-                    FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend, selfP.castling)
+                    FixedPositions = xy_to_TableNotation(selfP.move,selfP.take, selfP.defend, selfP.castling)
                 elif isinstance(selfP,Pawn):
-                    FixedPositions = xy_to_TableNotation(selfP.passiv_move ,selfP.take, selfP.defend, selfP.attack)
-                elif isinstance(selfP,Chess):
-                    FixedPositions = xy_to_TableNotation(selfP.move        ,selfP.take, selfP.defend)
+                    FixedPositions = xy_to_TableNotation(selfP.passive_move, selfP.take, selfP.defend, selfP.attack)
+                elif isinstance(selfP,Archer):
+                    FixedPositions = xy_to_TableNotation(selfP.move, selfP.take, selfP.defend, selfP.attack)
+                else:
+                    FixedPositions = xy_to_TableNotation(selfP.move, selfP.take, selfP.defend)
 
             L21 =f"\tSelected PIECE {selfP} {NAME}\n\n" if isinstance(selfP,Chess) else ""
             L22 =f"  Moves: {FixedPositions[0]}\n" if (isinstance(selfP,Chess) and not isinstance(selfP,Pawn)) else ""
             L23 =f"  Castling: {FixedPositions[3]}\n" if isinstance(selfP,King) else ""
-            L24 =f"  Passive Move: {FixedPositions[0]}\n" if isinstance(selfP,Pawn) else ""
+            L24 =f"  Passive Move: {FixedPositions[0]}\n" if isinstance(selfP,Pawn) or isinstance(selfP,Archer) else ""
             L25 =f"  Attack: {FixedPositions[3]}\n" if isinstance(selfP,Pawn) else ""
             L26 =f"  Takes: {FixedPositions[1]}\n" if isinstance(selfP,Chess) else ""
             L27 =f"  Defends: {FixedPositions[2]}\n" if isinstance(selfP,Chess) else ""
             L28 =f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
-            L29 =f"  Defender: {selfP.Defender}\n\n" if (isinstance(selfP,Chess) and selfP.Defender) else "\n"
+            L29 =f"  Pinned: {selfP.pinned}\n\n" if (isinstance(selfP,Chess) and selfP.pinned) else "\n"
 
             try:
                 SIDE = "WHITE" if selfP.side=='w' else "BLACK"
@@ -438,11 +442,10 @@ class MouseKeyboard:
                 team = Chess.AllActions_W if GamePlay.Turn==1 else Chess.AllActions_B
             
 
-            M=team['move'] ; PM=team['passive_move'] ; T=team['take'] ; A=team['attack'] ; D=team['defend'] ; KA=team['kingAttack']
-            TeamFixedPositions = xy_to_TableNotation(M,PM,T,A,D,*Chess.Check)
+            M=team['move'] ; PM=team['passive_move'] ; T=team['take'] ; A=team['attack'] ; D=team['defend']
+            TeamFixedPositions = xy_to_TableNotation(M,PM,T,A,D)
 
             L30=f"\tALL possible ACTIONS {SIDE}\n\n"
-            L31=f"  Check: {TeamFixedPositions[5:]}\n" if Chess.Check else ""
             L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n\n"
             L33=f"  Team possible Moves: {TeamFixedPositions[0]}\n"
             L34=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
@@ -453,7 +456,7 @@ class MouseKeyboard:
 
             StatisticTextList = [ L11, L12, L13, L14,
                             L21, L22, L23, L24, L25, L26, L27, L28, L29,
-                            L30, L31, L32, L33, L34, L35, L36, L37]
+                            L30, L32, L33, L34, L35, L36, L37]
             StatisticText = str()
             for l in StatisticTextList:
                 StatisticText+=l
@@ -488,7 +491,7 @@ class MouseKeyboard:
         if MouseKeyboard.Delete == 'Free_Remove':         
             startTime = time.time()
             if GamePlay.Self is not None and not isinstance(GamePlay.Self,King):
-                Chess.pieces.remove(GamePlay.Self)
+                Chess.piecesW.remove(GamePlay.Self) if GamePlay.Self.side=='w' else Chess.piecesB.remove(GamePlay.Self)
                 GamePlay.Self = None
                 Rendering.borderDefault()     
                 GamePlay.End_Turn()

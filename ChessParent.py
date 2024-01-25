@@ -3,26 +3,29 @@ from ImagesDecorators import Decorator,Import
 class Chess:
 #------------------------------------------------------------------------------------------------------------------------------------------  
 # >>> Shared Initialization <<<
-    pieces = [] 
+    piecesW = []
+    piecesB = []
+    
+    AllActions_W = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
+    AllActions_B = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[]}
+
+    Check = False
+    enPassant = list()
+    TakenDict = {}
+    PromoteDict = {}
+
     def __init__(self,side) -> None:
         super().__init__()
-        self.side       =side
-        self.move       =set()
-        self.take       =set()
-        self.kingAttack =set()
-        self.defend     =set()
-        self.Defender   =False
-        self.actionsCounter=0
-        Chess.pieces.append(self)
+        self.side           =side
+        self.take           =set()
+        self.defend         =set()
+        self.pinned         = []
+        self.attacked       =0
+        self.actionsCounter =0
+        Chess.piecesW.append(self) if self.side =='w' else Chess.piecesB.append(self)
 
 #------------------------------------------------------------------------------------------------------------------------------------------ 
 # >>> Hash TABLES  --  CORE MECHANIC <<<
-    TakenDict = {}
-    PromoteDict = {}
-    Check = {}
-    AllActions_W = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[],'kingAttack':[]}
-    AllActions_B = {'move':[],'take':[],'defend':[],'attack':[],'passive_move':[],'kingAttack':[]}
-
     # >>> STATIC Dictionaries <<<
     def emptyTableDict():  
         emptyTableDict = {}
@@ -50,8 +53,10 @@ class Chess:
     #@Decorator.countExecutionMethod
     def piecesDict():
         piecesDict = {}
-        for i in Chess.pieces:
-            piecesDict[i.getXY()] = i
+        for p in Chess.piecesW:
+            piecesDict[p.getXY()] = p
+        for p in Chess.piecesB:
+            piecesDict[p.getXY()] = p
         return piecesDict
     
     #@Decorator.countExecutionMethod
@@ -74,6 +79,12 @@ class Actions:
     def setXY(self,xy):
         self.x,self.y = xy
  
+    def XY_InsideBorder(self):
+        return (8>= self.x >=1) and (8>= self.y >=1)
+    
+    def XY_Content(self,tableDict):
+        return tableDict[self.x,self.y]
+
     def incrementation(self,path):
         if path == Actions.direction[0]:
             self.x +=1
@@ -103,7 +114,10 @@ class Actions:
     def Move(self,newXY):
         tablePosition_OLD = Chess.NotationTableDict[self.getXY()] # ------------------------- Work - Setter -------------------------------
         tablePosition_NEW = Chess.NotationTableDict[newXY]
-        self.setXY(newXY) 
+        if hasattr(self,'passive_move') and (abs(self.x-newXY[0]))==2:
+            jump=(3,self.y) if self.side=='w' else (6,self.y)
+            Chess.enPassant = [jump,newXY,self.side]
+        self.setXY(newXY)
         self.actionsCounter +=1 # ---------------------------------------------------------------------------------------------------------
 
         # ----------------------------------------------------------------------------------- Output - Print ------------------------------
@@ -117,7 +131,7 @@ class Actions:
         tablePosition_NEW = Chess.NotationTableDict[enemyXY] 
         self.setXY(enemyXY)
         self.actionsCounter +=1
-        Chess.pieces.remove(enemy) # ------------------------------------------------------------------------------------------------------
+        Chess.piecesW.remove(enemy) if enemy.side=='w' else Chess.piecesB.remove(enemy)# --------------------------------------------------
 
         if self not in Chess.TakenDict: # ------------------------------------------ Not Necessary ----------------------------------------
             Chess.TakenDict[self] = {}
@@ -134,7 +148,7 @@ class Actions:
         tablePosition_ENEMY = Chess.NotationTableDict[enemyXY]
         self.setXY(newXY)
         self.actionsCounter +=1 
-        Chess.pieces.remove(enemy) # ------------------------------------------------------------------------------------------------------
+        Chess.piecesW.remove(enemy) if enemy.side=='w' else Chess.piecesB.remove(enemy)# --------------------------------------------------
 
         if self not in Chess.TakenDict: # ------------------------------------------ Not Necessary ----------------------------------------
             Chess.TakenDict[self] = {}
@@ -158,3 +172,5 @@ class Actions:
         transcript = f"{posSide} {pieceSide}" 
         moveOutput = f"{posSide.ljust(11)}{self} {Import.castlingSign} {rook}"
         return moveOutput,transcript # ----------------------------------------------------------------------------------------------------   
+    
+#------------------------------------------------------------------------------------------------------------------------------------------    

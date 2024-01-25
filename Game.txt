@@ -1,0 +1,8 @@
+1 Queen D8 move E7
+2 Queen D1 move E2
+3 Queen E7 move E6
+4 Queen E2 move E4
+5 Bishop C1 move E3
+6 Queen E6 move E7
+7 Queen E4 took B7 Pawn
+8 Bishop C8 move G4

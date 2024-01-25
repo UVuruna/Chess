@@ -1,5 +1,4 @@
 from tkinter import *
-import copy
 from ChessParent import Chess
 from Pieces import *
 from ImagesDecorators import Decorator
@@ -7,285 +6,97 @@ from ImagesDecorators import Decorator
 
 class AI:
 
-    def ClearPossibleActions(everything=True,check=True,TwoCheck=False):
-        def side(piece,TwoCheck):
-            if not TwoCheck:
-                return True
+    def ClearPossibleActions():
+        for k in Chess.AllActions_W.keys():
+            Chess.AllActions_W[k].clear()
+        for k in Chess.AllActions_B.keys():
+            Chess.AllActions_B[k].clear()
+        Chess.Check=False
+
+        pieces = Chess.piecesB+Chess.piecesW
+        for p in pieces:
+            if isinstance(p,King):
+                p.check.clear() ; p.checkLine.clear()
+            if not isinstance(p,Pawn):
+                p.move.clear()
+                if isinstance(p,Archer):
+                    p.attack.clear()
             else:
-                return piece.side!=TwoCheck and not isinstance(piece,King)
-
-        if TwoCheck!='w': 
-            for k in Chess.AllActions_W.keys():
-                Chess.AllActions_W[k].clear()
-        if TwoCheck!='b':
-            for k in Chess.AllActions_B.keys():
-                Chess.AllActions_B[k].clear()
-        if check:
-            Chess.Check.clear()
-        if everything:
-            for p in Chess.pieces:
-                if side(p,TwoCheck):
-                    if not isinstance(p,Pawn):
-                        p.move.clear()
-                    else:
-                        p.attack.clear() ; p.passiv_move.clear()
-                    p.take.clear() ; p.defend.clear() ; p.Defender=False ; p.kingAttack.clear()
-
-    def insideBorder(Self):
-        return (8>= Self.x >=1) and (8>= Self.y >=1)
-    def square(Self,tableDict):
-        return tableDict[Self.x,Self.y]
+                p.attack.clear() ; p.passive_move.clear() ; p.enpassant = None
+            p.take.clear() ; p.defend.clear() ; p.pinned.clear()
 
     #@Decorator.countExecutionMethod
-    def updatingAttributes(Self,m,t,d,De=None,a=None):
-        if De:
-            defender = De[0]
-            defender.Defender = True
-            if not defender.move:
-                if not isinstance(defender,Pawn):
-                    defender.move.update(De[1])
-                else:
-                    defender.passiv_move.update(De[1])
-                    defender.attack.update(De[1])
-                defender.take.update([Self.getXY()])
-            else:
-                defender.move &= De[1]
-                defender.take &= set([Self.getXY()])
-
-        if Self.Defender is False:
-            Self.take.update(t)
-            Self.defend.update(d)
-            if not isinstance(Self,Pawn):
-                Self.move.update(m)
-                Self.kingAttack.update(m)
-            else:
-                Self.passiv_move.update(m)
-                Self.attack.update(a)
-                Self.kingAttack.update(a)
-        else:
-            Self.take &= t
-            if not isinstance(Self,Pawn):
-                Self.move &= m
-                Self.kingAttack.update(m)
-            else:
-                Self.passiv_move &= m
-                Self.attack &= a
-                Self.kingAttack.update(a)
-
-    #@Decorator.countExecutionMethod 
-    def AllActions(Self,tableDict):
-        Self_Copy = copy.deepcopy(Self)
-        if Self.type == 'Archer':
-            AI.AllActionsArcher(Self,Self_Copy,tableDict)
-        elif Self.type == 'Pawn':
-            AI.AllActionsPawn(Self,Self_Copy,tableDict)
-        else:
-            AI.AllActionsWarrior(Self,Self_Copy,tableDict)
-    
-    #@Decorator.countExecutionMethod
-    def AllActionsArcher(Self,Self_Copy,tableDict):
-        possibleMoves = set()
-        possibleTakes = set()
-        possibleDefends = set()
-        Defenders = {}
-        for dir in Self_Copy.direction:
-            DefenderEnemy=None ; extLine=False ; check=False
-            possMove,extendedLine = set(),set()
-            Self_Copy.x,Self_Copy.y = Self.getXY()
-            while AI.insideBorder(Self_Copy): 
-                Self_Copy.incrementation(dir)
-                if AI.insideBorder(Self_Copy):
-                    if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
-                        if not extLine:
-                            if not check:
-                                possMove.add(Self_Copy.getXY()) 
-                            else:
-                                Self.move.add(Self_Copy.getXY())
-                                break    
-                        else:
-                            extendedLine.add(Self_Copy.getXY()) # ----------------------------------------------------------------------------------------
-                    elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura ---------------------------------------------------
-                        if not extLine:
-                            enemy = tableDict[Self_Copy.getXY()]
-                            possibleTakes.add(Self_Copy.getXY())                               
-                            if isinstance(enemy,King):
-                                check=True
-                                Chess.Check[Self.side,Self.getXY(),Self_Copy.getXY()]=possMove
-                                possibleMoves.update(possMove)
-                            else:
-                                if not check:
-                                    extLine=True
-                                    DefenderEnemy = enemy
-                                else:
-                                    break
-                        else:
-                            if isinstance(tableDict[Self_Copy.getXY()],King):
-                                Defenders=[DefenderEnemy,(extendedLine|possMove)]
-                                possibleMoves.update(possMove) 
-                                break
-                            else:
-                                DefenderEnemy=None
-                                possibleMoves.update(possMove)
-                                break # -------------------------------------------------------------------------------------------------------------------
-
-                    elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
-                        if not extLine:
-                            if not check:
-                                possibleDefends.add(Self_Copy.getXY())
-                                possibleMoves.update(possMove)
-                                break
-                            else:
-                                Self.defend.add(Self_Copy.getXY())
-                                break
-                        else:
-                            DefenderEnemy=None
-                            possibleMoves.update(possMove) 
-                            break # -----------------------------------------------------------------------------------------------------------------------
-                else:
-                    DefenderEnemy=None
-                    possibleMoves.update(possMove)
-                    break
-        else:
-            del Self_Copy
-            AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,Defenders)
-
-    #@Decorator.countExecutionMethod
-    def AllActionsWarrior(Self,Self_Copy,tableDict):
-        possibleMoves = set()
-        possibleTakes = set()
-        possibleDefends = set()
-        for dir in Self_Copy.direction:
-            Self_Copy.x,Self_Copy.y = Self.getXY()
-            while AI.insideBorder(Self_Copy): 
-                Self_Copy.incrementation(dir)
-                if AI.insideBorder(Self_Copy):
-                    if AI.square(Self_Copy,tableDict) == '': # -------------------Prazno polje---------------------------------------------------------------
-                        possibleMoves.add(Self_Copy.getXY())
-                        break  # ----------------------------------------------------------------------------------------------------------------------------
-
-                    elif Self_Copy.side !=AI.square(Self_Copy,tableDict).side: # -------Protivnicka figura --------------------------------------------------
-                        possibleTakes.add(Self_Copy.getXY())                               
-                        if isinstance(tableDict[Self_Copy.getXY()],King):
-                            Chess.Check[Self.side,Self.getXY(),Self_Copy.getXY()]=set()
-                        break # -----------------------------------------------------------------------------------------------------------------------------
-
-                    elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side: # ----------Nasa figura-------------------------------------------------------
-                        possibleDefends.add(Self_Copy.getXY())
-                        break # -----------------------------------------------------------------------------------------------------------------------------
-                else:
-                    break
-        else:
-            del Self_Copy
-            AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends)
-
-    #@Decorator.countExecutionMethod
-    def AllActionsPawn(Self,Self_Copy,tableDict):
-        possibleMoves = set()
-        possibleTakes = set()
-        possibleDefends = set()
-        possibleAttacks = set()
-        tries = 2 if Self.actionsCounter==0 else 1
-        for dir in Self.directionMove:
-            Self_Copy.x,Self_Copy.y = Self.getXY()
-            while AI.insideBorder(Self_Copy): 
-                Self_Copy.incrementation(dir)
-                if tries == 0: 
-                    break
-                elif AI.insideBorder(Self_Copy) and AI.square(Self_Copy,tableDict) =='':
-                    possibleMoves.add(Self_Copy.getXY())
-                    tries -= 1
-                else: 
-                    break
-        for dir in Self.directionAttack:
-            Self_Copy.x,Self_Copy.y = Self.getXY()
-            while AI.insideBorder(Self_Copy):
-                Self_Copy.incrementation(dir)
-                if AI.insideBorder(Self_Copy):
-                    if AI.square(Self_Copy,tableDict) !='':
-                        if Self_Copy.side !=AI.square(Self_Copy,tableDict).side:
-                            possibleTakes.add(Self_Copy.getXY())
-                            if isinstance(tableDict[Self_Copy.getXY()],King):
-                                Chess.Check[Self.side,Self.getXY(),Self_Copy.getXY()]=set()
-                            break
-                        elif Self_Copy.side ==AI.square(Self_Copy,tableDict).side:
-                            possibleDefends.add(Self_Copy.getXY())
-                            break
-                    else:
-                        possibleAttacks.add(Self_Copy.getXY())
-                        break
-                else:
-                    break
-        del Self_Copy            
-        AI.updatingAttributes(Self,possibleMoves,possibleTakes,possibleDefends,None,possibleAttacks)                   
-
-    #@Decorator.countExecutionMethod
-    def PossibleActions(enPassantSquare=None,side=None):
+    def PossibleActions():
         W_King=None ; B_King=None
         WL_Rook=None ; WR_Rook=None
         BL_Rook=None ; BR_Rook=None
-        if Chess.Check:
-            numOfAttackers = len(Chess.Check)
-            for k,v in Chess.Check.items():
-                attackerSide = k[0]
-                enemyAttacker = k[1]
-                enemyLine = v
-                break
-           
-        else:
-            numOfAttackers=0
-        for p in Chess.pieces:
-            if p.side=='w':
-                Chess.AllActions_W['defend'].extend(p.defend)
-                if isinstance(p,King):
-                    W_King=p    
+
+        def updateActionsDict(p,ActionsDict):
+            ActionsDict['defend'].extend(p.defend)
+            if p.pinned:
+                pin = p.pinned
+                p.move &= pin[0]
+                p.take &= pin[1]
+            if Chess.enPassant and isinstance(p,Pawn) and Chess.enPassant[2]!=p.side and Chess.enPassant[0] in p.attack:
+                    p.take.add(Chess.enPassant[0])
+                    p.enpassant = Chess.enPassant[1]
+
+            if len(check)==1:
+                try:
+                    p.move &= checkLine
+                except AttributeError:
+                    p.passive_move &= checkLine
+                    p.attack &= checkLine
+                p.take &= check
+            elif len(check)>1:
+                try:
+                    p.move.clear()
+                except AttributeError:
+                    p.passive_move.clear()
+                    p.attack.clear()
+                p.take.clear()
+                return
+            
+            try:
+                ActionsDict['move'].extend(p.move)
+                if isinstance(p,Archer):
+                    ActionsDict['attack'].extend(p.attack)
+            except AttributeError:
+                ActionsDict['passive_move'].extend(p.passive_move)
+                ActionsDict['attack'].extend(p.attack)
+            ActionsDict['take'].extend(p.take)
+
+        for p in Chess.piecesW:
+            if isinstance(p,King):
+                check = set()
+                checkLine = set()
+                W_King=p
+                check.update(p.check)
+                checkLine.update(p.checkLine)
+            elif isinstance(p,Rook) and p.actionsCounter==0:
+                if p.name=='L':
+                    WL_Rook=p
                 else:
-                    if isinstance(p,Rook) and p.actionsCounter==0:
-                        if p.name=='L':
-                            WL_Rook=p
-                        else:
-                            WR_Rook=p
-                    if numOfAttackers ==1 and attackerSide=='b':
-                        if not isinstance(p,Pawn):
-                            p.move &= enemyLine
-                        else:
-                            p.passiv_move &= enemyLine
-                            p.attack &= enemyLine
-                        p.take &= set([enemyAttacker])
-                    if not isinstance(p,Pawn):
-                        Chess.AllActions_W['move'].extend(p.move)
-                    else:
-                        if enPassantSquare in p.attack and side!='w':
-                            p.take.add(enPassantSquare)
-                        Chess.AllActions_W['passive_move'].extend(p.passiv_move)
-                        Chess.AllActions_W['attack'].extend(p.attack)
-                    Chess.AllActions_W['kingAttack'].extend(p.kingAttack)
-                    Chess.AllActions_W['take'].extend(p.take)
+                    WR_Rook=p
+                updateActionsDict(p,Chess.AllActions_W)
             else:
-                Chess.AllActions_B['defend'].extend(p.defend)
-                if isinstance(p,King):
-                    B_King=p
+                updateActionsDict(p,Chess.AllActions_W)
+
+        for p in Chess.piecesB:
+            if isinstance(p,King):
+                check = set()
+                checkLine = set()
+                B_King=p
+                check.update(p.check)
+                checkLine.update(p.checkLine)
+            elif isinstance(p,Rook) and p.actionsCounter==0:
+                if p.name=='L':
+                    BL_Rook=p
                 else:
-                    if isinstance(p,Rook) and p.actionsCounter==0:
-                        if p.name=='L':
-                            BL_Rook=p
-                        else:
-                            BR_Rook=p
-                    if numOfAttackers ==1 and attackerSide=='w':
-                        if not isinstance(p,Pawn):
-                            p.move &= enemyLine
-                        else:
-                            p.passiv_move &= enemyLine
-                            p.attack &= enemyLine
-                        p.take &= set([enemyAttacker])
-                    if not isinstance(p,Pawn):
-                        Chess.AllActions_B['move'].extend(p.move)
-                    else:
-                        if enPassantSquare in p.attack and side!='b':
-                            p.take.add(enPassantSquare)
-                        Chess.AllActions_B['passive_move'].extend(p.passiv_move)
-                        Chess.AllActions_B['attack'].extend(p.attack)
-                    Chess.AllActions_B['kingAttack'].extend(p.kingAttack)
-                    Chess.AllActions_B['take'].extend(p.take)       
+                    BR_Rook=p
+                updateActionsDict(p,Chess.AllActions_B)
+            else:
+                updateActionsDict(p,Chess.AllActions_B)
 
         W_King.take -= set(Chess.AllActions_B['defend'])
         B_King.take -= set(Chess.AllActions_W['defend'])
@@ -293,18 +104,18 @@ class AI:
         W = W_King.move.copy()
         B = B_King.move.copy()
 
-        W_King.move -= (set(Chess.AllActions_B['kingAttack']) | B )
-        B_King.move -= (set(Chess.AllActions_W['kingAttack']) | W )
+        W_King.move -= (set(Chess.AllActions_B['attack']) | set(Chess.AllActions_B['move']) | B )
+        B_King.move -= (set(Chess.AllActions_W['attack']) | set(Chess.AllActions_W['move']) | W )
         
-        if numOfAttackers >1:
-            AI.ClearPossibleActions(True,False,attackerSide)
 
         Chess.AllActions_W['move'].extend(W_King.move)
         Chess.AllActions_W['take'].extend(W_King.take)
         Chess.AllActions_B['move'].extend(B_King.move)
         Chess.AllActions_B['take'].extend(B_King.take)
+        Chess.enPassant.clear()
 
         return W_King,WL_Rook,WR_Rook,B_King,BL_Rook,BR_Rook
+
 
     #@Decorator.countExecutionMethod
     def castlingCheck(W_King,WL_Rook,WR_Rook,B_King,BL_Rook,BR_Rook):
@@ -353,20 +164,20 @@ class AI:
                           if Turn==1 else
                             set(Chess.AllActions_B['move']) | set(Chess.AllActions_B['take']) | set(Chess.AllActions_B['passive_move'])  )
         if not Solution:
-            if not Chess.Check:
+            if Chess.Check is False:
                 return 'StaleMate'
             else:
                 return 'CheckMate'
-        elif len(Chess.pieces)<5:
+        elif len(Chess.piecesW)<3 and len(Chess.piecesB)<3:
             whiteTeam = []
             blackTeam = []
-            for piece in Chess.pieces:
-                if piece.side =='w':
+            for piece in Chess.piecesW:
                     if isinstance(piece,Queen) or isinstance(piece,Rook) or isinstance(piece,Pawn):
                         whiteTeam.clear()
                         break
                     whiteTeam.append(piece)
-                else:
+
+            for piece in Chess.piecesB:
                     if isinstance(piece,Queen) or isinstance(piece,Rook) or isinstance(piece,Pawn):
                         blackTeam.clear()
                         break

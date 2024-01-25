@@ -93,11 +93,12 @@ class Rewind:
                 self = Table[endXY]
                 self.actionsCounter -=1
                 enemy = Chess.TakenDict[Table[endXY]][moveCounter]
-                Chess.pieces.append(enemy)
+                Chess.piecesW.append(enemy) if enemy.side=='w' else Chess.piecesB.append(enemy)
                 self.setXY(startXY)
                 enemy.setXY(endXY)
             elif direction == 'n':
-                Chess.pieces.remove(Table[endXY])
+                enemy = Table[endXY]
+                Chess.piecesW.remove(enemy) if enemy.side=='w' else Chess.piecesB.remove(enemy)
                 self = Table[startXY]
                 self.actionsCounter +=1
                 self.setXY(endXY)
@@ -117,29 +118,30 @@ class Rewind:
             if direction == 'b':
                 promote = Table[xy]
                 self = Chess.PromoteDict[promote]
-                Chess.pieces.append(self)
+                Chess.piecesW.append(self) if self.side=='w' else Chess.piecesB.append(self)
                 self.setXY(xy)
-                Chess.pieces.remove(promote)
+                Chess.piecesW.remove(promote) if promote.side=='w' else Chess.piecesB.remove(promote)
                 Rewind.PosInTransc -=1
                 Rewind.AnalyzeTranscript('b',moveCounter)
             elif direction == 'n':
                 self = Table[xy]
                 promote = next((k for k,v in Chess.PromoteDict.items() if v==self),None)
-                Chess.pieces.append(promote)
+                Chess.piecesW.append(promote) if promote.side=='w' else Chess.piecesB.append(promote)
                 promote.setXY(xy)
-                Chess.pieces.remove(self)
+                Chess.piecesW.remove(self) if self.side=='w' else Chess.piecesB.remove(self)
         elif len(lastPlay)==7: # EnPassant
             startXY,endXY,objXY = Rewind.positionConverter(lastPlay,2)
             if direction == 'b':
                 self = Table[endXY]
                 self.actionsCounter -=1
                 enemy = Chess.TakenDict[self][moveCounter]
-                Chess.pieces.append(enemy)
+                Chess.piecesW.append(enemy) if enemy.side=='w' else Chess.piecesB.append(enemy)
                 self.setXY(startXY)
                 enemy.setXY(objXY) 
             elif direction == 'n':
+                enemy = Table[objXY]
                 self = Table[startXY]
-                Chess.pieces.remove(Table[objXY])
+                Chess.piecesW.remove(enemy) if enemy.side=='w' else Chess.piecesB.remove(enemy)
                 self.actionsCounter +=1
                 self.setXY(endXY)
         return Table

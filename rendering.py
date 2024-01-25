@@ -22,7 +22,8 @@ class Rendering:
                     if tableDict[k].side == 'w':
                         buttonDict[k].config(image=AllImages[1][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][0])
                     else:
-                        buttonDict[k].config(image=AllImages[3][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][0])                 
+                        buttonDict[k].config(image=AllImages[3][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][0])
+                    buttonDict[k].config(background=Rendering.yellow) if tableDict[k].check else buttonDict[k].config(background='SystemButtonFace')            
                 elif isinstance(tableDict[k],Queen): # Queen
                     if tableDict[k].side == 'w':
                         buttonDict[k].config(image=AllImages[1][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][1])
@@ -62,7 +63,7 @@ class Rendering:
         if not isinstance(Self,Pawn):
             MoveColor,TakeColor = Self.move,Self.take
         else:
-            MoveColor,TakeColor = Self.passiv_move,Self.take
+            MoveColor,TakeColor = Self.passive_move,Self.take
         for m in MoveColor:
             buttonDict[m].config(background='#00BB00')
             Rendering.ButtonChanged.append(buttonDict[m])
@@ -73,14 +74,6 @@ class Rendering:
             for c in Self.castling:
                 buttonDict[c].config(background=Rendering.cyan)
                 Rendering.ButtonChanged.append(buttonDict[c])
-
-    def borderCheck(buttonDict):
-        if Chess.Check:
-            for k in Chess.Check.keys():
-                checkColor = k[2]
-                break
-            buttonDict[checkColor].config(background=Rendering.yellow)
-            Rendering.ButtonChanged.append(buttonDict[checkColor])
 
     def borderDefault():
         for b in Rendering.ButtonChanged:

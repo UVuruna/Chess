@@ -1,25 +1,27 @@
 from ChessParent import Chess,Actions
+from PiecesParent import *
 from ImagesDecorators import Import
+import copy
 
-class King(Chess,Actions):
+class King(Warrior):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<   
-    def __init__(self,side,castling=False) -> None:
+    def __init__(self,side) -> None:
         super().__init__(side)
-        self.type = 'Warrior'
-        self.castling = castling
+        self.check = set()
+        self.checkLine = set()
+        self.castling = False
         self.x = (1 if self.side == 'w' else 8)
         self.y = 5
  
     def __str__(self) -> str:
         return f"{Import.whiteKing if self.side == 'w' else Import.blackKing}King"
 
-class Queen(Chess,Actions):
+class Queen(Archer):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
         super().__init__(side)
-        self.type = 'Archer'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
         self.y = 4
@@ -27,12 +29,11 @@ class Queen(Chess,Actions):
     def __str__(self) -> str:
         return f"{Import.whiteQueen if self.side == 'w' else Import.blackQueen}Queen"
 
-class Rook(Chess,Actions):
+class Rook(Archer):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<< 
     def __init__(self,side,name=None) -> None:
         super().__init__(side)
-        self.type = 'Archer'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
         self.y = (1 if self.name == 'L' else 8)
@@ -41,12 +42,11 @@ class Rook(Chess,Actions):
     def __str__(self) -> str:
         return f"{Import.whiteRook if self.side =='w' else Import.blackRook}Rook"        
 
-class Bishop(Chess,Actions):
+class Bishop(Archer):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
         super().__init__(side)
-        self.type = 'Archer'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
         self.y = (3 if self.name == 'L' else 6)
@@ -55,12 +55,11 @@ class Bishop(Chess,Actions):
     def __str__(self) -> str:
         return f"{Import.whiteBishop if self.side == 'w' else Import.blackBishop}Bishop"
 
-class Knight(Chess,Actions):
+class Knight(Warrior):
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # >>> Creating Object <<<
     def __init__(self,side,name=None) -> None:
         super().__init__(side)
-        self.type = 'Warrior'
         self.name = name
         self.x = (1 if self.side == 'w' else 8)
         self.y = (2 if self.name == 'L' else 7)
@@ -101,10 +100,10 @@ class Pawn(Chess,Actions):
     Name = ['L1','L2','L3','CL','CR','R3','R2','R1']  
     def __init__(self,side,name=None) -> None:
         super().__init__(side)
-        self.type = 'Pawn'
         self.name = name
-        self.passiv_move = set()
+        self.passive_move = set()
         self.attack = set()
+        self.enpassant = None
         self.x = (2 if self.side == 'w' else 7)
         self.y = Pawn.Name.index(self.name)+1
         if self.side == 'w':
@@ -115,4 +114,40 @@ class Pawn(Chess,Actions):
             self.directionAttack = Actions.direction[6:]
 
     def __str__(self) -> str:
-        return f"{Import.whitePawn if self.side == 'w' else Import.blackPawn}Pawn"      
+        return f"{Import.whitePawn if self.side == 'w' else Import.blackPawn}Pawn"
+
+    def AllActions(self,tableDict):
+        selfCopy = copy.copy(self)
+        tries = 2 if self.actionsCounter==0 else 1
+        selfCopy.x,selfCopy.y = self.getXY()
+        while selfCopy.XY_InsideBorder(): # Nema for jer Pion ima samo jedan pravac za pasivno kretanje
+            selfCopy.incrementation(self.directionMove)
+            if tries == 0: 
+                break
+            elif selfCopy.XY_InsideBorder() and selfCopy.XY_Content(tableDict) =='':
+                self.passive_move.add(selfCopy.getXY())
+                tries -= 1
+            else: 
+                break
+        for dir in self.directionAttack:
+            selfCopy.x,selfCopy.y = self.getXY()
+            while selfCopy.XY_InsideBorder():
+                selfCopy.incrementation(dir)
+                if selfCopy.XY_InsideBorder():
+                    if selfCopy.XY_Content(tableDict) !='':
+                        if selfCopy.side !=selfCopy.XY_Content(tableDict).side:
+                            self.take.add(selfCopy.getXY())
+                            enemy = tableDict[selfCopy.getXY()]
+                            if hasattr(enemy,'check'):
+                                enemy.check.add(self.getXY())
+                                Chess.Check=True
+                            break
+                        elif selfCopy.side ==selfCopy.XY_Content(tableDict).side:
+                            self.defend.add(selfCopy.getXY())
+                            break
+                    else:
+                        self.attack.add(selfCopy.getXY())
+                        break
+                else:
+                    break
+        del selfCopy
