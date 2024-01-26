@@ -2,6 +2,7 @@ from Pieces import *
 from ChessParent import Chess
 from tkinter import *
 from Transcript import Rewind
+from ImagesDecorators import Decorator
 
 
 class Rendering:
@@ -13,8 +14,10 @@ class Rendering:
     purple = "#8866CC"
     gold   = "#FDD017"
     
+    ButtonChanged = [] # Button Borders Rendering
     AllColors_forPrint = [green,red,purple,cyan,blue]
-        
+ 
+    @Decorator.countExecutionMethod
     def RenderingScreen(tableDict,buttonDict,AllImages): # Table Screen Rendering
         for k,v in tableDict.items(): # Ovo je glupo malo jer svaki put prolazi kroz All Images bes potrebe (moze da se izvuce ispred)
             if v != '':  #          ali nema veze jer se to radi samo u igri (nakon odigravanja poteza), ne u izracunavanju poteza (ne usporava kalkulacije)
@@ -23,7 +26,10 @@ class Rendering:
                         buttonDict[k].config(image=AllImages[1][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][0])
                     else:
                         buttonDict[k].config(image=AllImages[3][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][0])
-                    buttonDict[k].config(background=Rendering.yellow) if tableDict[k].check else buttonDict[k].config(background='SystemButtonFace')            
+                    if tableDict[k].check:
+                        buttonDict[k].config(background=Rendering.yellow)
+                        Rendering.ButtonChanged.append(buttonDict[k])
+            
                 elif isinstance(tableDict[k],Queen): # Queen
                     if tableDict[k].side == 'w':
                         buttonDict[k].config(image=AllImages[1][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][1])
@@ -58,7 +64,6 @@ class Rendering:
             else: # Empty Square
                 buttonDict[k].config(image=AllImages[0][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[0][2])
           
-    ButtonChanged = [] # Button Borders Rendering
     def borderColors(square,buttonDict,Self):
         if not isinstance(Self,Pawn):
             MoveColor,TakeColor = Self.move,Self.take

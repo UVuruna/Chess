@@ -29,7 +29,6 @@ window.iconbitmap(os.path.join(Import.ImagesLocation,"ico.ico"))
 class GamePlay:
     Self            =None
     Turn            =None
-    EnPassantPawn   =None
 
     def verification(position,startingTime): # Ovo je kada SELEKTUJEMO FIGURU  >>> First Click <<<
         def verify(xy):
@@ -44,7 +43,6 @@ class GamePlay:
         except AttributeError:
             None
         verificationTime = time.time()
-        Rendering.RenderingScreen(GameFlow.TablePosition,MainPanel.ButtonDict,Import.AllImages)
         endTime = time.time()
         Rendering.timeShowing(SidePanel.ExecutionTime,GamePlay.Turn,
                               GamePlay.Self,startingTime,endTime,verificationTime,None) 
@@ -189,8 +187,8 @@ class GamePlay:
 
         gameover = AI.GameOverCheck(GamePlay.Turn)
         GameFlow.GameOver(GamePlay.Turn,gameover)
-        
         Rendering.borderDefault()
+        
         Rewind.UpdateTranscript(Import.TranscriptName)
         Rendering.PreviousNextButtons(MainPanel.canvasSide,SidePanel.Screen_Game_Frames[1:])
         
@@ -432,7 +430,6 @@ class MouseKeyboard:
             L26 =f"  Takes: {FixedPositions[1]}\n" if isinstance(selfP,Chess) else ""
             L27 =f"  Defends: {FixedPositions[2]}\n" if isinstance(selfP,Chess) else ""
             L28 =f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
-            L29 =f"  Pinned: {selfP.pinned}\n\n" if (isinstance(selfP,Chess) and selfP.pinned) else "\n"
 
             try:
                 SIDE = "WHITE" if selfP.side=='w' else "BLACK"
@@ -447,15 +444,15 @@ class MouseKeyboard:
 
             L30=f"\tALL possible ACTIONS {SIDE}\n\n"
             L32=f"  Number of POSSIBLE ACTIONS: {(len(team['move'])+len(team['passive_move'])+len(team['take']))}\n\n"
-            L33=f"  Team possible Moves: {TeamFixedPositions[0]}\n"
+            L33=f"  Team possible Moves: {TeamFixedPositions[0]}\n\n"
             L34=f"  Team passive Moves: {TeamFixedPositions[1]}\n"
             L35=f"  Team possible Attacks: {TeamFixedPositions[3]}\n\n"
             L36=f"  Team possible Takes: {TeamFixedPositions[2]}\n\n"
-            L37=f"  Team possible Defends: {TeamFixedPositions[4]}\n"
+            L37=f"  Team possible Defends: {TeamFixedPositions[4]}"
             
 
             StatisticTextList = [ L11, L12, L13, L14,
-                            L21, L22, L23, L24, L25, L26, L27, L28, L29,
+                            L21, L22, L23, L24, L25, L26, L27, L28,
                             L30, L32, L33, L34, L35, L36, L37]
             StatisticText = str()
             for l in StatisticTextList:

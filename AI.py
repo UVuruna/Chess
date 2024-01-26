@@ -35,8 +35,13 @@ class AI:
             ActionsDict['defend'].extend(p.defend)
             if p.pinned:
                 pin = p.pinned
-                p.move &= pin[0]
+                try:
+                    p.move &= pin[0]
+                except AttributeError:
+                    p.passive_move &= pin[0]
+                    p.attack &= pin[0]
                 p.take &= pin[1]
+
             if Chess.enPassant and isinstance(p,Pawn) and Chess.enPassant[2]!=p.side and Chess.enPassant[0] in p.attack:
                     p.take.add(Chess.enPassant[0])
                     p.enpassant = Chess.enPassant[1]

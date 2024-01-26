@@ -3,19 +3,6 @@ from ChessParent import Chess
 class Rewind:
     FullTranscript  = None
     PosInTransc     = -1
-    
-    def EnPassant(TranscriptName): # zove je verifikacija # Pravi novi possible Take i novi Take move
-        with open(f'{TranscriptName}.txt','r') as f:
-            text = f.readlines()
-        try:
-            lastPlay = text[Rewind.PosInTransc].split()
-            XS =int(lastPlay[2][1])
-            XE =int(lastPlay[4][1])
-            if lastPlay[3]=='move' and lastPlay[1]=='Pawn' and abs(XS-XE) ==2:
-                Y =Rewind.letterToNum(lastPlay[2][0])
-                return ((XS+XE)//2,Y),(XE,Y)
-        except (IndexError,ValueError):
-            return
 
     def ResetPosition():
         Rewind.PosInTransc = -1
