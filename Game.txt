@@ -1,20 +1,4 @@
-1 Pawn F2 move F4
-2 Pawn F7 move F6
-3 Pawn F4 move F5
-4 Pawn G7 move G5
-5 Pawn F5 take G6 Pawn G5
-6 Pawn E7 move E5
-7 Pawn G6 took H7 Pawn
-8 Pawn D7 move D5
-9 Pawn H7 took G8 Knight
-9 promote Queen G8
-10 Rook H8 took G8 Queen
-11 Pawn E2 move E3
-12 Pawn F6 move F5
-13 Bishop F1 move B5
-14 Pawn C7 move C6
-15 Queen D1 move H5
-16 Rook G8 move G6
-17 Queen H5 took G6 Rook
-18 King E8 move D7
-19 Queen G6 took F5 Pawn
+1 Pawn F2 move F3
+2 Pawn E7 move E6
+3 Pawn G2 move G4
+4 Queen D8 move H4
