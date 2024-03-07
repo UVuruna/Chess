@@ -25,11 +25,12 @@ class Rendering:
                     if tableDict[k].side == 'w':
                         buttonDict[k].config(image=AllImages[1][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][0])
                     else:
-                        buttonDict[k].config(image=AllImages[3][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][0])
+                        buttonDict[k].config(image=AllImages[3][0]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[4][0])           
                     if tableDict[k].check:
                         buttonDict[k].config(background=Rendering.yellow)
-                        Rendering.ButtonChanged.append(buttonDict[k])
-            
+                    else:
+                        buttonDict[k].config(background='SystemButtonFace')
+                    
                 elif isinstance(tableDict[k],Queen): # Queen
                     if tableDict[k].side == 'w':
                         buttonDict[k].config(image=AllImages[1][1]) if buttonDict[k].color == 'w' else buttonDict[k].config(image=AllImages[2][1])

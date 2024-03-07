@@ -34,7 +34,7 @@ class Archer(Chess,Actions):
                             try:                                  # Ovo ako jeste kralj opet se nema BREAK jer mora da spreci kralja da stane na pozicije iza
                                 enemy.check.add(self.getXY())
                                 enemy.checkLine.update(possMove)
-                                Chess.Check=True
+                                Chess.Check=selfCopy.getXY()
                                 self.move.update(possMove)
                                 check=True
                             except AttributeError:
@@ -94,7 +94,7 @@ class Warrior(Chess,Actions):
                         enemy = tableDict[selfCopy.getXY()]                             
                         if hasattr(enemy,'check'):
                             enemy.check.add(self.getXY())
-                            Chess.Check=True
+                            Chess.Check=selfCopy.getXY()
                         break # -----------------------------------------------------------------------------------------------------------------------------
                     elif selfCopy.side ==selfCopy.XY_Content(tableDict).side: # ----------Nasa figura-------------------------------------------------------
                         self.defend.add(selfCopy.getXY())

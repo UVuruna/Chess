@@ -133,7 +133,7 @@ class Pawn(Chess,Actions):
                             enemy = tableDict[selfCopy.getXY()]
                             if hasattr(enemy,'check'):
                                 enemy.check.add(self.getXY())
-                                Chess.Check=True
+                                Chess.Check=selfCopy.getXY()
                             break
                         elif selfCopy.side ==selfCopy.XY_Content(tableDict).side:
                             self.defend.add(selfCopy.getXY())
