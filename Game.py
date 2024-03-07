@@ -429,7 +429,7 @@ class MouseKeyboard:
             L25 =f"  Attack: {FixedPositions[3]}\n" if isinstance(selfP,Pawn) else ""
             L26 =f"  Takes: {FixedPositions[1]}\n" if isinstance(selfP,Chess) else ""
             L27 =f"  Defends: {FixedPositions[2]}\n" if isinstance(selfP,Chess) else ""
-            L28 =f"  Action Counter: {selfP.actionsCounter}\n" if isinstance(selfP,Chess) else ""
+            L28 =f"  Action Counter: {selfP.actionsCounter}\n\n" if isinstance(selfP,Chess) else ""
 
             try:
                 SIDE = "WHITE" if selfP.side=='w' else "BLACK"

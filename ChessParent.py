@@ -88,28 +88,21 @@ class Actions:
     def incrementation(self,path):
         if path == Actions.direction[0]:
             self.x +=1
-            return self.x,self.y
         elif path == Actions.direction[1]:
             self.x -=1
-            return self.x,self.y
         elif path == Actions.direction[2]:
             self.y -=1
-            return self.x,self.y
         elif path == Actions.direction[3]:
             self.y +=1
-            return self.x,self.y
         elif path == Actions.direction[4]:
             self.x +=1 ; self.y -=1
-            return self.x,self.y
         elif path == Actions.direction[5]:
             self.x +=1 ; self.y +=1
-            return self.x,self.y
         elif path == Actions.direction[6]:
             self.x -=1 ; self.y -=1
-            return self.x,self.y
         elif path == Actions.direction[7]:
             self.x -=1 ; self.y +=1
-            return self.x,self.y
+        return self.x,self.y
 #------------------------------------------------------------------------------------------------------------------------------------------    
     def Move(self,newXY):
         tablePosition_OLD = Chess.NotationTableDict[self.getXY()] # ------------------------- Work - Setter -------------------------------

@@ -17,7 +17,7 @@ class Rendering:
     ButtonChanged = [] # Button Borders Rendering
     AllColors_forPrint = [green,red,purple,cyan,blue]
  
-    @Decorator.countExecutionMethod
+    #@Decorator.countExecutionMethod
     def RenderingScreen(tableDict,buttonDict,AllImages): # Table Screen Rendering
         for k,v in tableDict.items(): # Ovo je glupo malo jer svaki put prolazi kroz All Images bes potrebe (moze da se izvuce ispred)
             if v != '':  #          ali nema veze jer se to radi samo u igri (nakon odigravanja poteza), ne u izracunavanju poteza (ne usporava kalkulacije)

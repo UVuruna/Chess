@@ -71,28 +71,21 @@ class Knight(Warrior):
     def incrementation(self, path):
         if path == self.direction[0]:
             self.x +=2 ; self.y +=1
-            return self.x,self.y
         elif path == self.direction[1]:
             self.x +=1 ; self.y +=2
-            return self.x,self.y
         elif path == self.direction[2]:
             self.x +=2 ; self.y -=1
-            return self.x,self.y
         elif path == self.direction[3]:
             self.x +=1 ; self.y -=2
-            return self.x,self.y
         elif path == self.direction[4]:
             self.x -=2 ; self.y +=1
-            return self.x,self.y
         elif path == self.direction[5]:
             self.x -=1 ; self.y +=2
-            return self.x,self.y
         elif path == self.direction[6]:
             self.x -=2 ; self.y -=1
-            return self.x,self.y
         elif path == self.direction[7]:
             self.x -=1 ; self.y -=2
-            return self.x,self.y
+        return self.x,self.y
 
 class Pawn(Chess,Actions):   
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
